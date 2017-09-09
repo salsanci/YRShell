@@ -40,7 +40,7 @@ testresult:
 clean:
 	rm -rf html
 	rm -f test
-	rm -f shell
+	rm -f yrshell
 	rm -f testresult
 	rm -f doxygen.log
 	rm -f *.o

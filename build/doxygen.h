@@ -57,7 +57,7 @@ MarkDown here.
 
 : sl1 { auxIO  s' UUUU' .str crlf mainIO s' AAAA' .str crlf cr? } 
 
-: term s' Hit CTL-k to exit\r\n' .str { auxKey? [ emit ][ drop ] key? [ dup 0x0B == [ drop -1 ][ auxEmit 0 ] ] }
+: term s' Hit CTL-k to exit' .str crlf { auxKey? [ emit ][ drop ] key? [ dup 0x0B == [ drop -1 ][ auxEmit 0 ] ] }
 
 
 
