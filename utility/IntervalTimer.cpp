@@ -1,11 +1,13 @@
 
 #include "IntervalTimer.h"
-#include <time.h>
 
-#if defined(__linux__) || defined(__APPLE__)
+
 IntervalTimer::IntervalTimer( unsigned intervalInMilliSeconds) {
     setInterval( intervalInMilliSeconds);
 }
+
+#if defined(__linux__) || defined(__APPLE__)
+#include <time.h>
 void IntervalTimer::setInterval( unsigned intervalInMilliSeconds) {
     struct timespec t;
     clock_gettime(CLOCK_REALTIME, &t);
@@ -19,10 +21,17 @@ bool IntervalTimer::hasIntervalElapsed( void) {
 }
 
 #else
-#include "Arduino.h"
-IntervalTimer::IntervalTimer( unsigned intervalInMilliSeconds) {
-    setInterval( intervalInMilliSeconds);
+#ifdef USE_HAL_DRIVER
+#include "stm32l4xx_hal.h"
+void IntervalTimer::setInterval( unsigned intervalInMilliSeconds) {
+    m_start = HAL_GetTick();
+    m_interval = intervalInMilliSeconds;
 }
+bool IntervalTimer::hasIntervalElapsed( void) {
+    return (HAL_GetTick() - m_start) >= m_interval;
+}
+#else
+#include "Arduino.h"
 void IntervalTimer::setInterval( unsigned intervalInMilliSeconds) {
     m_start = millis();
     m_interval = intervalInMilliSeconds;
@@ -31,5 +40,4 @@ bool IntervalTimer::hasIntervalElapsed( void) {
     return (millis() - m_start) >= m_interval;
 }
 #endif
-
-
+#endif
