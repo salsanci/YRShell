@@ -127,6 +127,7 @@ void *kscan(void *x_void_ptr) {
 
 int main(int argc, const char * argv[]) {
     pthread_t kThread;
+    int slowDownFactor, slowDownCounter;
     
     if(pthread_create(&kThread, NULL, kscan, (void*) NULL)) {
         
@@ -141,6 +142,9 @@ int main(int argc, const char * argv[]) {
     iTimer.setInterval(10);
     
     std::cout.setf( std::ios_base::unitbuf );
+    
+    slowDownFactor = 1;
+    slowDownCounter = 0;
     while( 1) {
         if( iTimer.hasIntervalElapsed()) {
             for(int i = 0; i < 32 && keyQ.valueAvailable() && currenYRShell->getInq().spaceAvailable(); i++) {
@@ -151,12 +155,15 @@ int main(int argc, const char * argv[]) {
         shell1.slice();
         shell2.slice();
         usleep( 10);
-        if( currenYRShell->getOutQ().valueAvailable()) {
-            //std::cout << "<<";
-            for(int i = 0; i < 256 && currenYRShell->getOutQ().valueAvailable(); i++) {
-                std::cout << currenYRShell->getOutQ().get();
+        if( slowDownCounter++ > slowDownFactor) {
+            slowDownCounter = 0;
+            if( currenYRShell->getOutQ().valueAvailable()) {
+                //std::cout << "<<";
+                for(int i = 0; i < 256 && currenYRShell->getOutQ().valueAvailable(); i++) {
+                    std::cout << currenYRShell->getOutQ().get();
+                }
+                //std::cout << ">>";
             }
-            //std::cout << ">>";
         }
         if( currenYRShell->getAuxOutQ().valueAvailable()) {
             //std::cout << "<<";

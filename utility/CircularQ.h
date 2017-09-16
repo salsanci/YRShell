@@ -1,6 +1,12 @@
 
 #ifndef CircularQ_h
 #define CircularQ_h
+
+#ifdef NOTARDUINO_AC6
+#include "processorGlobal.h"
+#endif
+
+
 #include <stdint.h>
 
 /** \brief CircularQ - a FIFO Queue meant to be used by one reader and one writer
@@ -44,10 +50,6 @@ public:
     CircularQ() {
         reset();
     }
-    /** \brief Deletes all items in the queue.
-
-    Only the indices are updated. The buffer is not reset to a know value.
-    */
     void reset() {
         m_size = SIZE;
         m_head = m_tail = 0;

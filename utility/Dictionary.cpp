@@ -6,31 +6,31 @@ Dictionary::Dictionary( ) {
     M_interpreter = NULL;
 }
 uint16_t Dictionary::getFirstEntry( ) {
-    yrshellERROR(__BASE_FILE__, __LINE__);
+    yrshellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
 uint16_t Dictionary::getNextEntry( uint16_t index){
-    yrshellERROR(__BASE_FILE__, __LINE__);
+    yrshellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
 uint16_t Dictionary::getToken( uint16_t index){
-    yrshellERROR(__BASE_FILE__, __LINE__);
+    yrshellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
 uint16_t Dictionary::getNameAddressToken( uint16_t index){
-    yrshellERROR(__BASE_FILE__, __LINE__);
+    yrshellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
 uint16_t Dictionary::getWord( uint16_t index) {
-    yrshellERROR(__BASE_FILE__, __LINE__);
+    yrshellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
 const char* Dictionary::getAddress( uint16_t index){
-    yrshellERROR(__BASE_FILE__, __LINE__);
+    yrshellERROR(__FILE__, __LINE__);
     return NULL;
 }
 uint16_t Dictionary::find( const char* name) {
-    yrshellERROR(__BASE_FILE__, __LINE__);
+    yrshellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
 void Dictionary::yrshellERROR( const char* file, unsigned line) {

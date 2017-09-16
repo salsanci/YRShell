@@ -1,6 +1,10 @@
 #ifndef IntervalTimer_h
 #define IntervalTimer_h
 
+#ifdef NOTARDUINO_AC6
+#include "processorGlobal.h"
+#endif
+
 #if defined(__linux__) || defined(__APPLE__)
 
 class IntervalTimer {

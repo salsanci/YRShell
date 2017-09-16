@@ -21,8 +21,7 @@ bool IntervalTimer::hasIntervalElapsed( void) {
 }
 
 #else
-#ifdef USE_HAL_DRIVER
-#include "stm32l4xx_hal.h"
+#ifdef NOTARDUINO_AC6
 void IntervalTimer::setInterval( unsigned intervalInMilliSeconds) {
     m_start = HAL_GetTick();
     m_interval = intervalInMilliSeconds;

@@ -1,6 +1,10 @@
 #ifndef YRShellInterpreter_h
 #define YRShellInterpreter_h
 
+#ifdef NOTARDUINO_AC6
+#include "processorGlobal.h"
+#endif
+
 #include "CircularQ.h"
 #include "IntervalTimer.h"
 #include "Dictionary.h"
@@ -234,6 +238,7 @@ protected:
 
 public:
     YRShellInterpreter( ) { }
+    virtual ~YRShellInterpreter() { }
     void init( void);
     
     virtual void shellERROR( const char* file, unsigned line);

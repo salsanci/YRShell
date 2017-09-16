@@ -1,5 +1,4 @@
 
-#define _POSIX_C_SOURCE 200112L
 #include "YRShellInterpreter.h"
 
 static const FunctionEntry interpreterFunctions[] = {
@@ -353,7 +352,7 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             outChar( '\n');
             break;
         case SI_CC_reset:
-            reset( __BASE_FILE__, __LINE__, "COMMAND RESET\r\n");
+            reset( __FILE__, __LINE__, "COMMAND RESET\r\n");
             break;
         case SI_CC_uint16:
             v1 = fetchCurrentValueToken();
@@ -589,7 +588,7 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
         case SI_CC_parameterStackAt:
             v1 = m_topOfStack - 2 - popParameterStack();
             if( v1 >= m_topOfStack) {
-                shellERROR( __BASE_FILE__, __LINE__, "BAD STACK ACCESS");
+                shellERROR( __FILE__, __LINE__, "BAD STACK ACCESS");
             } else {
                 pushParameterStack( m_parameterStack[ v1]);
             }
@@ -598,7 +597,7 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
         case SI_CC_returnStackAt:
             v1 = m_returnTopOfStack - 1 - popParameterStack();
             if( v1 >= m_returnTopOfStack) {
-                shellERROR( __BASE_FILE__, __LINE__, "BAD RETURN STACK ACCESS");
+                shellERROR( __FILE__, __LINE__, "BAD RETURN STACK ACCESS");
             } else {
                 pushParameterStack( m_returnStack[ v1]);
             }
@@ -606,7 +605,7 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
         case SI_CC_compileStackAt:
             v1 = m_compileTopOfStack - 1 - popParameterStack();
             if( v1 >= m_compileTopOfStack) {
-                shellERROR( __BASE_FILE__, __LINE__, "BAD COMPILE STACK ACCESS");
+                shellERROR( __FILE__, __LINE__, "BAD COMPILE STACK ACCESS");
             } else {
                 pushParameterStack( m_compileStack[ v1]);
             }
@@ -852,7 +851,7 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             
 #endif
         default:
-            reset( __BASE_FILE__, __LINE__);
+            reset( __FILE__, __LINE__);
             break;
     }
 }
@@ -913,7 +912,7 @@ void YRShellInterpreter::CC_if( ) {
 void YRShellInterpreter::CC_else( ) {
     uint32_t v = popCompileStack();
     if( (v & 0xF0000000) != 0x10000000) {
-        shellERROR( __BASE_FILE__, __LINE__, "MISSING [");
+        shellERROR( __FILE__, __LINE__, "MISSING [");
     } else {
         m_dictionaryCurrent.addToken( SI_CC_jmp);
         pushCompileStack(0x10000000 | YRSHELL_DICTIONARY_RELATIVE | m_dictionaryCurrent.getWordEnd());
@@ -924,7 +923,7 @@ void YRShellInterpreter::CC_else( ) {
 void YRShellInterpreter::CC_then( ) {
     uint32_t v = popCompileStack();
     if( (v & 0xF0000000) != 0x10000000) {
-        shellERROR( __BASE_FILE__, __LINE__, "MISSING [");
+        shellERROR( __FILE__, __LINE__, "MISSING [");
     } else {
         m_dictionaryCurrent.setToken( v & YRSHELL_DICTIONARY_ADDRESS_MASK, YRSHELL_DICTIONARY_RELATIVE | m_dictionaryCurrent.getWordEnd());
     }
@@ -935,7 +934,7 @@ void YRShellInterpreter::CC_begin( ) {
 void YRShellInterpreter::CC_until( ) {
     uint32_t v = popCompileStack();
     if( (v & 0xF0000000) != 0x20000000) {
-        shellERROR( __BASE_FILE__, __LINE__, "MISSING {");
+        shellERROR( __FILE__, __LINE__, "MISSING {");
     } else {
         m_dictionaryCurrent.addToken( SI_CC_jmpz);
         m_dictionaryCurrent.addToken(YRSHELL_DICTIONARY_RELATIVE | (v & YRSHELL_DICTIONARY_ADDRESS_MASK));
@@ -1027,7 +1026,7 @@ void YRShellInterpreter::fillPad( char c) {
         }
     }
     if( m_padCount > (YRSHELL_PAD_SIZE - 2)) {
-        reset( __BASE_FILE__, __LINE__, "INPUT BUFFER OVERFLOW");
+        reset( __FILE__, __LINE__, "INPUT BUFFER OVERFLOW");
     } else {
         if( c == '\r' || c == '\n') {
             nextState( YRSHELL_BEGIN_PARSING);
@@ -1054,10 +1053,10 @@ void YRShellInterpreter::beginParsing(void) {
     } else {
         if( strcmp( m_token, ":")) {
             if( !m_dictionaryCurrent.newCompile("_")) {
-                shellERROR( __BASE_FILE__, __LINE__);
+                shellERROR( __FILE__, __LINE__);
             }
             if( m_compileTopOfStack) {
-                shellERROR(__BASE_FILE__, __LINE__);
+                shellERROR(__FILE__, __LINE__);
             }
             pushReturnStack( 0);
             m_PC = YRSHELL_DICTIONARY_CURRENT_RELATIVE | YRSHELL_DICTIONARY_CURRENT | m_dictionaryCurrent.getWordEnd();
@@ -1069,10 +1068,10 @@ void YRShellInterpreter::beginParsing(void) {
         } else {
             m_token = strtok_r( NULL, "\t ", &m_saveptr);
             if( m_token == NULL) {
-                shellERROR( __BASE_FILE__, __LINE__, "NULL DEFINITION");
+                shellERROR( __FILE__, __LINE__, "NULL DEFINITION");
             } else {
                 if( !m_dictionaryCurrent.newCompile(m_token)) {
-                    shellERROR( __BASE_FILE__, __LINE__, "DICTIONARY FULL");
+                    shellERROR( __FILE__, __LINE__, "DICTIONARY FULL");
                 } else {
 #ifdef YRSHELL_DEBUG
                     if( m_debugFlags & YRSHELL_DEBUG_TOKEN) {
@@ -1089,7 +1088,7 @@ void YRShellInterpreter::beginParsing(void) {
 
 void YRShellInterpreter::slice(void) {
     char c;
-    if( ( (m_outq.free() < m_outq.size()/2) || (m_auxOutq.free() < m_auxOutq.size()/2) ) && m_state != YRSHELL_WAIT_FOR_OUTPUT_SPACE) {
+    if( ( (m_outq.free() < (m_outq.size()/2)) || (m_auxOutq.free() < (m_auxOutq.size()/2)) ) && m_state != YRSHELL_WAIT_FOR_OUTPUT_SPACE) {
         nextState( YRSHELL_WAIT_FOR_OUTPUT_SPACE);
         m_outputTimeout.setInterval(m_outputTimeoutInMilliseconds);
     }
@@ -1145,7 +1144,7 @@ void YRShellInterpreter::slice(void) {
             if( m_token == NULL) {
                 if( m_compileTopOfStack) {
                     m_dictionaryCurrent.rollBack();
-                    shellERROR(__BASE_FILE__, __LINE__, "INCOMPLETE CONTROL STRUCTURE");
+                    shellERROR(__FILE__, __LINE__, "INCOMPLETE CONTROL STRUCTURE");
                 } else {
                     m_dictionaryCurrent.newCompileDone();
                     nextState( YRSHELL_BEGIN_IDLE);
@@ -1156,16 +1155,17 @@ void YRShellInterpreter::slice(void) {
             executing();
             break;
         case YRSHELL_WAIT_FOR_OUTPUT_SPACE:
-            if( m_outq.free() < m_outq.size()/2 && m_auxOutq.free() < m_auxOutq.size()/2 ) {
+            if( m_outq.used() < (m_outq.size()/2) && m_auxOutq.used() < (m_auxOutq.size()/2) ) {
                 nextState( m_lastState);
             } else if( m_outputTimeout.hasIntervalElapsed()) {
-                shellERROR( __BASE_FILE__, __LINE__, "OUTPUT WAIT FOR SPACE TIMEOUT");
+                shellERROR( __FILE__, __LINE__, "OUTPUT WAIT FOR SPACE TIMEOUT");
             }
             break;
         case YRSHELL_WAIT_DELAY:
             if( m_delayTimer.hasIntervalElapsed()) {
                 nextState( m_lastState);
             }
+            break;
         default:
             break;
             
@@ -1185,27 +1185,27 @@ bool YRShellInterpreter::processLiteralToken( ){
         rc = true;
         if( (value & 0xFFFF0000) == 0xFFFF0000) {
             if( !m_dictionaryCurrent.addToken( SI_CC_nint16)) {
-                shellERROR( __BASE_FILE__, __LINE__);
+                shellERROR( __FILE__, __LINE__);
             }
             if( !m_dictionaryCurrent.addToken( (uint16_t) value)) {
-                shellERROR( __BASE_FILE__, __LINE__);
+                shellERROR( __FILE__, __LINE__);
             }
         } else if( (value & 0xFFFF0000) == 0) {
             if( !m_dictionaryCurrent.addToken( SI_CC_uint16)) {
-                shellERROR( __BASE_FILE__, __LINE__);
+                shellERROR( __FILE__, __LINE__);
             }
             if( !m_dictionaryCurrent.addToken( (uint16_t) value)) {
-                shellERROR( __BASE_FILE__, __LINE__);
+                shellERROR( __FILE__, __LINE__);
             }
         } else {
             if( !m_dictionaryCurrent.addToken( SI_CC_uint32)) {
-                shellERROR( __BASE_FILE__, __LINE__);
+                shellERROR( __FILE__, __LINE__);
             }
             if( !m_dictionaryCurrent.addToken( (uint16_t) (0xFFFF & value))) {
-                shellERROR( __BASE_FILE__, __LINE__);
+                shellERROR( __FILE__, __LINE__);
             }
             if( !m_dictionaryCurrent.addToken( (uint16_t) (value >> 16))) {
-                shellERROR( __BASE_FILE__, __LINE__);
+                shellERROR( __FILE__, __LINE__);
             }
         }
     }
@@ -1214,7 +1214,7 @@ bool YRShellInterpreter::processLiteralToken( ){
 void YRShellInterpreter::processToken( ){
     if( m_token == NULL) {
         if( !m_dictionaryCurrent.addToken( SI_CC_return)) {
-            shellERROR( __BASE_FILE__, __LINE__,  "DICTIONARY FULL");
+            shellERROR( __FILE__, __LINE__,  "DICTIONARY FULL");
         }
     } else {
         uint16_t rc = find( m_token);
@@ -1234,7 +1234,7 @@ void YRShellInterpreter::processToken( ){
                     rc |= YRSHELL_DICTIONARY_CURRENT_RELATIVE | YRSHELL_DICTIONARY_RELATIVE;
                 }
                 if( !m_dictionaryCurrent.addToken( rc)) {
-                    shellERROR( __BASE_FILE__, __LINE__, "DICTIONARY FULL");
+                    shellERROR( __FILE__, __LINE__, "DICTIONARY FULL");
                 }
             }
         }
@@ -1297,7 +1297,7 @@ uint16_t YRShellInterpreter::fetchCurrentValueToken( ) {
 uint16_t YRShellInterpreter::fetchCurrentToken( ) {
     uint16_t token = fetchCurrentValueToken();
     if( token == YRSHELL_DICTIONARY_INVALID) {
-        shellERROR( __BASE_FILE__, __LINE__);
+        shellERROR( __FILE__, __LINE__);
     }
     return token;
 }
@@ -1345,7 +1345,7 @@ void YRShellInterpreter::executeToken( uint16_t token ) {
             executeFunction(token);
             break;
         default:
-            shellERROR( __BASE_FILE__, __LINE__);
+            shellERROR( __FILE__, __LINE__);
             break;
     }
 }
@@ -1365,11 +1365,11 @@ YRShellAuxOutQ& YRShellInterpreter::getAuxOutQ() {
 void YRShellInterpreter::outChar( const char c) {
     if( m_useAuxQueues) {
         if( !m_auxOutq.put( c) && m_state != YRSHELL_INRESET) {
-            shellERROR( __BASE_FILE__, __LINE__, "OUTPUT BUFFER OVERFLOW");
+            shellERROR( __FILE__, __LINE__, "OUTPUT BUFFER OVERFLOW");
         }
     } else {
         if( !m_outq.put( c) && m_state != YRSHELL_INRESET) {
-            shellERROR( __BASE_FILE__, __LINE__, "OUTPUT BUFFER OVERFLOW");
+            shellERROR( __FILE__, __LINE__, "OUTPUT BUFFER OVERFLOW");
         }
     }
 }
@@ -1679,7 +1679,7 @@ uint32_t YRShellInterpreter::popParameterStack( ) {
     if(m_topOfStack > 0) {
         rc = m_parameterStack[ --m_topOfStack];
     } else {
-        shellERROR( __BASE_FILE__, __LINE__, "STACK UNDERFLOW\r\n");
+        shellERROR( __FILE__, __LINE__, "STACK UNDERFLOW\r\n");
     }
     return rc;
 }
@@ -1688,7 +1688,7 @@ uint32_t YRShellInterpreter::popReturnStack( ) {
     if(m_returnTopOfStack > 0) {
         rc = m_returnStack[ --m_returnTopOfStack];
     } else {
-        shellERROR( __BASE_FILE__, __LINE__, "RETURN STACK UNDERFLOW\r\n");
+        shellERROR( __FILE__, __LINE__, "RETURN STACK UNDERFLOW\r\n");
     }
     return rc;
 }
@@ -1697,7 +1697,7 @@ uint32_t YRShellInterpreter::popCompileStack( ) {
     if(m_compileTopOfStack > 0) {
         rc = m_compileStack[ --m_compileTopOfStack];
     } else {
-        shellERROR( __BASE_FILE__, __LINE__, "COMPILE STACK UNDERFLOW\r\n");
+        shellERROR( __FILE__, __LINE__, "COMPILE STACK UNDERFLOW\r\n");
     }
     return rc;
 }
@@ -1705,21 +1705,21 @@ void YRShellInterpreter::pushParameterStack( uint32_t v) {
     if( m_topOfStack < YRSHELL_PARAMETER_STACK_SIZE){
         m_parameterStack[ m_topOfStack++] = v;
     } else {
-        shellERROR( __BASE_FILE__, __LINE__, "STACK OVERFLOW\r\n");
+        shellERROR( __FILE__, __LINE__, "STACK OVERFLOW\r\n");
     }
 }
 void YRShellInterpreter::pushReturnStack( uint32_t v) {
     if( m_returnTopOfStack < YRSHELL_RETURN_STACK_SIZE){
         m_returnStack[ m_returnTopOfStack++] = v;
     } else {
-        shellERROR( __BASE_FILE__, __LINE__, "RETURN STACK OVERFLOW\r\n");
+        shellERROR( __FILE__, __LINE__, "RETURN STACK OVERFLOW\r\n");
     }
 }
 void YRShellInterpreter::pushCompileStack( uint32_t v) {
     if( m_compileTopOfStack < YRSHELL_COMPILE_STACK_SIZE){
         m_compileStack[ m_compileTopOfStack++] = v;
     } else {
-        shellERROR( __BASE_FILE__, __LINE__, "RETURN STACK OVERFLOW\r\n");
+        shellERROR( __FILE__, __LINE__, "RETURN STACK OVERFLOW\r\n");
     }
 }
 void YRShellInterpreter::CC_clearPad() {

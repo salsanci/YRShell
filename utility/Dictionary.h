@@ -1,6 +1,11 @@
 #ifndef Dictionary_h
 #define Dictionary_h
 
+#ifdef NOTARDUINO_AC6
+#include "processorGlobal.h"
+#endif
+
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>

@@ -1,6 +1,11 @@
 #ifndef YRShellDefines_h
 #define YRShellDefines_h
 
+#ifdef NOTARDUINO_AC6
+#include "processorGlobal.h"
+#endif
+
+
 #define YRSHELL_DEBUG
 #define YRSHELL_INTERPRETER_FLOATING_POINT
 
