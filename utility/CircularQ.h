@@ -9,14 +9,49 @@
 
 #include <stdint.h>
 
-/** \brief CircularQ - a FIFO Queue meant to be used by one reader and one writer
+/** \brief CircularQBase - abstract base class for a FIFO Queue meant to be used by one reader and one writer
  
+CircularQBase is a template class which provides threadsafe operation for one reader and one writer.
+
+The template declaration has 1 parameters: TYPE.  This is to easily support and abstraction for queues of the same type, but of different sizes.
+
+
+Common use is to typedef,
+This allows for more compact declaration, especially when passing as a reference as a parameter.
+
+    Examples:
+    typedef CircularQBase<char>         MyCharQ;
+    MyCharQ         *InQ = & CircularQ<char, 23>;
+    MyCharQ         *AuxInQ = & CircularQ<char, 23>;
+
+ 
+ 
+*/
+template <class TYPE>
+class CircularQBase {
+    
+public:
+	CircularQBase() { }
+	virtual ~CircularQBase() { }
+
+    virtual void reset( void ) = 0;
+    virtual const uint16_t size( void ) = 0;
+    virtual const uint16_t used( void ) = 0;
+    virtual const uint16_t free( void ) = 0;
+    virtual const bool valueAvailable( uint16_t n = 1) = 0;
+    virtual const bool spaceAvailable( uint16_t n = 1) = 0;
+    virtual TYPE get(void) = 0;
+    virtual bool put( TYPE v) = 0;
+};
+
+/** \brief CircularQ - a FIFO Queue meant to be used by one reader and one writer
+
 CircularQ is a template class which provides threadsafe operation for one reader and one writer.
 
-The template declaration has 2 parameters: TYPE and SIZE. This is to easily support static declaration. 
+The template declaration has 2 parameters: TYPE and SIZE. This is to easily support static declaration.
 
 
-The minimum value for size is 2, and teh maximum is 65,535.
+The minimum value for size is 2, and the maximum is 65,535.
 
 Common use is to typedef,
 This allows for more compact declaration, especially when passing as a reference as a parameter.
@@ -30,12 +65,11 @@ This allows for more compact declaration, especially when passing as a reference
     MyOutQ          outQ;
     MyInternalQ     iQ;
 
- 
- 
- */
 
-template <class TYPE, unsigned SIZE>
-class CircularQ
+
+ */
+template <class BASE, class TYPE, unsigned SIZE>
+class CircularQ : public BASE
 {
 protected:  
     uint16_t m_head; /**< Index to the next value that will be written to the queue. */
@@ -99,7 +133,7 @@ public:
  
     Returns the next item in the queue. valueAvailable() should always be called first.
     */
-    TYPE get() {
+    TYPE get( void) {
         TYPE rc = 0;
         uint16_t newTail;
         if( m_head != m_tail) {

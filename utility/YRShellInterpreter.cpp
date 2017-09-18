@@ -1349,16 +1349,16 @@ void YRShellInterpreter::executeToken( uint16_t token ) {
             break;
     }
 }
-YRShellInQ& YRShellInterpreter::getInq() {
+YRCharQ& YRShellInterpreter::getInq() {
     return m_inq;
 }
-YRShellAuxInQ& YRShellInterpreter::getAuxInq() {
+YRCharQ& YRShellInterpreter::getAuxInq() {
     return m_auxInq;
 }
-YRShellOutQ& YRShellInterpreter::getOutQ() {
+YRCharQ& YRShellInterpreter::getOutQ() {
     return m_outq;
 }
-YRShellAuxOutQ& YRShellInterpreter::getAuxOutQ() {
+YRCharQ& YRShellInterpreter::getAuxOutQ() {
     return m_auxOutq;
 }
 

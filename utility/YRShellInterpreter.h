@@ -13,10 +13,11 @@
 #include "math.h"
 #endif
 
-typedef CircularQ<char, YRSHELL_INQ_SIZE>YRShellInQ;
-typedef CircularQ<char, YRSHELL_AUX_INQ_SIZE>YRShellAuxInQ;
-typedef CircularQ<char, YRSHELL_OUTQ_SIZE>YRShellOutQ;
-typedef CircularQ<char, YRSHELL_AUX_OUTQ_SIZE>YRShellAuxOutQ;
+typedef CircularQBase<char> YRCharQ;
+typedef CircularQ<YRCharQ, char, YRSHELL_INQ_SIZE>YRShellInQ;
+typedef CircularQ<YRCharQ, char, YRSHELL_AUX_INQ_SIZE>YRShellAuxInQ;
+typedef CircularQ<YRCharQ, char, YRSHELL_OUTQ_SIZE>YRShellOutQ;
+typedef CircularQ<YRCharQ, char, YRSHELL_AUX_OUTQ_SIZE>YRShellAuxOutQ;
 
 /** \brief YRShellInterpreter - interactive
  
@@ -248,10 +249,10 @@ public:
     void setPrompt( const char* prompt );
     
     void slice( void);
-    YRShellInQ& getInq( void);
-    YRShellAuxInQ& getAuxInq( void);
-    YRShellOutQ& getOutQ(void);
-    YRShellAuxOutQ& getAuxOutQ(void);
+    YRCharQ& getInq( void);
+    YRCharQ& getAuxInq( void);
+    YRCharQ& getOutQ(void);
+    YRCharQ& getAuxOutQ(void);
     
     char charToHex( char c);
     void intToString(int32_t n, uint8_t numDigits, char *s);

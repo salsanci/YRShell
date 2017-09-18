@@ -11,7 +11,7 @@
 #include <pthread.h>
 #include "unistd.h"
 
-CircularQ<char, 4000> keyQ;
+CircularQ<YRCharQ, char, 4000> keyQ;
 
 IntervalTimer iTimer;
 
@@ -50,6 +50,7 @@ CompiledDictionary compiledExtensionDictionary( NULL, 0xFFFF , 0x0000 , YRSHELL_
 
 MyYRShell shell1;
 MyYRShell shell2;
+
 MyYRShell *shellVector[] = {& shell1, &shell2};
 uint8_t shellVectorIndex;
 #define NUM_YRSHELLS (sizeof(shellVector)/sizeof( *shellVector))
@@ -124,6 +125,23 @@ void *kscan(void *x_void_ptr) {
     return NULL;
 }
 
+class StdoutQ {
+public:
+    StdoutQ( ) { }
+    virtual ~StdoutQ( void) { }
+    void slice( YRCharQ& q);
+};
+void StdoutQ::slice(YRCharQ& q) {
+    if( q.valueAvailable()) {
+        for(int i = 0; i < 256 && q.valueAvailable(); i++) {
+            std::cout << q.get();
+        }
+    }
+}
+
+
+StdoutQ out1;
+StdoutQ out2;
 
 int main(int argc, const char * argv[]) {
     pthread_t kThread;
@@ -157,23 +175,8 @@ int main(int argc, const char * argv[]) {
         usleep( 10);
         if( slowDownCounter++ > slowDownFactor) {
             slowDownCounter = 0;
-            if( currenYRShell->getOutQ().valueAvailable()) {
-                //std::cout << "<<";
-                for(int i = 0; i < 256 && currenYRShell->getOutQ().valueAvailable(); i++) {
-                    std::cout << currenYRShell->getOutQ().get();
-                }
-                //std::cout << ">>";
-            }
-        }
-        if( currenYRShell->getAuxOutQ().valueAvailable()) {
-            //std::cout << "<<";
-            std::cout << "\r\n[AUX\r\n";
-            for(int i = 0; i < 256 && currenYRShell->getAuxOutQ().valueAvailable(); i++) {
-                std::cout << currenYRShell->getAuxOutQ().get();
-            }
-            //std::cout << ">>";
-            std::cout << "\r\n]\r\n";
-        }
+            out1.slice( currenYRShell->getOutQ());
+            out2.slice(currenYRShell->getAuxOutQ());
     }
     return 0;
 }
