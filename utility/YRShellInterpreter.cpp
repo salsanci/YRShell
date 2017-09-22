@@ -1355,10 +1355,10 @@ YRCharQ& YRShellInterpreter::getInq() {
 YRCharQ& YRShellInterpreter::getAuxInq() {
     return m_auxInq;
 }
-YRCharQ& YRShellInterpreter::getOutQ() {
+YRCharQ& YRShellInterpreter::getOutq() {
     return m_outq;
 }
-YRCharQ& YRShellInterpreter::getAuxOutQ() {
+YRCharQ& YRShellInterpreter::getAuxOutq() {
     return m_auxOutq;
 }
 

@@ -251,8 +251,8 @@ public:
     void slice( void);
     YRCharQ& getInq( void);
     YRCharQ& getAuxInq( void);
-    YRCharQ& getOutQ(void);
-    YRCharQ& getAuxOutQ(void);
+    YRCharQ& getOutq(void);
+    YRCharQ& getAuxOutq(void);
     
     char charToHex( char c);
     void intToString(int32_t n, uint8_t numDigits, char *s);
