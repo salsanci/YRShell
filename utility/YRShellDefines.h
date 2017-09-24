@@ -134,6 +134,7 @@
 #endif
 
 typedef enum {
+	YRSHELL_INVALID_STATE = 0,
     YRSHELL_BEGINNING = 1,
     YRSHELL_INRESET,
     YRSHELL_BEGIN_IDLE,

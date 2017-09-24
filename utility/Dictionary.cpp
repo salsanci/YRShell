@@ -5,6 +5,9 @@ Dictionary::Dictionary( ) {
     m_mask = 0;
     M_interpreter = NULL;
 }
+Dictionary::~Dictionary( ) {
+    yrshellERROR(__FILE__, __LINE__);
+}
 uint16_t Dictionary::getFirstEntry( ) {
     yrshellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;

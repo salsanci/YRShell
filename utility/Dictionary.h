@@ -28,6 +28,11 @@ public:
     Default constructor, no parameters are required.
     */
     Dictionary( void);
+    /** \brief Destructor.
+
+    Default destructor.
+    */
+    virtual ~Dictionary( void);
     /** \brief Returns the mask.
 
     Returns the mask value applied to the tokens in this dictionary.

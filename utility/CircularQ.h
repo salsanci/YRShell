@@ -58,7 +58,7 @@ public:
 
 /** \brief CircularQ - a FIFO Queue meant to be used by one reader and one writer
 
- CircularQ is a template class which provides threadsafe operation for one reader and one writer.
+ CircularQ is a template class which provides thread safe operation for one reader and one writer.
 
  The template declaration has 2 parameters: TYPE and SIZE. This is to easily support static declaration.
 
@@ -150,8 +150,7 @@ public:
 	 Drops the next n items in the Q.
 	 */
 	void drop(uint16_t n) {
-		uint16_t sz;
-		sz = used();
+		uint16_t sz = used();
 		if (n > sz) {
 			n = sz;
 		}
@@ -168,8 +167,7 @@ public:
 	 Appends the next n items in the Q.
 	 */
 	void append(uint16_t n) {
-		uint16_t sz;
-		sz = free();
+		uint16_t sz = free();
 		if (n > sz) {
 			n = sz;
 		}

@@ -237,8 +237,8 @@ protected:
     void CC_nextEntry( void);
 
 public:
-    YRShellInterpreter( ) { }
-    virtual ~YRShellInterpreter() { }
+    YRShellInterpreter( );
+    virtual ~YRShellInterpreter();
     void init( void);
     
     virtual void shellERROR( const char* file, unsigned line);

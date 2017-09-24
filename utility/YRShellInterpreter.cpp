@@ -262,6 +262,24 @@ void YRShellInterpreter::init( ) {
     m_dictionaryList[ YRSHELL_DICTIONARY_FUNCTION_INDEX] = NULL;
     m_dictionaryList[ YRSHELL_DICTIONARY_INTERPRETER_FUNCTION_INDEX] =  &dictionaryInterpreterFunction;
 }
+YRShellInterpreter::YRShellInterpreter() {
+	m_compileTopOfStack = 0;
+	m_debugFlags = 0;
+	m_hexMode = false;
+	m_lastState = YRSHELL_INVALID_STATE;
+	m_outputTimeoutInMilliseconds = 1000;
+	m_padCount = 0;
+	m_PC = YRSHELL_DICTIONARY_INVALID;
+	m_returnTopOfStack = 0;
+	m_saveptr = NULL;
+	m_state = YRSHELL_INVALID_STATE;
+	m_token = NULL;
+	m_topOfStack = 0;
+	m_useAuxQueues = false;
+}
+YRShellInterpreter::~YRShellInterpreter() {
+
+}
 bool YRShellInterpreter::isCompileToken() {
     return m_token != NULL && (!strcmp( m_token, "s'") || !strcmp( m_token, "[") || !strcmp( m_token, "][") || !strcmp( m_token, "]") || !strcmp( m_token, "{") || !strcmp( m_token, "}") );
 }
