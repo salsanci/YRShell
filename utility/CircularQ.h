@@ -6,6 +6,7 @@
 #endif
 
 #include <stdint.h>
+#include <string.h>
 
 /** \brief CircularQBase - abstract base class for a FIFO Queue meant to be used by one reader and one writer
  
@@ -45,6 +46,10 @@ public:
 	virtual char* getBuffer(void) = 0;
 	virtual char* getLinearReadBuffer(void) = 0;
 	virtual uint16_t getLinearReadBufferSize(void) = 0;
+	virtual void drop(uint16_t n) = 0;
+	virtual char* getLinearWriteBuffer(void) = 0;
+	virtual uint16_t getLinearWriteBufferSize(void) = 0;
+	virtual void append(uint16_t n) = 0;
 	virtual void setHead(uint16_t h) = 0;
 	virtual void setNextQ( CircularQBase<TYPE>& q) = 0;
 	virtual void setPreviousQ( CircularQBase<TYPE>& q) = 0;
@@ -75,14 +80,13 @@ public:
 
 
  */
-template<class BASE, class TYPE, unsigned SIZE>
-class CircularQ: public BASE {
+template<class TYPE, unsigned SIZE>
+class CircularQ: public CircularQBase<TYPE> {
 protected:
-	BASE* m_nextQ; /**< Pointer to a queue which receives the output of this queue. */
-	BASE* m_previousQ; /**< Pointer to a queue which provides the input to this queue. */
+	CircularQBase<TYPE>* m_nextQ; /**< Pointer to a queue which receives the output of this queue. */
+	CircularQBase<TYPE>* m_previousQ; /**< Pointer to a queue which provides the input to this queue. */
 	uint16_t m_head; /**< Index to the next value that will be written to the queue. */
 	uint16_t m_tail; /**< Index to the next value that will be read from the queue. If equal to m_head the queue is empty. */
-	uint16_t m_size; /**< The size of the queue buffer in items. The number of values which can be stored is m_size - 1. */
 	TYPE m_buf[SIZE]; /**< Storage for the items in the queue. */
 public:
 	/** \brief Constructor.
@@ -98,7 +102,6 @@ public:
 	 Clears Q.
 	 */
 	void reset() {
-		m_size = SIZE;
 		m_head = m_tail = 0;
 	}
 	/** \brief Sets the queue which receives the output of this Q.
@@ -120,14 +123,25 @@ public:
 	 Pulls input from the queue Q, pushes output to the next queue.
 	 */
 	void slice( ) {
+		uint16_t s1, s2;
 		if( m_nextQ != NULL) {
-			for( uint16_t i = 0; i < SIZE && valueAvailable() && m_nextQ->spaceAvailable(); i++) {
-				m_nextQ->put( get());
+			s1 = getLinearReadBufferSize();
+			s2 = m_nextQ->getLinearWriteBufferSize();
+			s1 = s1 <= s2 ? s1 : s2;
+			if( s1 > 0) {
+				memcpy(m_nextQ->getLinearWriteBuffer(), getLinearReadBuffer(), s1);
+				drop( s1);
+				m_nextQ->append( s1);
 			}
 		}
 		if( m_previousQ != NULL) {
-			for( uint16_t i = 0; i < SIZE && m_previousQ->valueAvailable() && spaceAvailable(); i++) {
-				put( m_previousQ->get());
+			s1 = getLinearWriteBufferSize();
+			s2 = m_previousQ->getLinearReadBufferSize();
+			s1 = s1 <= s2 ? s1 : s2;
+			if( s1 > 0) {
+				memcpy(getLinearWriteBuffer(), m_previousQ->getLinearReadBuffer(), s1);
+				m_previousQ->drop( s1);
+				append( s1);
 			}
 		}
 	}
@@ -142,10 +156,29 @@ public:
 			n = sz;
 		}
 		if (n > 0) {
-			m_tail += n;
-			if(m_tail >= m_size) {
-				m_tail -= m_size;
+			sz = m_tail + n;
+			if(sz >= SIZE) {
+				sz -= SIZE;
 			}
+			m_tail = sz;
+		}
+	}
+	/** \brief Appends the next n items in the Q
+
+	 Appends the next n items in the Q.
+	 */
+	void append(uint16_t n) {
+		uint16_t sz;
+		sz = free();
+		if (n > sz) {
+			n = sz;
+		}
+		if (n > 0) {
+			sz = m_head + n;
+			if(sz >= SIZE) {
+				sz -= SIZE;
+			}
+			m_head = sz;
 		}
 	}
 	/** \brief Sets the pointer to the next item for a put
@@ -175,7 +208,30 @@ public:
 		if (m_tail < m_head) {
 			rc = m_head - m_tail;
 		} else if (m_tail > m_head) {
-			rc = m_size - m_tail;
+			rc = SIZE - m_tail;
+		}
+		return rc;
+	}
+	/** \brief Returns a pointer to the buffer used by the queue for the next put operation
+
+	 Returns a pointer to the buffer used by the queue for the next put operation.
+	 */
+	TYPE* getLinearWriteBuffer() {
+		return &m_buf[m_head];
+	}
+	/** \brief Returns the size of the linear buffer
+
+	 Returns the size of the linear buffer.
+	 */
+	uint16_t getLinearWriteBufferSize() {
+		uint16_t rc = 0;
+		if( m_head < m_tail) {
+			rc = m_tail - 1 - m_head;
+		} else if( m_head >= m_tail) {
+			rc = SIZE - m_head;
+			if( m_tail == 0 && rc > 0) {
+				rc--;
+			}
 		}
 		return rc;
 	}

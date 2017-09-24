@@ -11,7 +11,7 @@
 #include <pthread.h>
 #include "unistd.h"
 
-CircularQ<YRCharQ, char, 4000> keyQ;
+CircularQ<CircularQBase<char>Q, char, 4000> keyQ;
 
 IntervalTimer iTimer;
 
@@ -129,9 +129,9 @@ class StdoutQ {
 public:
     StdoutQ( ) { }
     virtual ~StdoutQ( void) { }
-    void slice( YRCharQ& q);
+    void slice( CircularQBase<char>Q& q);
 };
-void StdoutQ::slice(YRCharQ& q) {
+void StdoutQ::slice(CircularQBase<char>Q& q) {
     if( q.valueAvailable()) {
         for(int i = 0; i < 256 && q.valueAvailable(); i++) {
             std::cout << q.get();
