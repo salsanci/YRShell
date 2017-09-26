@@ -238,15 +238,3 @@ const char* CurrentVariableDictionary::getAddress( uint16_t index) {
     return index < m_dictionaryCurrentWordEnd ? (const char*) &m_dictionary[ index] : NULL;
 }
 
-CurrentDictionary::CurrentDictionary( )  {
-    m_mask = YRSHELL_DICTIONARY_CURRENT;
-    m_size = YRSHELL_DICTIONARY_SIZE;
-    m_dictionary = m_dictionaryBuffer;
-    m_dictionaryBackupWordEnd = 0;
-    m_dictionaryBackupLastWord = 0;
-    m_dictionaryCurrentWordEnd = 0;
-    m_lastWord = YRSHELL_DICTIONARY_INVALID;
-}
-
-
-

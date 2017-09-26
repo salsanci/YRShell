@@ -142,8 +142,8 @@ void loop()
         myShell.getInq().put( Serial.read());
     }
   }
-  for( int i = 0; i < YRSHELL_OUTQ_SIZE && myShell.getOutQ().valueAvailable(); i++) {
-    Serial.write( myShell.getOutQ().get());
+  for( int i = 0; i < YRSHELL_OUTQ_SIZE && myShell.getOutq().valueAvailable(); i++) {
+    Serial.write( myShell.getOutq().get());
   }
   
   myShell.slice();

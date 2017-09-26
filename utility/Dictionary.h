@@ -255,12 +255,21 @@ public:
     
 };
 
+template<unsigned SHELL_DICTIONARY_SIZE>
 class CurrentDictionary  : public CurrentVariableDictionary  {
 protected:
-        uint16_t    m_dictionaryBuffer[ YRSHELL_DICTIONARY_SIZE];
+    uint16_t    m_dictionaryBuffer[ SHELL_DICTIONARY_SIZE];
 public:
-        CurrentDictionary( void);
-
+    CurrentDictionary( void) {
+        m_mask = YRSHELL_DICTIONARY_CURRENT;
+        m_size = SHELL_DICTIONARY_SIZE;
+        m_dictionary = m_dictionaryBuffer;
+        m_dictionaryBackupWordEnd = 0;
+        m_dictionaryBackupLastWord = 0;
+        m_dictionaryCurrentWordEnd = 0;
+        m_lastWord = YRSHELL_DICTIONARY_INVALID;
+    }
+    
 };
 
 #endif

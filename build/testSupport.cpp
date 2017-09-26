@@ -43,8 +43,8 @@ bool ShellRunner::runCommand( const char* Setup,  const char *Command) {
             }
             c++;
             m_shell.slice();
-            while( (FirstOutput == NULL ||  SecondOutput == NULL)  && m_shell.getOutQ().valueAvailable()) {
-                *P++ = m_shell.getOutQ().get();
+            while( (FirstOutput == NULL ||  SecondOutput == NULL)  && m_shell.getOutq().valueAvailable()) {
+                *P++ = m_shell.getOutq().get();
                 *P = '\0';
             }
             if( P >= Lim) {

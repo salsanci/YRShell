@@ -162,8 +162,8 @@ void loop()
       currentShell->getInq().put( Serial.read());
     }
   }
-  for( int i = 0; i < YRSHELL_OUTQ_SIZE && currentShell->getOutQ().valueAvailable(); i++) {
-    Serial.write( currentShell->getOutQ().get());
+  for( int i = 0; i < YRSHELL_OUTQ_SIZE && currentShell->getOutq().valueAvailable(); i++) {
+    Serial.write( currentShell->getOutq().get());
   }
   
   shell1.slice();

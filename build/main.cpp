@@ -11,7 +11,7 @@
 #include <pthread.h>
 #include "unistd.h"
 
-CircularQ<CircularQBase<char>Q, char, 4000> keyQ;
+CircularQ<char, 4000> keyQ;
 
 IntervalTimer iTimer;
 
@@ -69,7 +69,7 @@ static const char *YRShellExtensionDebugStrings[] = {
 MyYRShell::MyYRShell( ){
 }
 void MyYRShell::init() {
-   YRShell::init();
+    YRShell::init();
     compiledExtensionDictionary.setInterpreter(this);
     dictionaryExtensionFunction.setInterpreter(this);
     m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_COMPILED_INDEX] = &compiledExtensionDictionary;
@@ -129,9 +129,9 @@ class StdoutQ {
 public:
     StdoutQ( ) { }
     virtual ~StdoutQ( void) { }
-    void slice( CircularQBase<char>Q& q);
+    void slice( CircularQBase<char>& q);
 };
-void StdoutQ::slice(CircularQBase<char>Q& q) {
+void StdoutQ::slice(CircularQBase<char>& q) {
     if( q.valueAvailable()) {
         for(int i = 0; i < 256 && q.valueAvailable(); i++) {
             std::cout << q.get();
@@ -175,8 +175,9 @@ int main(int argc, const char * argv[]) {
         usleep( 10);
         if( slowDownCounter++ > slowDownFactor) {
             slowDownCounter = 0;
-            out1.slice( currenYRShell->getOutQ());
-            out2.slice(currenYRShell->getAuxOutQ());
+            out1.slice( currenYRShell->getOutq());
+            out2.slice(currenYRShell->getAuxOutq());
+        }
     }
     return 0;
 }

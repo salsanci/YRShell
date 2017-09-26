@@ -252,10 +252,10 @@ void YRShellInterpreter::init( ) {
     reset();
     
     emptyDictionary.setInterpreter( this);
-    m_dictionaryCurrent.setInterpreter(this);
+    m_DictionaryCurrent->setInterpreter(this);
     dictionaryInterpreterFunction.setInterpreter(this);
     m_dictionaryList[ YRSHELL_DICTIONARY_DUMMY_INDEX] = &emptyDictionary;
-    m_dictionaryList[ YRSHELL_DICTIONARY_CURRENT_INDEX] = &m_dictionaryCurrent;
+    m_dictionaryList[ YRSHELL_DICTIONARY_CURRENT_INDEX] = m_DictionaryCurrent;
     m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_COMPILED_INDEX] = NULL;
     m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_FUNCTION_INDEX] = NULL;
     m_dictionaryList[ YRSHELL_DICTIONARY_COMPILED_INDEX] = NULL;
@@ -263,6 +263,7 @@ void YRShellInterpreter::init( ) {
     m_dictionaryList[ YRSHELL_DICTIONARY_INTERPRETER_FUNCTION_INDEX] =  &dictionaryInterpreterFunction;
 }
 YRShellInterpreter::YRShellInterpreter() {
+    m_DictionaryCurrent = NULL;
 	m_compileTopOfStack = 0;
 	m_debugFlags = 0;
 	m_hexMode = false;
@@ -278,7 +279,6 @@ YRShellInterpreter::YRShellInterpreter() {
 	m_useAuxQueues = false;
 }
 YRShellInterpreter::~YRShellInterpreter() {
-
 }
 bool YRShellInterpreter::isCompileToken() {
     return m_token != NULL && (!strcmp( m_token, "s'") || !strcmp( m_token, "[") || !strcmp( m_token, "][") || !strcmp( m_token, "]") || !strcmp( m_token, "{") || !strcmp( m_token, "}") );
@@ -329,9 +329,6 @@ void YRShellInterpreter::CC_nextEntry( ) {
     }
     pushParameterStack( v2);
     pushParameterStack( res);
-}
-void YRShellInterpreter::setPrompt( const char* prompt ) {
-    m_prompt = prompt;
 }
 
 void YRShellInterpreter::executeFunction( uint16_t n) {
@@ -669,13 +666,13 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             }
             break;
         case SI_CC_getCurrentDictionary:
-            pushParameterStack( m_dictionaryCurrent.getWord(popParameterStack()));
+            pushParameterStack( m_DictionaryCurrent->getWord(popParameterStack()));
             break;
         case SI_CC_getCurrentDictionaryEnd:
-            pushParameterStack(m_dictionaryCurrent.getBackupWordEnd());
+            pushParameterStack(m_DictionaryCurrent->getBackupWordEnd());
             break;
         case SI_CC_getCurrentDictionaryLastWord:
-            pushParameterStack(m_dictionaryCurrent.getBackupLastWord());
+            pushParameterStack(m_DictionaryCurrent->getBackupLastWord());
             break;
             
         case SI_CC_delay:
@@ -877,7 +874,7 @@ void YRShellInterpreter::CC_stringDef( ) {
     char c;
     uint16_t token = 0;
     bool tokenEmpty = true;
-    m_dictionaryCurrent.addToken( SI_CC_string);
+    m_DictionaryCurrent->addToken( SI_CC_string);
     while( 1) {
         c =  *m_saveptr++;
         if( c == '\\') {
@@ -906,9 +903,9 @@ void YRShellInterpreter::CC_stringDef( ) {
         }
         if( c == '\'' || c == '\0' ) {
             if( tokenEmpty) {
-                m_dictionaryCurrent.addToken( 0);
+                m_DictionaryCurrent->addToken( 0);
             } else {
-                m_dictionaryCurrent.addToken( token);
+                m_DictionaryCurrent->addToken( token);
             }
             break;
         }
@@ -918,24 +915,24 @@ void YRShellInterpreter::CC_stringDef( ) {
         } else {
             token |= ((uint16_t) c) << 8;
             tokenEmpty = true;
-            m_dictionaryCurrent.addToken( token);
+            m_DictionaryCurrent->addToken( token);
         }
     }
 }
 void YRShellInterpreter::CC_if( ) {
-    m_dictionaryCurrent.addToken( SI_CC_jmpz);
-    pushCompileStack(0x10000000 | YRSHELL_DICTIONARY_RELATIVE| m_dictionaryCurrent.getWordEnd());
-    m_dictionaryCurrent.addToken( 0);
+    m_DictionaryCurrent->addToken( SI_CC_jmpz);
+    pushCompileStack(0x10000000 | YRSHELL_DICTIONARY_RELATIVE| m_DictionaryCurrent->getWordEnd());
+    m_DictionaryCurrent->addToken( 0);
 }
 void YRShellInterpreter::CC_else( ) {
     uint32_t v = popCompileStack();
     if( (v & 0xF0000000) != 0x10000000) {
         shellERROR( __FILE__, __LINE__, "MISSING [");
     } else {
-        m_dictionaryCurrent.addToken( SI_CC_jmp);
-        pushCompileStack(0x10000000 | YRSHELL_DICTIONARY_RELATIVE | m_dictionaryCurrent.getWordEnd());
-        m_dictionaryCurrent.addToken( 0);
-        m_dictionaryCurrent.setToken( v & YRSHELL_DICTIONARY_ADDRESS_MASK, YRSHELL_DICTIONARY_RELATIVE| m_dictionaryCurrent.getWordEnd());
+        m_DictionaryCurrent->addToken( SI_CC_jmp);
+        pushCompileStack(0x10000000 | YRSHELL_DICTIONARY_RELATIVE | m_DictionaryCurrent->getWordEnd());
+        m_DictionaryCurrent->addToken( 0);
+        m_DictionaryCurrent->setToken( v & YRSHELL_DICTIONARY_ADDRESS_MASK, YRSHELL_DICTIONARY_RELATIVE| m_DictionaryCurrent->getWordEnd());
     }
 }
 void YRShellInterpreter::CC_then( ) {
@@ -943,19 +940,19 @@ void YRShellInterpreter::CC_then( ) {
     if( (v & 0xF0000000) != 0x10000000) {
         shellERROR( __FILE__, __LINE__, "MISSING [");
     } else {
-        m_dictionaryCurrent.setToken( v & YRSHELL_DICTIONARY_ADDRESS_MASK, YRSHELL_DICTIONARY_RELATIVE | m_dictionaryCurrent.getWordEnd());
+        m_DictionaryCurrent->setToken( v & YRSHELL_DICTIONARY_ADDRESS_MASK, YRSHELL_DICTIONARY_RELATIVE | m_DictionaryCurrent->getWordEnd());
     }
 }
 void YRShellInterpreter::CC_begin( ) {
-    pushCompileStack(0x20000000 | YRSHELL_DICTIONARY_RELATIVE | m_dictionaryCurrent.getWordEnd());
+    pushCompileStack(0x20000000 | YRSHELL_DICTIONARY_RELATIVE | m_DictionaryCurrent->getWordEnd());
 }
 void YRShellInterpreter::CC_until( ) {
     uint32_t v = popCompileStack();
     if( (v & 0xF0000000) != 0x20000000) {
         shellERROR( __FILE__, __LINE__, "MISSING {");
     } else {
-        m_dictionaryCurrent.addToken( SI_CC_jmpz);
-        m_dictionaryCurrent.addToken(YRSHELL_DICTIONARY_RELATIVE | (v & YRSHELL_DICTIONARY_ADDRESS_MASK));
+        m_DictionaryCurrent->addToken( SI_CC_jmpz);
+        m_DictionaryCurrent->addToken(YRSHELL_DICTIONARY_RELATIVE | (v & YRSHELL_DICTIONARY_ADDRESS_MASK));
     }
 }
 void YRShellInterpreter::interpretReset( ) {
@@ -963,7 +960,7 @@ void YRShellInterpreter::interpretReset( ) {
     m_padCount = 0;
     m_token = NULL;
     m_saveptr = NULL;
-    m_dictionaryCurrent.rollBack();
+    m_DictionaryCurrent->rollBack();
 }
 void YRShellInterpreter::reset( ) {
     if( m_state != YRSHELL_INRESET) {
@@ -1070,14 +1067,14 @@ void YRShellInterpreter::beginParsing(void) {
         nextState( YRSHELL_BEGIN_IDLE  );
     } else {
         if( strcmp( m_token, ":")) {
-            if( !m_dictionaryCurrent.newCompile("_")) {
+            if( !m_DictionaryCurrent->newCompile("_")) {
                 shellERROR( __FILE__, __LINE__);
             }
             if( m_compileTopOfStack) {
                 shellERROR(__FILE__, __LINE__);
             }
             pushReturnStack( 0);
-            m_PC = YRSHELL_DICTIONARY_CURRENT_RELATIVE | YRSHELL_DICTIONARY_CURRENT | m_dictionaryCurrent.getWordEnd();
+            m_PC = YRSHELL_DICTIONARY_CURRENT_RELATIVE | YRSHELL_DICTIONARY_CURRENT | m_DictionaryCurrent->getWordEnd();
 #ifdef YRSHELL_DEBUG
             debugToken();
 #endif
@@ -1088,7 +1085,7 @@ void YRShellInterpreter::beginParsing(void) {
             if( m_token == NULL) {
                 shellERROR( __FILE__, __LINE__, "NULL DEFINITION");
             } else {
-                if( !m_dictionaryCurrent.newCompile(m_token)) {
+                if( !m_DictionaryCurrent->newCompile(m_token)) {
                     shellERROR( __FILE__, __LINE__, "DICTIONARY FULL");
                 } else {
 #ifdef YRSHELL_DEBUG
@@ -1161,10 +1158,10 @@ void YRShellInterpreter::slice(void) {
 #endif
             if( m_token == NULL) {
                 if( m_compileTopOfStack) {
-                    m_dictionaryCurrent.rollBack();
+                    m_DictionaryCurrent->rollBack();
                     shellERROR(__FILE__, __LINE__, "INCOMPLETE CONTROL STRUCTURE");
                 } else {
-                    m_dictionaryCurrent.newCompileDone();
+                    m_DictionaryCurrent->newCompileDone();
                     nextState( YRSHELL_BEGIN_IDLE);
                 }
             }
@@ -1202,27 +1199,27 @@ bool YRShellInterpreter::processLiteralToken( ){
             ) {
         rc = true;
         if( (value & 0xFFFF0000) == 0xFFFF0000) {
-            if( !m_dictionaryCurrent.addToken( SI_CC_nint16)) {
+            if( !m_DictionaryCurrent->addToken( SI_CC_nint16)) {
                 shellERROR( __FILE__, __LINE__);
             }
-            if( !m_dictionaryCurrent.addToken( (uint16_t) value)) {
+            if( !m_DictionaryCurrent->addToken( (uint16_t) value)) {
                 shellERROR( __FILE__, __LINE__);
             }
         } else if( (value & 0xFFFF0000) == 0) {
-            if( !m_dictionaryCurrent.addToken( SI_CC_uint16)) {
+            if( !m_DictionaryCurrent->addToken( SI_CC_uint16)) {
                 shellERROR( __FILE__, __LINE__);
             }
-            if( !m_dictionaryCurrent.addToken( (uint16_t) value)) {
+            if( !m_DictionaryCurrent->addToken( (uint16_t) value)) {
                 shellERROR( __FILE__, __LINE__);
             }
         } else {
-            if( !m_dictionaryCurrent.addToken( SI_CC_uint32)) {
+            if( !m_DictionaryCurrent->addToken( SI_CC_uint32)) {
                 shellERROR( __FILE__, __LINE__);
             }
-            if( !m_dictionaryCurrent.addToken( (uint16_t) (0xFFFF & value))) {
+            if( !m_DictionaryCurrent->addToken( (uint16_t) (0xFFFF & value))) {
                 shellERROR( __FILE__, __LINE__);
             }
-            if( !m_dictionaryCurrent.addToken( (uint16_t) (value >> 16))) {
+            if( !m_DictionaryCurrent->addToken( (uint16_t) (value >> 16))) {
                 shellERROR( __FILE__, __LINE__);
             }
         }
@@ -1231,7 +1228,7 @@ bool YRShellInterpreter::processLiteralToken( ){
 }
 void YRShellInterpreter::processToken( ){
     if( m_token == NULL) {
-        if( !m_dictionaryCurrent.addToken( SI_CC_return)) {
+        if( !m_DictionaryCurrent->addToken( SI_CC_return)) {
             shellERROR( __FILE__, __LINE__,  "DICTIONARY FULL");
         }
     } else {
@@ -1251,7 +1248,7 @@ void YRShellInterpreter::processToken( ){
                     rc &= YRSHELL_DICTIONARY_ADDRESS_MASK;
                     rc |= YRSHELL_DICTIONARY_CURRENT_RELATIVE | YRSHELL_DICTIONARY_RELATIVE;
                 }
-                if( !m_dictionaryCurrent.addToken( rc)) {
+                if( !m_DictionaryCurrent->addToken( rc)) {
                     shellERROR( __FILE__, __LINE__, "DICTIONARY FULL");
                 }
             }
@@ -1260,7 +1257,7 @@ void YRShellInterpreter::processToken( ){
 }
 void YRShellInterpreter::executing( ) {
     if( (m_PC & YRSHELL_DICTIONARY_ADDRESS_MASK) == 0) {
-        m_dictionaryCurrent.rollBack();
+        m_DictionaryCurrent->rollBack();
         nextState( YRSHELL_BEGIN_IDLE);
     } else {
 #ifdef YRSHELL_DEBUG

@@ -182,9 +182,9 @@ protected:
     
     char *m_token, *m_saveptr;
     uint32_t m_PC;
-    const char* m_prompt = "\r\nOK>";
+    const char* m_prompt = "\r\n>";
     
-    CurrentDictionary m_dictionaryCurrent;
+    CurrentVariableDictionary* m_DictionaryCurrent;
     
 #ifdef YRSHELL_DEBUG
     void debugToken( void);
@@ -244,8 +244,8 @@ public:
     virtual void shellERROR( const char* file, unsigned line);
     virtual void shellERROR( const char* file, unsigned line, const char* message);
     
-    
-    void setPrompt( const char* prompt );
+
+    virtual void setPrompt( const char* prompt ) = 0;
     
     void slice( void);
     CircularQBase<char>& getInq( void);

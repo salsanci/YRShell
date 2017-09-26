@@ -181,8 +181,8 @@ void loop()
         myShell.getInq().put( Serial.read());
     }
   }
-  for( int i = 0; i < YRSHELL_OUTQ_SIZE && myShell.getOutQ().valueAvailable(); i++) {
-    Serial.write( myShell.getOutQ().get());
+  for( int i = 0; i < YRSHELL_OUTQ_SIZE && myShell.getOutq().valueAvailable(); i++) {
+    Serial.write( myShell.getOutq().get());
   }
   for( int i = 0; i < 32 && Serial1.available(); i++) {
     if( myShell.getAuxInq().spaceAvailable()) {

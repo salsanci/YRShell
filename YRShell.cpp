@@ -179,13 +179,9 @@ YRShellCompiledDictionary compiledDictionary( compiledDictionaryData, 0x01CB , 0
  */
 
 static const FunctionEntry shellFunctions[] = {
-    { YRShell::S_CC_zero,        "0" },
-    { YRShell::S_CC_plusOne,     "1+" },
-    { YRShell::S_CC_plusTwo,     "2+" },
-    { YRShell::S_CC_plusFour,    "4+" },
-    { YRShell::S_CC_minusOne,    "1-" },
-    { YRShell::S_CC_minusTwo,    "2-" },
-    { YRShell::S_CC_minusFour,   "4-" },
+    { YRShellBase::S_CC_zero,        "0" },
+    { YRShellBase::S_CC_plusOne,     "1+" },
+    { YRShellBase::S_CC_minusOne,    "1-" },
     { 0, NULL}
 };
 static FunctionDictionary dictionaryFunction( shellFunctions, YRSHELL_DICTIONARY_FUNCTION );
@@ -267,27 +263,23 @@ const char *YRShellDebugStrings[] = {
     "S_CC_first",
     "S_CC_zero",
     "S_CC_plusOne",
-    "S_CC_plusTwo",
-    "S_CC_plusFour",
     "S_CC_minusOne",
-    "S_CC_minusTwo",
-    "S_CC_minusFour",
     "S_CC_last",
 };
 #endif
 
-void YRShell::init() {
-    YRShellInterpreter::init();
+void YRShellBase::init() {
+    YRShellInterpreter::init( );
     compiledDictionary.setInterpreter(this);
     dictionaryFunction.setInterpreter(this);
     m_dictionaryList[ YRSHELL_DICTIONARY_COMPILED_INDEX] = &compiledDictionary;
     m_dictionaryList[ YRSHELL_DICTIONARY_FUNCTION_INDEX] = &dictionaryFunction;
     
 }
-uint16_t YRShell::find( const char* name) {
+uint16_t YRShellBase::find( const char* name) {
     return YRShellInterpreter::find( name);
 }
-void YRShell::executeFunction( uint16_t n) {
+void YRShellBase::executeFunction( uint16_t n) {
     if( n <= S_CC_first || n >= S_CC_last) {
         YRShellInterpreter::executeFunction(n);
     } else {
@@ -305,25 +297,16 @@ void YRShell::executeFunction( uint16_t n) {
             case S_CC_plusOne:
                 pushParameterStack(popParameterStack()+1);
                 break;
-            case S_CC_plusTwo:
-                pushParameterStack(popParameterStack()+2);
-                break;
-            case S_CC_plusFour:
-                pushParameterStack(popParameterStack()+4);
-                break;
             case S_CC_minusOne:
                 pushParameterStack(popParameterStack()-1);
-                break;
-            case S_CC_minusTwo:
-                pushParameterStack(popParameterStack()-2);
-                break;
-            case S_CC_minusFour:
-                pushParameterStack(popParameterStack()-4);
                 break;
             default:
                 shellERROR( __BASE_FILE__, __LINE__);
                 break;
         }
     }
+}
+void YRShellBase::setPrompt( const char* prompt ) {
+    m_prompt = prompt;
 }
 
