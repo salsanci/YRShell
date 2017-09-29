@@ -179,10 +179,10 @@ YRShellCompiledDictionary compiledDictionary( compiledDictionaryData, 0x01CB , 0
  */
 
 static const FunctionEntry shellFunctions[] = {
-    { YRShellBase::S_CC_zero,        "0" },
-    { YRShellBase::S_CC_plusOne,     "1+" },
-    { YRShellBase::S_CC_minusOne,    "1-" },
-    { 0, NULL}
+    { (uint16_t)YRShellBase::S_CC_zero,        "0" },
+    { (uint16_t)YRShellBase::S_CC_plusOne,     "1+" },
+    { (uint16_t)YRShellBase::S_CC_minusOne,    "1-" },
+    { (uint16_t)0, NULL}
 };
 static FunctionDictionary dictionaryFunction( shellFunctions, YRSHELL_DICTIONARY_FUNCTION );
 
