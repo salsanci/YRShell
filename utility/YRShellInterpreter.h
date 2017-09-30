@@ -13,10 +13,6 @@
 #include "math.h"
 #endif
 
-typedef CircularQ<char, YRSHELL_INQ_SIZE>YRShellInQ;
-typedef CircularQ<char, YRSHELL_AUX_INQ_SIZE>YRShellAuxInQ;
-typedef CircularQ<char, YRSHELL_OUTQ_SIZE>YRShellOutQ;
-typedef CircularQ<char, YRSHELL_AUX_OUTQ_SIZE>YRShellAuxOutQ;
 
 /** \brief YRShellInterpreter - interactive
  
@@ -151,14 +147,14 @@ enum SI_CC_functions {
 };
 
 protected:
-   YRShellState  m_lastState, m_state;
-   YRShellInQ    m_inq;
-   YRShellAuxInQ m_auxInq;
+   YRShellState                             m_lastState, m_state;
+   CircularQ<char, YRSHELL_INQ_SIZE>        m_inq;
+   CircularQ<char, YRSHELL_AUX_INQ_SIZE>    m_auxInq;
 
     Dictionary *m_dictionaryList[ YRSHELL_DICTIONARY_LAST_INDEX];
     
-   YRShellOutQ   m_outq;
-   YRShellAuxOutQ   m_auxOutq;
+   CircularQ<char, YRSHELL_OUTQ_SIZE>       m_outq;
+   CircularQ<char, YRSHELL_AUX_INQ_SIZE>    m_auxOutq;
 #ifdef YRSHELL_DEBUG
     unsigned    m_debugFlags;
 #endif
