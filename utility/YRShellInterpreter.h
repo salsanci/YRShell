@@ -18,7 +18,6 @@
  
  Details on what YRShellInterpreter is
  
- 
  */
 class YRShellInterpreter {
 public:
@@ -115,6 +114,9 @@ enum SI_CC_functions {
     SI_CC_emit,
     SI_CC_auxEmit,
     
+    SI_CC_shellSize,
+    SI_CC_printShellClass,
+
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     SI_CC_dotf,
     SI_CC_dote,
@@ -147,14 +149,12 @@ enum SI_CC_functions {
 };
 
 protected:
-   YRShellState                             m_lastState, m_state;
-   CircularQ<char, YRSHELL_INQ_SIZE>        m_inq;
-   CircularQ<char, YRSHELL_AUX_INQ_SIZE>    m_auxInq;
+    YRShellState                            m_lastState, m_state;
 
     Dictionary *m_dictionaryList[ YRSHELL_DICTIONARY_LAST_INDEX];
+
+    CircularQBase<char>                     *m_Inq, *m_AuxInq, *m_Outq, *m_AuxOutq;
     
-   CircularQ<char, YRSHELL_OUTQ_SIZE>       m_outq;
-   CircularQ<char, YRSHELL_AUX_INQ_SIZE>    m_auxOutq;
 #ifdef YRSHELL_DEBUG
     unsigned    m_debugFlags;
 #endif
@@ -165,13 +165,16 @@ protected:
     IntervalTimer m_outputTimeout;
     IntervalTimer m_delayTimer;
     
-    char        m_pad[ YRSHELL_PAD_SIZE];
+    char        *m_Pad;
     uint16_t    m_padCount;
+    uint16_t    m_padSize;
+
+    uint32_t*   m_Registers;
+    uint16_t    m_numRegisters;
+
+    uint32_t    *m_ParameterStack, *m_ReturnStack, *m_CompileStack;
+    uint8_t     m_parameterStackSize, m_returnStackSize, m_compileStackSize;
     
-    uint32_t    m_parameterStack[ YRSHELL_PARAMETER_STACK_SIZE];
-    uint32_t    m_returnStack[ YRSHELL_RETURN_STACK_SIZE];
-    uint32_t    m_compileStack[ YRSHELL_COMPILE_STACK_SIZE];
-    uint32_t    m_registers[ YRSHELL_NUM_REGISTERS];
     uint8_t     m_topOfStack;
     uint8_t     m_returnTopOfStack;
     uint8_t     m_compileTopOfStack;
@@ -190,7 +193,8 @@ protected:
     virtual bool isCompileToken( void);
     
     virtual void executeFunction( uint16_t n);
-
+    virtual uint32_t shellSize( void) { return sizeof( *this); }
+    virtual const char* shellClass( void) { return "YRShellInterpreter"; }
     
     void nextState(YRShellState n);
     void fillPad( char c);
@@ -240,7 +244,6 @@ public:
     virtual void shellERROR( const char* file, unsigned line);
     virtual void shellERROR( const char* file, unsigned line, const char* message);
     
-
     virtual void setPrompt( const char* prompt ) = 0;
     
     void slice( void);

@@ -30,12 +30,34 @@ enum SE_CC_functions {
 };
 protected:
     virtual void executeFunction( uint16_t n);
-    virtual uint16_t find( const char* name);
-
+ 
 public:
-    MyYRShell();
+    MyYRShell() { }
     void init(void);
 };
+
+class SmallYRShell : public YRShellTemplate<128, 64, 16, 16, 16, 8, 64, 64, 64, 64> {
+public:
+    /** \brief Used by SmallYRShell to map to the native functions.
+     
+     Used by SmallYRShell to map to the native functions.
+     */
+    enum SE_CC_functions {
+        SE_CC_first = YRSHELL_DICTIONARY_EXTENSION_FUNCTION,
+        SE_CC_timesTwo,
+        SE_CC_timesFour,
+        SE_CC_nexYRShell,
+        SE_CC_last
+    };
+protected:
+    virtual void executeFunction( uint16_t n);
+    
+public:
+    SmallYRShell() { }
+    void init(void);
+};
+
+
 
 static const FunctionEntry shellExtensionFunctions[] = {
     { MyYRShell::SE_CC_timesTwo,       "2*"},
@@ -49,15 +71,15 @@ static FunctionDictionary dictionaryExtensionFunction( shellExtensionFunctions, 
 CompiledDictionary compiledExtensionDictionary( NULL, 0xFFFF , 0x0000 , YRSHELL_DICTIONARY_EXTENSION_COMPILED);
 
 MyYRShell shell1;
-MyYRShell shell2;
+SmallYRShell shell2;
 
-MyYRShell *shellVector[] = {& shell1, &shell2};
+YRShellBase *shellVector[] = {& shell1, &shell2};
 uint8_t shellVectorIndex;
 #define NUM_YRSHELLS (sizeof(shellVector)/sizeof( *shellVector))
-MyYRShell *currenYRShell = shellVector[ shellVectorIndex];
+YRShellBase *currenYRShell = shellVector[ shellVectorIndex];
 
 #ifdef YRSHELL_DEBUG
-static const char *YRShellExtensionDebugStrings[] = {
+static const char *MyYRShellExtensionDebugStrings[] = {
     "SE_CC_first",
     "SE_CC_timesTwo",
     "SE_CC_timesFour",
@@ -66,27 +88,22 @@ static const char *YRShellExtensionDebugStrings[] = {
 };
 #endif
 
-MyYRShell::MyYRShell( ){
-}
 void MyYRShell::init() {
-    YRShell::init();
+    YRShellBase::init();
     compiledExtensionDictionary.setInterpreter(this);
     dictionaryExtensionFunction.setInterpreter(this);
     m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_COMPILED_INDEX] = &compiledExtensionDictionary;
     m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_FUNCTION_INDEX] = &dictionaryExtensionFunction;
 }
 
-uint16_t MyYRShell::find( const char* name) {
-    return YRShell::find( name);
-}
 void MyYRShell::executeFunction( uint16_t n) {
     if( n <= SE_CC_first || n >= SE_CC_last) {
-       YRShell::executeFunction(n);
+       YRShellBase::executeFunction(n);
     } else {
 #ifdef YRSHELL_DEBUG
         if( m_debugFlags & YRSHELL_DEBUG_EXECUTE) {
             outString("[");
-            outString(YRShellExtensionDebugStrings[n - SE_CC_first]);
+            outString(MyYRShellExtensionDebugStrings[n - SE_CC_first]);
             outString("]");
         }
 #endif
@@ -109,6 +126,53 @@ void MyYRShell::executeFunction( uint16_t n) {
         }
     }
 }
+
+void SmallYRShell::init() {
+    YRShellBase::init();
+    compiledExtensionDictionary.setInterpreter(this);
+    dictionaryExtensionFunction.setInterpreter(this);
+    m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_COMPILED_INDEX] = &compiledExtensionDictionary;
+    m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_FUNCTION_INDEX] = &dictionaryExtensionFunction;
+}
+
+void SmallYRShell::executeFunction( uint16_t n) {
+    if( n <= SE_CC_first || n >= SE_CC_last) {
+        YRShellBase::executeFunction(n);
+    } else {
+#ifdef YRSHELL_DEBUG
+        if( m_debugFlags & YRSHELL_DEBUG_EXECUTE) {
+            outString("[");
+            outString(MyYRShellExtensionDebugStrings[n - SE_CC_first]);
+            outString("]");
+        }
+#endif
+        switch( n) {
+            case SE_CC_timesTwo:
+                pushParameterStack(popParameterStack()*2);
+                break;
+            case SE_CC_timesFour:
+                pushParameterStack(popParameterStack()*4);
+                break;
+            case SE_CC_nexYRShell:
+                if( ++shellVectorIndex >= NUM_YRSHELLS) {
+                    shellVectorIndex = 0;
+                }
+                currenYRShell = shellVector[ shellVectorIndex];
+                break;
+            default:
+                shellERROR(__BASE_FILE__, __LINE__);
+                break;
+        }
+    }
+}
+
+
+
+
+
+
+
+
 
 void *kscan(void *x_void_ptr) {
     int c;

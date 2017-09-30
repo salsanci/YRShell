@@ -77,6 +77,9 @@ static const FunctionEntry interpreterFunctions[] = {
     { (uint16_t)YRShellInterpreter::SI_CC_emit,                                   "emit" },
     { (uint16_t)YRShellInterpreter::SI_CC_auxEmit,                                "auxEmit" },
 
+    { (uint16_t)YRShellInterpreter::SI_CC_shellSize,                              "shellSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_printShellClass,                        "printShellClass" },
+    
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     { (uint16_t)YRShellInterpreter::SI_CC_dotf,                                   ".f" },
     { (uint16_t)YRShellInterpreter::SI_CC_dote,                                   ".e" },
@@ -104,7 +107,7 @@ static const FunctionEntry interpreterFunctions[] = {
     { (uint16_t)YRShellInterpreter::SI_CC_fRound,                                 "fround" },
     { (uint16_t)YRShellInterpreter::SI_CC_floatToInt,                             "f>i" },
     { (uint16_t)YRShellInterpreter::SI_CC_intToFloat,                             "i>f" },
-    
+ 
 #endif
     { (uint16_t)0, NULL}
 };
@@ -212,7 +215,10 @@ const char *SIDebugStrings[] = {
     "SI_CC_mainIO",
     "SI_CC_emit",
     "SI_CC_auxEmit",
-   
+
+    "SI_CC_shellSize",
+    "SI_CC_printShellClass",
+
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     "SI_CC_dotf",
     "SI_CC_dote",
@@ -264,12 +270,20 @@ void YRShellInterpreter::init( ) {
 }
 YRShellInterpreter::YRShellInterpreter() {
     m_DictionaryCurrent = NULL;
+    m_Inq = m_AuxInq = m_Outq = m_AuxOutq = NULL;
+    m_ParameterStack = m_ReturnStack = m_CompileStack = NULL;
+    m_parameterStackSize = m_returnStackSize = m_compileStackSize = 0;
+
+    m_Pad = NULL;
+    m_Registers = NULL;
+    m_numRegisters = 0;
 	m_compileTopOfStack = 0;
 	m_debugFlags = 0;
 	m_hexMode = false;
 	m_lastState = YRSHELL_INVALID_STATE;
 	m_outputTimeoutInMilliseconds = 1000;
 	m_padCount = 0;
+    m_padSize = 0;
 	m_PC = YRSHELL_DICTIONARY_INVALID;
 	m_returnTopOfStack = 0;
 	m_saveptr = NULL;
@@ -280,6 +294,7 @@ YRShellInterpreter::YRShellInterpreter() {
 }
 YRShellInterpreter::~YRShellInterpreter() {
 }
+
 bool YRShellInterpreter::isCompileToken() {
     return m_token != NULL && (!strcmp( m_token, "s'") || !strcmp( m_token, "[") || !strcmp( m_token, "][") || !strcmp( m_token, "]") || !strcmp( m_token, "{") || !strcmp( m_token, "}") );
 }
@@ -605,7 +620,7 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             if( v1 >= m_topOfStack) {
                 shellERROR( __FILE__, __LINE__, "BAD STACK ACCESS");
             } else {
-                pushParameterStack( m_parameterStack[ v1]);
+                pushParameterStack( m_ParameterStack[ v1]);
             }
             break;
             
@@ -614,7 +629,7 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             if( v1 >= m_returnTopOfStack) {
                 shellERROR( __FILE__, __LINE__, "BAD RETURN STACK ACCESS");
             } else {
-                pushParameterStack( m_returnStack[ v1]);
+                pushParameterStack( m_ReturnStack[ v1]);
             }
             break;
         case SI_CC_compileStackAt:
@@ -622,7 +637,7 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             if( v1 >= m_compileTopOfStack) {
                 shellERROR( __FILE__, __LINE__, "BAD COMPILE STACK ACCESS");
             } else {
-                pushParameterStack( m_compileStack[ v1]);
+                pushParameterStack( m_CompileStack[ v1]);
             }
             break;
         case SI_CC_notEqual:
@@ -707,8 +722,8 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             }
             break;
         case SI_CC_keyQ:
-            if( m_inq.valueAvailable()) {
-                pushParameterStack( m_inq.get());
+            if( m_Inq->valueAvailable()) {
+                pushParameterStack( m_Inq->get());
                 pushParameterStack( -1);
             } else {
                 pushParameterStack( 0);
@@ -716,8 +731,8 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             }
             break;
         case SI_CC_auxKeyQ:
-            if( m_auxInq.valueAvailable()) {
-                pushParameterStack( m_auxInq.get());
+            if( m_AuxInq->valueAvailable()) {
+                pushParameterStack( m_AuxInq->get());
                 pushParameterStack( -1);
             } else {
                 pushParameterStack( 0);
@@ -738,6 +753,14 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             m_useAuxQueues = true;
             outChar( popParameterStack());
             m_useAuxQueues = b;
+            break;
+            
+        case SI_CC_shellSize:
+            pushParameterStack( shellSize());
+            break;
+            
+        case SI_CC_printShellClass:
+            outString( shellClass());
             break;
 
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
@@ -965,10 +988,10 @@ void YRShellInterpreter::interpretReset( ) {
 void YRShellInterpreter::reset( ) {
     if( m_state != YRSHELL_INRESET) {
 
-        m_inq.reset();
-        m_auxInq.reset();
-        m_outq.reset();
-        m_auxOutq.reset();
+        m_Inq->reset();
+        m_AuxInq->reset();
+        m_Outq->reset();
+        m_AuxOutq->reset();
     
 #ifdef YRSHELL_DEBUG
         //m_debugFlags = YRSHELL_DEBUG_STATE | YRSHELL_DEBUG_INPUT | YRSHELL_DEBUG_TOKEN;
@@ -988,7 +1011,7 @@ void YRShellInterpreter::reset( ) {
         m_useAuxQueues = false;
     
         m_PC = 0;
-        m_outputTimeoutInMilliseconds = YRSHELL_OUTPUT_TIMEOUT_IN_MILLISECONDS;
+        m_outputTimeoutInMilliseconds = 1000;
     
         outString("\r\n");;
         outString( YRSHELL_VERSION);
@@ -1040,14 +1063,14 @@ void YRShellInterpreter::fillPad( char c) {
             outChar( '\n');
         }
     }
-    if( m_padCount > (YRSHELL_PAD_SIZE - 2)) {
+    if( m_padCount > (m_padSize - 2)) {
         reset( __FILE__, __LINE__, "INPUT BUFFER OVERFLOW");
     } else {
         if( c == '\r' || c == '\n') {
             nextState( YRSHELL_BEGIN_PARSING);
         } else {
-            m_pad[ m_padCount++] = c;
-            m_pad[ m_padCount] = '\0';
+            m_Pad[ m_padCount++] = c;
+            m_Pad[ m_padCount] = '\0';
         }
     }
 }
@@ -1062,7 +1085,7 @@ void YRShellInterpreter::debugToken() {
 #endif
 void YRShellInterpreter::beginParsing(void) {
     m_saveptr = NULL;
-    m_token = strtok_r(m_pad, "\t ", &m_saveptr);
+    m_token = strtok_r(m_Pad, "\t ", &m_saveptr);
     if( m_token == NULL) {
         nextState( YRSHELL_BEGIN_IDLE  );
     } else {
@@ -1103,7 +1126,7 @@ void YRShellInterpreter::beginParsing(void) {
 
 void YRShellInterpreter::slice(void) {
     char c;
-    if( ( (m_outq.free() < (m_outq.size()/2)) || (m_auxOutq.free() < (m_auxOutq.size()/2)) ) && m_state != YRSHELL_WAIT_FOR_OUTPUT_SPACE) {
+    if( ( (m_Outq->free() < (m_Outq->size()/2)) || (m_AuxOutq->free() < (m_AuxOutq->size()/2)) ) && m_state != YRSHELL_WAIT_FOR_OUTPUT_SPACE) {
         nextState( YRSHELL_WAIT_FOR_OUTPUT_SPACE);
         m_outputTimeout.setInterval(m_outputTimeoutInMilliseconds);
     }
@@ -1116,24 +1139,24 @@ void YRShellInterpreter::slice(void) {
             break;
         case YRSHELL_IDLE:
             if( m_useAuxQueues) {
-                if( m_auxInq.valueAvailable()) {
+                if( m_AuxInq->valueAvailable()) {
                     nextState( YRSHELL_FILLING_AUXPAD);
                 }
             } else {
-                if( m_inq.valueAvailable()) {
+                if( m_Inq->valueAvailable()) {
                     nextState( YRSHELL_FILLING_PAD);
                 }
             }
             break;
         case YRSHELL_FILLING_PAD:
-            if( m_inq.valueAvailable() ) {
-                c = m_inq.get();
+            if( m_Inq->valueAvailable() ) {
+                c = m_Inq->get();
                 fillPad( c);
             }
             break;
         case YRSHELL_FILLING_AUXPAD:
-            if( m_auxInq.valueAvailable() ) {
-                c = m_auxInq.get();
+            if( m_AuxInq->valueAvailable() ) {
+                c = m_AuxInq->get();
                 fillPad( c);
             }
             break;
@@ -1170,7 +1193,7 @@ void YRShellInterpreter::slice(void) {
             executing();
             break;
         case YRSHELL_WAIT_FOR_OUTPUT_SPACE:
-            if( m_outq.used() < (m_outq.size()/2) && m_auxOutq.used() < (m_auxOutq.size()/2) ) {
+            if( m_Outq->used() < (m_Outq->size()/2) && m_AuxOutq->used() < (m_AuxOutq->size()/2) ) {
                 nextState( m_lastState);
             } else if( m_outputTimeout.hasIntervalElapsed()) {
                 shellERROR( __FILE__, __LINE__, "OUTPUT WAIT FOR SPACE TIMEOUT");
@@ -1365,25 +1388,25 @@ void YRShellInterpreter::executeToken( uint16_t token ) {
     }
 }
 CircularQBase<char>& YRShellInterpreter::getInq() {
-    return m_inq;
+    return *m_Inq;
 }
 CircularQBase<char>& YRShellInterpreter::getAuxInq() {
-    return m_auxInq;
+    return *m_AuxInq;
 }
 CircularQBase<char>& YRShellInterpreter::getOutq() {
-    return m_outq;
+    return *m_Outq;
 }
 CircularQBase<char>& YRShellInterpreter::getAuxOutq() {
-    return m_auxOutq;
+    return *m_AuxOutq;
 }
 
 void YRShellInterpreter::outChar( const char c) {
     if( m_useAuxQueues) {
-        if( !m_auxOutq.put( c) && m_state != YRSHELL_INRESET) {
+        if( !m_AuxOutq->put( c) && m_state != YRSHELL_INRESET) {
             shellERROR( __FILE__, __LINE__, "OUTPUT BUFFER OVERFLOW");
         }
     } else {
-        if( !m_outq.put( c) && m_state != YRSHELL_INRESET) {
+        if( !m_Outq->put( c) && m_state != YRSHELL_INRESET) {
             shellERROR( __FILE__, __LINE__, "OUTPUT BUFFER OVERFLOW");
         }
     }
@@ -1692,7 +1715,7 @@ void YRShellInterpreter::outInt32( int32_t v) {
 uint32_t YRShellInterpreter::popParameterStack( ) {
     uint32_t rc = 0;
     if(m_topOfStack > 0) {
-        rc = m_parameterStack[ --m_topOfStack];
+        rc = m_ParameterStack[ --m_topOfStack];
     } else {
         shellERROR( __FILE__, __LINE__, "STACK UNDERFLOW\r\n");
     }
@@ -1701,7 +1724,7 @@ uint32_t YRShellInterpreter::popParameterStack( ) {
 uint32_t YRShellInterpreter::popReturnStack( ) {
     uint32_t rc = 0;
     if(m_returnTopOfStack > 0) {
-        rc = m_returnStack[ --m_returnTopOfStack];
+        rc = m_ReturnStack[ --m_returnTopOfStack];
     } else {
         shellERROR( __FILE__, __LINE__, "RETURN STACK UNDERFLOW\r\n");
     }
@@ -1710,35 +1733,34 @@ uint32_t YRShellInterpreter::popReturnStack( ) {
 uint32_t YRShellInterpreter::popCompileStack( ) {
     uint32_t rc = 0;
     if(m_compileTopOfStack > 0) {
-        rc = m_compileStack[ --m_compileTopOfStack];
+        rc = m_CompileStack[ --m_compileTopOfStack];
     } else {
         shellERROR( __FILE__, __LINE__, "COMPILE STACK UNDERFLOW\r\n");
     }
     return rc;
 }
 void YRShellInterpreter::pushParameterStack( uint32_t v) {
-    if( m_topOfStack < YRSHELL_PARAMETER_STACK_SIZE){
-        m_parameterStack[ m_topOfStack++] = v;
+    if( m_topOfStack < m_parameterStackSize){
+        m_ParameterStack[ m_topOfStack++] = v;
     } else {
         shellERROR( __FILE__, __LINE__, "STACK OVERFLOW\r\n");
     }
 }
 void YRShellInterpreter::pushReturnStack( uint32_t v) {
-    if( m_returnTopOfStack < YRSHELL_RETURN_STACK_SIZE){
-        m_returnStack[ m_returnTopOfStack++] = v;
+    if( m_returnTopOfStack < m_returnStackSize){
+        m_ReturnStack[ m_returnTopOfStack++] = v;
     } else {
         shellERROR( __FILE__, __LINE__, "RETURN STACK OVERFLOW\r\n");
     }
 }
 void YRShellInterpreter::pushCompileStack( uint32_t v) {
-    if( m_compileTopOfStack < YRSHELL_COMPILE_STACK_SIZE){
-        m_compileStack[ m_compileTopOfStack++] = v;
+    if( m_compileTopOfStack < m_compileStackSize){
+        m_CompileStack[ m_compileTopOfStack++] = v;
     } else {
         shellERROR( __FILE__, __LINE__, "RETURN STACK OVERFLOW\r\n");
     }
 }
 void YRShellInterpreter::CC_clearPad() {
-    memset(m_pad, '\0', sizeof( m_pad));
-    m_pad[ sizeof(m_pad)-1] = '\0';
+    memset(m_Pad, '\0',  m_padSize);
 }
 

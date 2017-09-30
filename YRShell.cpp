@@ -16,7 +16,7 @@
  : _cd2 dup 0xF & 0== [ crlf s' // ' .str dup .wx crlf ]
  : _cd3 0 { _cd2 dup getCurrentDictionary .wx s' , ' .str 1 + dup getCurrentDictionaryEnd >= } drop
  : _cd4 getCurrentDictionaryEnd 0!= [ _cd3 crlf ] s' };\r\n' .str
- : _cd5 s'YRShellCompiledDictionary ' .str
+ : _cd5 s' YRShellCompiledDictionary ' .str
  : _cd6 s' compiledDictionary( compiledDictionaryData, ' .str
  : _cx6 s' compiledExtensionDictionary( compiledExtensionDictionaryData, ' .str
  : _cd7 getCurrentDictionaryLastWord .wx s' , ' .str getCurrentDictionaryEnd .wx
@@ -275,9 +275,6 @@ void YRShellBase::init() {
     m_dictionaryList[ YRSHELL_DICTIONARY_COMPILED_INDEX] = &compiledDictionary;
     m_dictionaryList[ YRSHELL_DICTIONARY_FUNCTION_INDEX] = &dictionaryFunction;
     
-}
-uint16_t YRShellBase::find( const char* name) {
-    return YRShellInterpreter::find( name);
 }
 void YRShellBase::executeFunction( uint16_t n) {
     if( n <= S_CC_first || n >= S_CC_last) {
