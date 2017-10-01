@@ -51,8 +51,8 @@ protected:
     
     CircularQ<char, INQ_SIZE>       m_inq;
     CircularQ<char, AUX_INQ_SIZE>   m_auxInq;
-    CircularQ<char, OUTQ_SIZE>       m_outq;
-    CircularQ<char, AUX_INQ_SIZE>    m_auxOutq;
+    CircularQ<char, OUTQ_SIZE>      m_outq;
+    CircularQ<char, AUX_OUTQ_SIZE>  m_auxOutq;
     
     char        m_pad[ PAD_SIZE];
     uint32_t    m_registers[ NUM_REGISTERS];
@@ -67,7 +67,7 @@ public:
         m_DictionaryCurrent = &m_dictionaryCurrent;
         m_Inq = &m_inq;
         m_AuxInq = &m_auxInq;
-        m_Outq = &m_auxOutq;
+        m_Outq = &m_outq;
         m_AuxOutq = &m_auxOutq;
         m_Pad = m_pad;
         m_padSize = sizeof( m_pad);

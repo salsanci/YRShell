@@ -116,6 +116,19 @@ enum SI_CC_functions {
     
     SI_CC_shellSize,
     SI_CC_printShellClass,
+    
+    SI_CC_dictionarySize,
+    SI_CC_padSize,
+    SI_CC_numRegisters,
+    SI_CC_parameterStackSize,
+    SI_CC_returnStackSize,
+    SI_CC_compileStackSize,
+    SI_CC_inqSize,
+    SI_CC_auxInqSize,
+    SI_CC_outqSize,
+    SI_CC_auxOutqSize,
+
+    SI_CC_dictionaryClear,
 
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     SI_CC_dotf,

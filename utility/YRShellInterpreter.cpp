@@ -80,6 +80,18 @@ static const FunctionEntry interpreterFunctions[] = {
     { (uint16_t)YRShellInterpreter::SI_CC_shellSize,                              "shellSize" },
     { (uint16_t)YRShellInterpreter::SI_CC_printShellClass,                        "printShellClass" },
     
+    { (uint16_t)YRShellInterpreter::SI_CC_dictionarySize,                        "dictionarySize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_padSize,                               "padSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_numRegisters,                          "numRegisters" },
+    { (uint16_t)YRShellInterpreter::SI_CC_parameterStackSize,                    "parameterStackSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_returnStackSize,                       "returnStackSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_compileStackSize,                      "compileStackSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_inqSize,                               "inqSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_auxInqSize,                            "auxInqSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_outqSize,                              "outqSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_auxOutqSize,                           "auxOutqSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_dictionaryClear,                       "dictClear" },
+
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     { (uint16_t)YRShellInterpreter::SI_CC_dotf,                                   ".f" },
     { (uint16_t)YRShellInterpreter::SI_CC_dote,                                   ".e" },
@@ -218,6 +230,19 @@ const char *SIDebugStrings[] = {
 
     "SI_CC_shellSize",
     "SI_CC_printShellClass",
+
+    "SI_CC_dictionarySize",
+    "SI_CC_padSize",
+    "SI_CC_numRegisters",
+    "SI_CC_parameterStackSize",
+    "SI_CC_returnStackSize",
+    "SI_CC_compileStackSize",
+    "SI_CC_inqSize",
+    "SI_CC_auxInqSize",
+    "SI_CC_outqSize",
+    "SI_CC_auxOutqSize",
+ 
+    "SI_CC_dictionaryClear",
 
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     "SI_CC_dotf",
@@ -758,9 +783,44 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
         case SI_CC_shellSize:
             pushParameterStack( shellSize());
             break;
-            
         case SI_CC_printShellClass:
             outString( shellClass());
+            break;
+
+        case SI_CC_dictionarySize:
+            pushParameterStack( m_DictionaryCurrent->getSize());
+            break;
+        case SI_CC_padSize:
+            pushParameterStack( m_padSize);
+            break;
+        case SI_CC_numRegisters:
+            pushParameterStack( m_numRegisters);
+            break;
+        case SI_CC_parameterStackSize:
+            pushParameterStack( m_parameterStackSize);
+            break;
+        case SI_CC_returnStackSize:
+            pushParameterStack( m_returnStackSize);
+            break;
+        case SI_CC_compileStackSize:
+            pushParameterStack( m_compileStackSize);
+            break;
+        case SI_CC_inqSize:
+            pushParameterStack( m_Inq->size());
+            break;
+        case SI_CC_auxInqSize:
+            pushParameterStack( m_AuxInq->size());
+            break;
+        case SI_CC_outqSize:
+            pushParameterStack( m_Outq->size());
+            break;
+        case SI_CC_auxOutqSize:
+            pushParameterStack( m_AuxOutq->size());
+            break;
+ 
+        case SI_CC_dictionaryClear:
+            m_DictionaryCurrent->reset();
+            nextState( YRSHELL_BEGIN_IDLE);
             break;
 
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT

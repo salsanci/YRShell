@@ -169,6 +169,7 @@ protected:
 public:
     CompiledDictionary( void);
     CompiledDictionary( uint16_t* dict, uint16_t lastWord, uint16_t size, uint16_t mask);
+    uint16_t getSize( void) { return m_size; }
     
     /** \brief Returns an index pointing to the first dictionary entry.
 
@@ -253,6 +254,8 @@ public:
     inline uint16_t getBackupLastWord( void) { return m_dictionaryBackupLastWord; }
     inline uint16_t getBackupWordEnd( void) { return m_dictionaryBackupWordEnd; }
     
+    virtual void reset( void);
+
 };
 
 template<unsigned SHELL_DICTIONARY_SIZE>
@@ -261,13 +264,13 @@ protected:
     uint16_t    m_dictionaryBuffer[ SHELL_DICTIONARY_SIZE];
 public:
     CurrentDictionary( void) {
+        reset();
+    }
+    virtual void reset( void) {
         m_mask = YRSHELL_DICTIONARY_CURRENT;
         m_size = SHELL_DICTIONARY_SIZE;
         m_dictionary = m_dictionaryBuffer;
-        m_dictionaryBackupWordEnd = 0;
-        m_dictionaryBackupLastWord = 0;
-        m_dictionaryCurrentWordEnd = 0;
-        m_lastWord = YRSHELL_DICTIONARY_INVALID;
+        CurrentVariableDictionary::reset( );
     }
     
 };

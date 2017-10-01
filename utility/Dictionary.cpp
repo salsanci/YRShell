@@ -160,22 +160,20 @@ CurrentVariableDictionary::CurrentVariableDictionary() {
     m_mask = 0;
     m_size = 0;
     m_dictionary = NULL;
-    m_dictionaryBackupWordEnd = 0;
-    m_dictionaryBackupLastWord = 0;
-    m_dictionaryCurrentWordEnd = 0;
-    m_lastWord = YRSHELL_DICTIONARY_INVALID;
-    
+    reset( );
 }
 CurrentVariableDictionary::CurrentVariableDictionary( uint16_t* dict, uint16_t size)  {
     m_mask = YRSHELL_DICTIONARY_CURRENT;
     m_size = size;
     m_dictionary = dict;
+    reset( );
+}
+void CurrentVariableDictionary::reset() {
     m_dictionaryBackupWordEnd = 0;
     m_dictionaryBackupLastWord = 0;
     m_dictionaryCurrentWordEnd = 0;
     m_lastWord = YRSHELL_DICTIONARY_INVALID;
 }
-
 
 bool CurrentVariableDictionary::setToken( uint16_t address, uint16_t token){
     bool rc = false;

@@ -34,6 +34,7 @@ protected:
 public:
     MyYRShell() { }
     void init(void);
+    virtual const char* shellClass( void) { return "MyYRShell"; }
 };
 
 class SmallYRShell : public YRShellTemplate<128, 64, 16, 16, 16, 8, 64, 64, 64, 64> {
@@ -55,6 +56,7 @@ protected:
 public:
     SmallYRShell() { }
     void init(void);
+    virtual const char* shellClass( void) { return "SmallYRShell"; }
 };
 
 
