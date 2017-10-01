@@ -22,7 +22,7 @@ public:
 Used by YRShell to map to the native functions.
 */
 enum S_CC_functions {
-    S_CC_first = YRSHELL_DICTIONARY_FUNCTION,
+    S_CC_first = YRSHELL_COMMON_DICTIONARY_FUNCTION,
     S_CC_zero,
     S_CC_plusOne,
     S_CC_minusOne,
@@ -36,7 +36,6 @@ public:
     YRShellBase( ) { }
     virtual ~YRShellBase( ) { }
     void init( void);
-    void setPrompt( const char* prompt);
     virtual uint32_t shellSize( void) { return sizeof( *this); }
     virtual const char* shellClass( void) { return "YRShellBase"; }
 

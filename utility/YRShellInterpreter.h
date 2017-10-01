@@ -257,7 +257,7 @@ public:
     virtual void shellERROR( const char* file, unsigned line);
     virtual void shellERROR( const char* file, unsigned line, const char* message);
     
-    virtual void setPrompt( const char* prompt ) = 0;
+    void setPrompt( const char* prompt );
     
     void slice( void);
     CircularQBase<char>& getInq( void);
