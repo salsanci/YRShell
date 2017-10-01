@@ -20,7 +20,6 @@ This class is not meant to be instatiated.
 class Dictionary {
 protected:
     uint16_t                m_mask;             /**< The mask applied to the tokens in this dictionary. */
-    YRShellInterpreter      *M_interpreter;     /**< The interpreter object this dictionary belongs to. */
     
 public:
     /** \brief Constructor.
@@ -73,26 +72,17 @@ public:
     Will be handled by subclasses as applicable.
     */
     virtual uint16_t find( const char* name) =0;
-    /** \brief Should not be called.
-
-    Dispatches an error to M_interpreter. This is a generalized error reporting call for all the dictionary classes. 
-    */
-    virtual void yrshellERROR( const char* file, unsigned line);
-    /** \brief Should not be called.
-
-    Dispatches an error to M_interpreter. This is a generalized error reporting call for all the dictionary classes. 
-    */
-    virtual void yrshellERROR( const char* file, unsigned line, const char* message);  
-    /** \brief Sets the intrepreter for this dictionary object.
-
-    Not necessary for main functionality. Used to provide an error reporting path.
-    */
-    virtual void setInterpreter( YRShellInterpreter* shell);   
-    /** \brief Returns the length rquired to store ths string in uin16_t words.
+    /** \brief Returns the length required to store ths string in uin16_t words.
 
     All strings (includes trminating 0) in the dictionaries are stored as a sequence uint16_t words. This returns the number of words necessary to store the string.
     */
     static uint16_t nameLength( const char* name) { size_t len = strlen( name) + 1; return (uint16_t) (len/2 + (len & 1)); }
+    /** \brief Error routine for dictionaries
+     
+     Error routine for dictionaries.
+     */
+    static void yrshellERROR( const char* name, unsigned line) {
+    }
 };
 
 /** \brief Maps from text to a function number.

@@ -15,7 +15,7 @@ CircularQ<char, 4000> keyQ;
 
 IntervalTimer iTimer;
 
-class MyYRShell : public YRShell {
+class MyYRShell : public virtual YRShell {
 public:
 /** \brief Used by MyYRShell to map to the native functions.
 
@@ -37,7 +37,7 @@ public:
     virtual const char* shellClass( void) { return "MyYRShell"; }
 };
 
-class SmallYRShell : public YRShellTemplate<128, 64, 16, 16, 16, 8, 64, 64, 64, 64> {
+class SmallYRShell : public virtual YRShellBase<128, 64, 16, 16, 16, 8, 64, 64, 64, 64> {
 public:
     /** \brief Used by SmallYRShell to map to the native functions.
      
@@ -75,10 +75,10 @@ CompiledDictionary compiledExtensionDictionary( NULL, 0xFFFF , 0x0000 , YRSHELL_
 MyYRShell shell1;
 SmallYRShell shell2;
 
-YRShellBase *shellVector[] = {& shell1, &shell2};
+YRShellInterpreter *shellVector[] = {& shell1, &shell2};
 uint8_t shellVectorIndex;
 #define NUM_YRSHELLS (sizeof(shellVector)/sizeof( *shellVector))
-YRShellBase *currenYRShell = shellVector[ shellVectorIndex];
+YRShellInterpreter *currenYRShell = shellVector[ shellVectorIndex];
 
 #ifdef YRSHELL_DEBUG
 static const char *MyYRShellExtensionDebugStrings[] = {
@@ -92,8 +92,6 @@ static const char *MyYRShellExtensionDebugStrings[] = {
 
 void MyYRShell::init() {
     YRShellBase::init();
-    compiledExtensionDictionary.setInterpreter(this);
-    dictionaryExtensionFunction.setInterpreter(this);
     m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_COMPILED_INDEX] = &compiledExtensionDictionary;
     m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_FUNCTION_INDEX] = &dictionaryExtensionFunction;
 }
@@ -131,8 +129,6 @@ void MyYRShell::executeFunction( uint16_t n) {
 
 void SmallYRShell::init() {
     YRShellBase::init();
-    compiledExtensionDictionary.setInterpreter(this);
-    dictionaryExtensionFunction.setInterpreter(this);
     m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_COMPILED_INDEX] = &compiledExtensionDictionary;
     m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_FUNCTION_INDEX] = &dictionaryExtensionFunction;
 }
@@ -167,9 +163,6 @@ void SmallYRShell::executeFunction( uint16_t n) {
         }
     }
 }
-
-
-
 
 
 

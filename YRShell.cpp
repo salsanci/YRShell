@@ -3,6 +3,14 @@
 
 #include "YRShell.h"
 
+/*
+ enum S_CC_functions {
+ S_CC_first = YRSHELL_DICTIONARY_COMMON_FUNCTION,
+ S_CC_zero,
+ S_CC_plusOne,
+ S_CC_minusOne,
+ S_CC_last
+ };
 #ifdef YRSHELL_DEBUG
 const char *YRShellDebugStrings[] = {
     "S_CC_first",
@@ -15,17 +23,16 @@ const char *YRShellDebugStrings[] = {
 
 
 static const FunctionEntry shellFunctions[] = {
-    { (uint16_t)YRShellBase::S_CC_zero,        "0" },
+    { (uint16_t)YRShellBase::S_CC_zero,        "zero" },
     { (uint16_t)YRShellBase::S_CC_plusOne,     "1+" },
     { (uint16_t)YRShellBase::S_CC_minusOne,    "1-" },
     { (uint16_t)0, NULL}
 };
-static FunctionDictionary dictionaryFunction( shellFunctions, YRSHELL_COMMON_DICTIONARY_FUNCTION );
+static FunctionDictionary dictionaryFunction( shellFunctions, YRSHELL_DICTIONARY_COMMON_FUNCTION );
 
 void YRShellBase::init() {
     YRShellInterpreter::init( );
-    dictionaryFunction.setInterpreter(this);
-    m_dictionaryList[ YRSHELL_DICTIONARY_COMMON_FUNCTION_INDEX] = &dictionaryFunction;
+    //m_dictionaryList[ YRSHELL_DICTIONARY_COMMON_FUNCTION_INDEX] = &dictionaryFunction;
     
 }
 void YRShellBase::executeFunction( uint16_t n) {
@@ -55,4 +62,4 @@ void YRShellBase::executeFunction( uint16_t n) {
         }
     }
 }
-
+*/

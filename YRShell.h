@@ -9,42 +9,16 @@
 
 
 
-/** \brief YRShell - interactive
+/** \brief YRShellBase - interactive
  
- Details on whatYRShell is
+ Details on whatYRShellBase is
  
  
  */
-class YRShellBase : public YRShellInterpreter{
-public:
-/** \brief Used by YRShell to map to the native functions.
-
-Used by YRShell to map to the native functions.
-*/
-enum S_CC_functions {
-    S_CC_first = YRSHELL_COMMON_DICTIONARY_FUNCTION,
-    S_CC_zero,
-    S_CC_plusOne,
-    S_CC_minusOne,
-    S_CC_last
-};
-
-protected:    
-    virtual void executeFunction( uint16_t n);
-    
-public:
-    YRShellBase( ) { }
-    virtual ~YRShellBase( ) { }
-    void init( void);
-    virtual uint32_t shellSize( void) { return sizeof( *this); }
-    virtual const char* shellClass( void) { return "YRShellBase"; }
-
-};
-
 template< unsigned DICTIONARY_SIZE, unsigned PAD_SIZE, unsigned NUM_REGISTERS,
     unsigned PARAMETER_STACK_SIZE, unsigned RETURN_STACK_SIZE, unsigned COMPILE_STACK_SIZE,
     unsigned INQ_SIZE, unsigned OUTQ_SIZE, unsigned AUX_INQ_SIZE, unsigned AUX_OUTQ_SIZE>
-class YRShellTemplate : public YRShellBase{
+class YRShellBase : public virtual YRShellInterpreter{
 protected:
     CurrentDictionary<DICTIONARY_SIZE> m_dictionaryCurrent;
     
@@ -60,9 +34,8 @@ protected:
     uint32_t    m_returnStack[ RETURN_STACK_SIZE];
     uint32_t    m_compileStack[ COMPILE_STACK_SIZE];
     
-
 public:
-    YRShellTemplate( ) {
+    YRShellBase( ) {
         m_DictionaryCurrent = &m_dictionaryCurrent;
         m_Inq = &m_inq;
         m_AuxInq = &m_auxInq;
@@ -79,12 +52,19 @@ public:
         m_CompileStack = m_compileStack;
         m_compileStackSize = sizeof(m_compileStack)/sizeof(m_compileStack[0]);
     }
-    virtual ~YRShellTemplate( ) { }
+    virtual ~YRShellBase( ) { }
     virtual uint32_t shellSize( void) { return sizeof( *this); }
-    virtual const char* shellClass( void) { return "YRShellTemplate"; }
+    virtual const char* shellClass( void) { return "YRShellBase"; }
+
 };
 
-class YRShell : public YRShellTemplate<2048, 128, 16, 16, 16, 8, 128, 256, 128, 256>{
+/** \brief YRShell - interactive
+ 
+ Details on whatYRShell is
+ 
+ 
+ */
+class YRShell : public virtual YRShellBase<2048, 128, 16, 16, 16, 8, 128, 256, 128, 256>{
 protected:
 public:
     YRShell( ) { }

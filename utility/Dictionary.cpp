@@ -3,7 +3,6 @@
 
 Dictionary::Dictionary( ) {
     m_mask = 0;
-    M_interpreter = NULL;
 }
 Dictionary::~Dictionary( ) {
     yrshellERROR(__FILE__, __LINE__);
@@ -36,21 +35,6 @@ uint16_t Dictionary::find( const char* name) {
     yrshellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
-void Dictionary::yrshellERROR( const char* file, unsigned line) {
-    if( M_interpreter != NULL) {
-        M_interpreter->shellERROR(file, line);
-    }
-}
-void Dictionary::yrshellERROR( const char* file, unsigned line, const char* message) {
-    if( M_interpreter != NULL) {
-        M_interpreter->shellERROR(file, line, message);
-    }
-}
-void Dictionary::setInterpreter( YRShellInterpreter* shell) {
-    M_interpreter = shell;
-}
-
-
 
 FunctionDictionary::FunctionDictionary( const FunctionEntry* dict, uint16_t mask) {
     M_dictionary = dict;
