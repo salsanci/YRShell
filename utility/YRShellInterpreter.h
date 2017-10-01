@@ -254,6 +254,7 @@ public:
     virtual ~YRShellInterpreter();
     void init( void);
     
+    static const char* getFileName( const char* P);
     virtual void shellERROR( const char* file, unsigned line);
     virtual void shellERROR( const char* file, unsigned line, const char* message);
     

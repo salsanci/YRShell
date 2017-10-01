@@ -15,7 +15,24 @@ CircularQ<char, 4000> keyQ;
 
 IntervalTimer iTimer;
 
-class MyYRShell : public virtual YRShell {
+class CommonShell : public virtual YRShellInterpreter {
+public:
+enum SC_CC_functions {
+    SC_CC_first = YRSHELL_DICTIONARY_COMMON_FUNCTION,
+    SC_CC_nextYRShell,
+    SC_CC_last
+};
+protected:
+    void executeFunction( uint16_t n);
+ 
+public:
+    CommonShell( void) {  }
+    virtual ~CommonShell( void) { }
+    void init(void);
+};
+
+
+class MyYRShell : public virtual YRShell, public virtual CommonShell {
 public:
 /** \brief Used by MyYRShell to map to the native functions.
 
@@ -25,7 +42,6 @@ enum SE_CC_functions {
     SE_CC_first = YRSHELL_DICTIONARY_EXTENSION_FUNCTION,
     SE_CC_timesTwo,
     SE_CC_timesFour,
-    SE_CC_nexYRShell,
     SE_CC_last
 };
 protected:
@@ -37,7 +53,7 @@ public:
     virtual const char* shellClass( void) { return "MyYRShell"; }
 };
 
-class SmallYRShell : public virtual YRShellBase<128, 64, 16, 16, 16, 8, 64, 64, 64, 64> {
+class SmallYRShell : public virtual YRShellBase<128, 64, 16, 16, 16, 8, 64, 64, 64, 64>, public virtual CommonShell {
 public:
     /** \brief Used by SmallYRShell to map to the native functions.
      
@@ -47,7 +63,6 @@ public:
         SE_CC_first = YRSHELL_DICTIONARY_EXTENSION_FUNCTION,
         SE_CC_timesTwo,
         SE_CC_timesFour,
-        SE_CC_nexYRShell,
         SE_CC_last
     };
 protected:
@@ -60,18 +75,6 @@ public:
 };
 
 
-
-static const FunctionEntry shellExtensionFunctions[] = {
-    { MyYRShell::SE_CC_timesTwo,       "2*"},
-    { MyYRShell::SE_CC_timesFour,      "4*"},
-    { MyYRShell::SE_CC_nexYRShell,      ">>>" },
-
-    { 0, NULL}
-};
-static FunctionDictionary dictionaryExtensionFunction( shellExtensionFunctions, YRSHELL_DICTIONARY_EXTENSION_FUNCTION );
-
-CompiledDictionary compiledExtensionDictionary( NULL, 0xFFFF , 0x0000 , YRSHELL_DICTIONARY_EXTENSION_COMPILED);
-
 MyYRShell shell1;
 SmallYRShell shell2;
 
@@ -80,41 +83,37 @@ uint8_t shellVectorIndex;
 #define NUM_YRSHELLS (sizeof(shellVector)/sizeof( *shellVector))
 YRShellInterpreter *currenYRShell = shellVector[ shellVectorIndex];
 
+
+static const FunctionEntry shellCommonFunctions[] = {
+    { CommonShell::SC_CC_nextYRShell,      ">>>" },
+
+    { 0, NULL}
+};
+static FunctionDictionary dictionaryCommonFunction( shellCommonFunctions, YRSHELL_DICTIONARY_COMMON_FUNCTION );
+void CommonShell::init() {
+    YRShellInterpreter::init();
+    m_dictionaryList[ YRSHELL_DICTIONARY_COMMON_FUNCTION_INDEX] = &dictionaryCommonFunction;
+}
 #ifdef YRSHELL_DEBUG
-static const char *MyYRShellExtensionDebugStrings[] = {
-    "SE_CC_first",
-    "SE_CC_timesTwo",
-    "SE_CC_timesFour",
-    "SE_CC_nexYRShell",
-    "SE_CC_last",
+static const char *CommonShellDebugStrings[] = {
+    "SC_CC_first",
+    "SC_CC_nextYRShell",
+    "SC_CC_last",
 };
 #endif
-
-void MyYRShell::init() {
-    YRShellBase::init();
-    m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_COMPILED_INDEX] = &compiledExtensionDictionary;
-    m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_FUNCTION_INDEX] = &dictionaryExtensionFunction;
-}
-
-void MyYRShell::executeFunction( uint16_t n) {
-    if( n <= SE_CC_first || n >= SE_CC_last) {
-       YRShellBase::executeFunction(n);
+void CommonShell::executeFunction( uint16_t n ) {
+    if( n <= SC_CC_first || n >= SC_CC_last) {
+       YRShellInterpreter::executeFunction(n);
     } else {
 #ifdef YRSHELL_DEBUG
         if( m_debugFlags & YRSHELL_DEBUG_EXECUTE) {
             outString("[");
-            outString(MyYRShellExtensionDebugStrings[n - SE_CC_first]);
+            outString(CommonShellDebugStrings[n - SC_CC_first]);
             outString("]");
         }
 #endif
         switch( n) {
-            case SE_CC_timesTwo:
-                pushParameterStack(popParameterStack()*2);
-                break;
-            case SE_CC_timesFour:
-                pushParameterStack(popParameterStack()*4);
-                break;
-            case SE_CC_nexYRShell:
+            case SC_CC_nextYRShell:
                 if( ++shellVectorIndex >= NUM_YRSHELLS) {
                     shellVectorIndex = 0;
                 }
@@ -127,15 +126,34 @@ void MyYRShell::executeFunction( uint16_t n) {
     }
 }
 
-void SmallYRShell::init() {
-    YRShellBase::init();
+
+
+
+static const FunctionEntry shellExtensionFunctions[] = {
+    { MyYRShell::SE_CC_timesTwo,       "2*"},
+    { MyYRShell::SE_CC_timesFour,      "4*"},
+ 
+    { 0, NULL}
+};
+static FunctionDictionary dictionaryExtensionFunction( shellExtensionFunctions, YRSHELL_DICTIONARY_EXTENSION_FUNCTION );
+CompiledDictionary compiledExtensionDictionary( NULL, 0xFFFF , 0x0000 , YRSHELL_DICTIONARY_EXTENSION_COMPILED);
+
+#ifdef YRSHELL_DEBUG
+static const char *MyYRShellExtensionDebugStrings[] = {
+    "SE_CC_first",
+    "SE_CC_timesTwo",
+    "SE_CC_timesFour",
+    "SE_CC_last",
+};
+#endif
+void MyYRShell::init() {
+    CommonShell::init();
     m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_COMPILED_INDEX] = &compiledExtensionDictionary;
     m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_FUNCTION_INDEX] = &dictionaryExtensionFunction;
 }
-
-void SmallYRShell::executeFunction( uint16_t n) {
+void MyYRShell::executeFunction( uint16_t n) {
     if( n <= SE_CC_first || n >= SE_CC_last) {
-        YRShellBase::executeFunction(n);
+       CommonShell::executeFunction(n);
     } else {
 #ifdef YRSHELL_DEBUG
         if( m_debugFlags & YRSHELL_DEBUG_EXECUTE) {
@@ -151,11 +169,35 @@ void SmallYRShell::executeFunction( uint16_t n) {
             case SE_CC_timesFour:
                 pushParameterStack(popParameterStack()*4);
                 break;
-            case SE_CC_nexYRShell:
-                if( ++shellVectorIndex >= NUM_YRSHELLS) {
-                    shellVectorIndex = 0;
-                }
-                currenYRShell = shellVector[ shellVectorIndex];
+            default:
+                shellERROR(__BASE_FILE__, __LINE__);
+                break;
+        }
+    }
+}
+
+void SmallYRShell::init() {
+    CommonShell::init();
+    m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_COMPILED_INDEX] = &compiledExtensionDictionary;
+    m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_FUNCTION_INDEX] = &dictionaryExtensionFunction;
+}
+void SmallYRShell::executeFunction( uint16_t n) {
+    if( n <= SE_CC_first || n >= SE_CC_last) {
+        CommonShell::executeFunction(n);
+    } else {
+#ifdef YRSHELL_DEBUG
+        if( m_debugFlags & YRSHELL_DEBUG_EXECUTE) {
+            outString("[");
+            outString(MyYRShellExtensionDebugStrings[n - SE_CC_first]);
+            outString("]");
+        }
+#endif
+        switch( n) {
+            case SE_CC_timesTwo:
+                pushParameterStack(popParameterStack()*2);
+                break;
+            case SE_CC_timesFour:
+                pushParameterStack(popParameterStack()*4);
                 break;
             default:
                 shellERROR(__BASE_FILE__, __LINE__);

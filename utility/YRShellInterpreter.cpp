@@ -706,11 +706,21 @@ uint16_t YRShellInterpreter::find( const char* name) {
     }
     return rc;
 }
+const char* YRShellInterpreter::getFileName( const char* P) {
+    const char* R = P;
+    while( *P++ != '\0') {
+        if( *P == '/' || *P == '\'') {
+            R = ++P;
+        }
+    }
+    return R;
+}
+
 void YRShellInterpreter::shellERROR( const char* file, unsigned line) {
-    reset( file, line);
+    reset( getFileName(file), line);
 }
 void YRShellInterpreter::shellERROR( const char* file, unsigned line, const char* message) {
-    reset( file, line, message);
+    reset( getFileName(file), line, message);
 }
 void YRShellInterpreter::CC_nextEntry( ) {
     uint32_t v1 = popParameterStack();
