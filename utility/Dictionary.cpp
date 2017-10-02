@@ -1,39 +1,51 @@
 #include "YRShellInterpreter.h"
 #include "Dictionary.h"
 
+void DictionaryError::shellERROR( const char* name, unsigned line) {
+    
+}
+
+DictionaryError* Dictionary::s_DictionaryError = NULL;
+
 Dictionary::Dictionary( ) {
     m_mask = 0;
 }
 Dictionary::~Dictionary( ) {
-    yrshellERROR(__FILE__, __LINE__);
+    shellERROR(__FILE__, __LINE__);
 }
 uint16_t Dictionary::getFirstEntry( ) {
-    yrshellERROR(__FILE__, __LINE__);
+    shellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
 uint16_t Dictionary::getNextEntry( uint16_t index){
-    yrshellERROR(__FILE__, __LINE__);
+    shellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
 uint16_t Dictionary::getToken( uint16_t index){
-    yrshellERROR(__FILE__, __LINE__);
+    shellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
 uint16_t Dictionary::getNameAddressToken( uint16_t index){
-    yrshellERROR(__FILE__, __LINE__);
+    shellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
 uint16_t Dictionary::getWord( uint16_t index) {
-    yrshellERROR(__FILE__, __LINE__);
+    shellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
 const char* Dictionary::getAddress( uint16_t index){
-    yrshellERROR(__FILE__, __LINE__);
+    shellERROR(__FILE__, __LINE__);
     return NULL;
 }
 uint16_t Dictionary::find( const char* name) {
-    yrshellERROR(__FILE__, __LINE__);
+    shellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
+}
+void Dictionary::shellERROR( const char* name, unsigned line) {
+    DictionaryError* t = s_DictionaryError;
+    if( t != NULL) {
+        t->shellERROR(name, line);
+    }
 }
 
 FunctionDictionary::FunctionDictionary( const FunctionEntry* dict, uint16_t mask) {

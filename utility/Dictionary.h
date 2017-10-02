@@ -13,6 +13,11 @@
 
 class YRShellInterpreter;
 
+class DictionaryError {
+public:
+    virtual void shellERROR( const char* name, unsigned line);
+};
+
 /** \brief Base class for all the dictionaries used by the interpreter
  
 This class is not meant to be instatiated. 
@@ -22,6 +27,8 @@ protected:
     uint16_t                m_mask;             /**< The mask applied to the tokens in this dictionary. */
     
 public:
+    static  DictionaryError*    s_DictionaryError; /**< The global error reporting object for dictionaires. */
+    
     /** \brief Constructor.
 
     Default constructor, no parameters are required.
@@ -72,17 +79,16 @@ public:
     Will be handled by subclasses as applicable.
     */
     virtual uint16_t find( const char* name) =0;
-    /** \brief Returns the length required to store ths string in uin16_t words.
-
-    All strings (includes trminating 0) in the dictionaries are stored as a sequence uint16_t words. This returns the number of words necessary to store the string.
-    */
-    static uint16_t nameLength( const char* name) { size_t len = strlen( name) + 1; return (uint16_t) (len/2 + (len & 1)); }
     /** \brief Error routine for dictionaries
      
      Error routine for dictionaries.
      */
-    static void yrshellERROR( const char* name, unsigned line) {
-    }
+    void shellERROR( const char* name, unsigned line);
+    /** \brief Returns the length required to store ths string in uin16_t words.
+     
+     All strings (includes trminating 0) in the dictionaries are stored as a sequence uint16_t words. This returns the number of words necessary to store the string.
+     */
+    static uint16_t nameLength( const char* name) { size_t len = strlen( name) + 1; return (uint16_t) (len/2 + (len & 1)); }
 };
 
 /** \brief Maps from text to a function number.

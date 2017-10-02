@@ -14,6 +14,15 @@
 CircularQ<char, 4000> keyQ;
 
 IntervalTimer iTimer;
+class derror : public DictionaryError {
+public:
+    derror() { }
+    virtual void shellERROR( const char* name, unsigned line);
+};
+void derror::shellERROR( const char* name, unsigned line) {
+    fprintf(stdout, "Dictionary ERROR [%s][%u]\n", name, line);
+}
+derror errd;
 
 class CommonShell : public virtual YRShellInterpreter {
 public:
@@ -252,8 +261,9 @@ int main(int argc, const char * argv[]) {
         
         fprintf(stderr, "Error creating thread\n");
         return 1;
-        
     }
+    Dictionary::s_DictionaryError =  &errd;
+
     shell1.init();
     shell2.init();
     shell1.setPrompt("\r\nHELO>");
