@@ -10,15 +10,7 @@
 
 
 #ifndef YRSHELL_VERSION
-#define YRSHELL_VERSION "\r\nYRShell Version 0.1\r\n" // make sure this string length is less than YRSHELL_OUTQ_SIZE
-#endif
-
-#ifndef YRSHELL_COMMAND_ECHO
-#define YRSHELL_COMMAND_ECHO  true
-#endif
-
-#ifndef YRSHELL_COMMAND_ECHO_EXPAND_CR
-#define YRSHELL_COMMAND_ECHO_EXPAND_CR  true
+#define YRSHELL_VERSION "\rYRShell Version 0.1\r" // make sure this string length is less than YRSHELL_OUTQ_SIZE
 #endif
 
 typedef enum {

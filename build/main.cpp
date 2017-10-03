@@ -266,8 +266,8 @@ int main(int argc, const char * argv[]) {
 
     shell1.init();
     shell2.init();
-    shell1.setPrompt("\r\nHELO>");
-    shell2.setPrompt("\r\nOK>");
+    shell1.setPrompt("\rHELO>");
+    shell2.setPrompt("\rOK>");
     iTimer.setInterval(10);
     
     std::cout.setf( std::ios_base::unitbuf );

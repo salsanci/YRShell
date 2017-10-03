@@ -129,6 +129,8 @@ enum SI_CC_functions {
     SI_CC_auxOutqSize,
 
     SI_CC_dictionaryClear,
+    SI_CC_setCommandEcho,
+    SI_CC_setExpandCR,
 
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     SI_CC_dotf,
@@ -164,13 +166,15 @@ enum SI_CC_functions {
 protected:
     YRShellState                            m_lastState, m_state;
 
-    Dictionary *m_dictionaryList[ YRSHELL_DICTIONARY_LAST_INDEX];
+    Dictionary                              *m_dictionaryList[ YRSHELL_DICTIONARY_LAST_INDEX];
 
     CircularQBase<char>                     *m_Inq, *m_AuxInq, *m_Outq, *m_AuxOutq;
     
 #ifdef YRSHELL_DEBUG
     unsigned    m_debugFlags;
 #endif
+    bool        m_commandEcho;
+    bool        m_expandCR;
     bool        m_hexMode;
     bool        m_useAuxQueues;
 
@@ -194,7 +198,7 @@ protected:
     
     char *m_token, *m_saveptr;
     uint32_t m_PC;
-    const char* m_prompt = "\r\n>";
+    const char* m_prompt = ">";
     
     CurrentVariableDictionary* m_DictionaryCurrent;
     
@@ -235,7 +239,7 @@ protected:
     uint16_t fetchCurrentToken( void);
     void executeToken( uint16_t token);
     void beginParsing( void);
-    void processToken( void);
+    bool processToken( void);
     bool processLiteralToken( void);
     void executing( void);
     
