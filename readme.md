@@ -100,17 +100,20 @@ AT THIS POINT, CHECK GROUPS FOR DIALOUT (FOR OSX and Linux)
   https://askubuntu.com/questions/207999/how-to-add-dialup-group
   enter this command at the linux command prompt:
   `sudo adduser $USER dialout`
-You must logout and log in again for this to take affect.
+You must logout and log in again for this to take affect.  
+
 ***
   
-TEST: Verify the Arduino IDE is correctly configured for the STM32-L476RG
-   (at the bottom of the Getting-Started page, folllow the link  to the Blink Example)
-   https://github.com/stm32duino/wiki/wiki/Blink-example
-   Verify the blink and button behavior (different blink, button has no effect)
-At this point, the general Arduino IDE is setup for the STM32Nucleo-L476RG.
-The IDE has been verified as working by successful compilaction and load of an example program.
-Now we procedue to the YrShell module.
+TEST: Verify the Arduino IDE is correctly configured for the STM32-L476RG  
+   (at the bottom of the Getting-Started page, folllow the link  to the Blink Example)  
+   https://github.com/stm32duino/wiki/wiki/Blink-example  
+   Verify the blink and button behavior (different blink, button has no effect)  
+At this point, the general Arduino IDE is setup for the STM32Nucleo-L476RG.  
+The IDE has been verified as working by successful compilaction and load of an example program.  
+Now we procedue to the YrShell module.  
+
 ***
+
 # Software Setup - YrShell
 **This is the goal of all the preceding steps**
 
