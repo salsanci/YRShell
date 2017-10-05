@@ -64,7 +64,8 @@ FIRST TIME ONLY:
   Start with the instructions https://github.com/stm32duino/wiki/wiki/Getting-Started  
 
 STEP 1:  
-- Download recent Arduino IDE (1.8.4 as of this writing) from:
+- Download recent Arduino IDE (1.8.4 as of this writing) from:  
+
       - Mac OSX used https://www.arduino.cc/download_handler.php?f=/arduino-1.8.4-macosx.zip
       - Linux (Ubuntu, Mint) used https://www.arduino.cc/download_handler.php?f=/arduino-1.8.4-linux64.tar.xz  
       
