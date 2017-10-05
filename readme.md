@@ -63,14 +63,14 @@ FIRST TIME ONLY:
 ## Setup-Arduino-IDE
   Start with the instructions https://github.com/stm32duino/wiki/wiki/Getting-Started  
 
-STEP 1:
-    Download recent Arduino IDE (1.8.4 as of this writing) from:
+STEP 1:  
+- Download recent Arduino IDE (1.8.4 as of this writing) from:
       - Mac OSX used https://www.arduino.cc/download_handler.php?f=/arduino-1.8.4-macosx.zip
       - Linux (Ubuntu, Mint) used https://www.arduino.cc/download_handler.php?f=/arduino-1.8.4-linux64.tar.xz  
       
-    [Follow the istruction until you the Arduino IDE icon on your desktop]  
-- Extract the contents of the archive (I did "extract here" in Downloads)
-- Find Install.sh (linux)  Execute this script, it puts the icon on the desktop,  but does not yet put an Arduino directory in your home folder
+- Follow the istruction until you the Arduino IDE icon on your desktop]  
+  - Extract the contents of the archive (I did "extract here" in Downloads)
+  - Find Install.sh (linux)  Execute this script, it puts the icon on the desktop,  but does not yet put an Arduino directory in your home folder
     
 STEP 2:
 - The second step of the instructions we are following take us to the Board Manager  
