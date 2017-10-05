@@ -28,7 +28,7 @@ End of introduction
 YrShell is designed and tested on ST-Microelectronics STM32Nucleo-L476RG micocontroller board. 
 This hardware should be more or ess compatible with ANY Arduino board, 
 but we will not be sure until user confirm or deny specific boards.
-For the purpose of this document we will only discuss one hardware board, the STM32Nucleo-K476RG.  
+For the purpose of this document we will only discuss one hardware board, the STM32Nucleo-L476RG.  
 
 # Setup-Hardware
 - Setup-STM32Nucleo-L476RG
