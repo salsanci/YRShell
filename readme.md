@@ -62,30 +62,28 @@ FIRST TIME ONLY:
 # Setup-PC-Software
 ## Setup-Arduino-IDE
   Start with the instructions https://github.com/stm32duino/wiki/wiki/Getting-Started  
-  
-  STEP 1:
+
+STEP 1:
     Download recent Arduino IDE (1.8.4 as of this writing) from:
       - Mac OSX used https://www.arduino.cc/download_handler.php?f=/arduino-1.8.4-macosx.zip
       - Linux (Ubuntu, Mint) used https://www.arduino.cc/download_handler.php?f=/arduino-1.8.4-linux64.tar.xz  
       
     [Follow the istruction until you the Arduino IDE icon on your desktop]  
+- Extract the contents of the archive (I did "extract here" in Downloads)
+- Find Install.sh (linux)  Execute this script, it puts the icon on the desktop,  but does not yet put an Arduino directory in your home folder
     
-    Extract the contents of the archive (I did "extract here" in Downloads)
-    Find Install.sh (linux)  Execute this script, it puts the icon on the desktop,
-          but does not yet put an Arduino directory in your home folder
-    
-  STEP 2:
-    The second step of the instructions we are following take us to the Board Manager
+STEP 2:
+- The second step of the instructions we are following take us to the Board Manager  
       https://github.com/stm32duino/wiki/wiki/Boards-Manager
       The board manager adds definitions for the STM32L476RG board we will be using.
-    Start the Arduino IDE
+- Start the Arduino IDE  
       Arduino IDE > File > Preferences > Settings > Additional Boards Manager URL: 
         https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json
-     Tools > Board Manager > Select "STM32 Cores" from the bottom of the list
-     OK
-     Close  
+     `Tools > Board Manager > Select "STM32 Cores" ` from the bottom of the list
+     OK  
+     Close    
 
-  STEP 3: 
+STEP 3: 
   Select the Nucleo-64 L476RG:
 - Arduino IDE > Tools > Board: > Nucleo-64 (at the bottom of the list)
 - Arduino IDE > Tools > Board number: Nucleo-L476RRG
