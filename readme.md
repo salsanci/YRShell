@@ -60,6 +60,34 @@ FIRST TIME ONLY:
   Congratulations! Your board is working correctly.
       
 # Setup-PC-Software
+
+There are two parts to the PC software.  These are the gneral PC build tools, and the arduino IDE.
+
+## Setup build tools
+
+The build tools are the (gnu) build-essential (compiler) build tools and the doxygen documentation tools.
+
+### build essential
+
+We need the build tools for compilation and and testing.  Your installation may or may not need these tools for the Arduino IDE. If you wish to perform automatic testing on the PC side, you will likely need the build tools.
+
+For Linux and OSX:
+
+`sudo apt-get update`
+`sudo apt-get install build-essential`
+
+For Windows: 
+
+Someone please tell me how to install the build tools on windows
+
+### doxygen
+
+Sal is using doxygen to generate the documentation for the source code.  If you want to use the same pro-tools as Sal, and/or wish to contribute to this project (optional) you can download and install from the author.
+
+http://www.stack.nl/~dimitri/doxygen/download.html
+
+NOTE: you are not required or expected to install or use doxygen, it is inclided here for completeness.
+
 ## Setup-Arduino-IDE
   Start with the instructions https://github.com/stm32duino/wiki/wiki/Getting-Started  
 
