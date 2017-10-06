@@ -137,7 +137,8 @@ Plug in the USB cable to the Nucleo-L476 board if it is not already.
 - Navigate to the Fshell arduino sketch:  
   `File > OPen > /home/<yourusername>/Arduino/libraries/YRShell/examples/multipleShells/multipleShells.ino`  
   
-The Arduino IDE should display the Fshell sketch on your screen if it is set upcorrectly.
+The Arduino IDE should display the Fshell sketch on your screen if it is set upcorrectly.  
+
 __Notice line 129 - Serial.begin(115200);__  
 
 Verify and upload the sketch to the Nucleo-L476 using the icons at the top of the arduino IDE.  
@@ -148,24 +149,24 @@ Verify and upload the sketch to the Nucleo-L476 using the icons at the top of th
   - If you can change the blink pattern for example 10 milliseconds on and 1500 millseconds off, you are set up correctly.  
   
 Test the Fshell Command line.  
-  - In the arduino IDE select
-  `Tools > Serial Monitor`
-  - At the bootom of the window, select:
-     `Carriage Return`
+  - In the arduino IDE select  
+  `Tools > Serial Monitor`  
+  - At the bootom of the window, select:  
+     `Carriage Return`  
      `115200 baud`  
 
-At the serial monitor input field (at the top of the window) type in a couple numbers separated by spaces, and hit enter.  
+At the serial monitor input field (at the top of the window) type in a couple numbers separated by spaces, and hit enter.   
 
 in the input field, type in 
- `st?` 
+ `st?`  
 and hit enter.   
 
-Type in 
-`wl`
+Type in  
+`wl`  
 and hit enter  
 
-YRShell is now set up and ready for action.
-# End of user documentation for initial setup  
+YRShell is now set up and ready for action.  
+# End of user documentation for initial setup    
  */
 
 /*! \page customizingDocumentation YrShell customizing documnetation
