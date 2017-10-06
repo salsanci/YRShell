@@ -71,12 +71,12 @@ The build tools are the (gnu) build-essential (compiler) build tools and the dox
 
 We need the build tools for compilation and and testing.  Your installation may or may not need these tools for the Arduino IDE. If you wish to perform automatic testing on the PC side, you will likely need the build tools.
 
-####For Linux and OSX:
+#### For Linux and OSX:
 
 `sudo apt-get update`  
 `sudo apt-get install build-essential`  
 
-####For Windows: 
+#### For Windows: 
 
 Someone please tell me how to install the build tools on windows  
 
