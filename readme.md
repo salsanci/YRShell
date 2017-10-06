@@ -157,7 +157,7 @@ Test the Fshell Command line.
 
 At the serial monitor input field (at the top of the window) type in a couple numbers separated by spaces, and hit enter.   
 
-in the input field, type in 
+in the input field, type in  
  `st?`  
 and hit enter.   
 
