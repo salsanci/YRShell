@@ -90,10 +90,11 @@ STEP 3:
 - Arduino IDE > Tools > Upload Method: Mass Storage (STLink gives an error)
 - Arduino IDE > Tools > USB Interface: None (default)
 - Arduino IDE > Tools > Other Serial instance: All (default)
-- Arduino IDE > Tools > Port: 
-` /dev/ttyACM0` (on Linux) 
-`/dev/ttyzzz` (on MACOS) 
-`COM1` (on Windows)
+- Arduino IDE > Tools > Port:  
+` /dev/ttyACM0` (on Linux)  
+`/dev/ttyzzz` (on MACOS)  
+`COM1` (on Windows) 
+
 If PORT is greyed out, plug in the USB cable
 AT THIS POINT, CHECK GROUPS FOR DIALOUT (FOR OSX and Linux)
   In linux, we need to grant permission for the user to access the communications port(s).
