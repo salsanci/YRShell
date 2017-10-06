@@ -95,13 +95,13 @@ STEP 3:
 `/dev/ttyzzz` (on MACOS)  
 `COM1` (on Windows) 
 
-If PORT is greyed out, plug in the USB cable
-AT THIS POINT, CHECK GROUPS FOR DIALOUT (FOR OSX and Linux)
-  In linux, we need to grant permission for the user to access the communications port(s).
-  https://askubuntu.com/questions/207999/how-to-add-dialup-group
-  enter this command at the linux command prompt:
-  `sudo adduser $USER dialout`
-You must logout and log in again for this to take affect.  
+If PORT is greyed out, plug in the USB cable  
+AT THIS POINT, CHECK GROUPS FOR DIALOUT (FOR OSX and Linux)  
+  In linux, we need to grant permission for the user to access the communications port(s).  
+  https://askubuntu.com/questions/207999/how-to-add-dialup-group  
+  enter this command at the linux command prompt:  
+  `sudo adduser $USER dialout`  
+You must logout and log in again for this to take affect.   
 
 ***
   
