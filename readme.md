@@ -161,7 +161,7 @@ in the input field, type in
  `st?`  
 and hit enter.   
 
-**You should see the current stack items displaye.**  Use the preiod **.** followed by the enter key to take items off the stack, and type numbers seeparated by spaces and terminated with the enter key to put items on the stack.  Notice how you can cause stack underflow messages when you remove more items than are  present.
+**You should see the current stack items displayed.**  Use the period **.** followed by the enter key to take items off the stack, and type numbers seeparated by spaces and terminated with the enter key to put items on the stack.  Notice how you can cause stack underflow messages when you remove more items than are  present.
 
 Type in  
 `wl`  
