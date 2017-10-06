@@ -127,26 +127,27 @@ to
    The result should look like this:
    `/home/<yourusername>/Arduino/libraries/YRShell`
    
-The YRShell directory should contain several files and subdirectories, such as:
-   `/home/<yourusername>/Arduino/libraries/YRShell/examples`
-   `/home/<yourusername>/Arduino/libraries/YRShell/utility`
-Plug in the USB cable to the Nucleo-L476 board if it is not already.
-Start the ARduino IDE
+The YRShell directory should contain several files and subdirectories, such as:  
+   `/home/<yourusername>/Arduino/libraries/YRShell/examples`  
+   `/home/<yourusername>/Arduino/libraries/YRShell/utility`  
+   
+Plug in the USB cable to the Nucleo-L476 board if it is not already.  
+- Start the ARduino IDE  
   `Sketch > Include Library > YRShell` (way at the bottom)
-Navigate to the Fshell arduino sketch:
+- Navigate to the Fshell arduino sketch:  
   `File > OPen > /home/<yourusername>/Arduino/libraries/YRShell/examples/multipleShells/multipleShells.ino`  
   
 The Arduino IDE should display the Fshell sketch on your screen if it is set upcorrectly.
 __Notice line 129 - Serial.begin(115200);__  
 
-Verify and upload the sketch to the Nucleo-L476 using the icons at the top of the arduino IDE.
+Verify and upload the sketch to the Nucleo-L476 using the icons at the top of the arduino IDE.  
   - The LD1 COMM LED on by the USB jack should flash from green to red a couple times. 
   - The green LED LD2 should flash ON for about a half second and OFF for about a second and a half.
   - Notice Lines 143 and 146.  You can very the blink pattern by changing these intervals.
   - Notice that you must upload after each edit for the change to affect the blink pattern.
   - If you can change the blink pattern for example 10 milliseconds on and 1500 millseconds off, you are set up correctly.  
   
-Test the Fshell Command line.
+Test the Fshell Command line.  
   - In the arduino IDE select
   `Tools > Serial Monitor`
   - At the bootom of the window, select:
