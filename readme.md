@@ -73,12 +73,12 @@ We need the build tools for compilation and and testing.  Your installation may 
 
 For Linux and OSX:
 
-`sudo apt-get update`
-`sudo apt-get install build-essential`
+`sudo apt-get update`  
+`sudo apt-get install build-essential`  
 
 For Windows: 
 
-Someone please tell me how to install the build tools on windows
+Someone please tell me how to install the build tools on windows  
 
 ### doxygen
 
