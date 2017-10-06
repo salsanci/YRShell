@@ -78,7 +78,7 @@ We need the build tools for compilation and and testing.  Your installation may 
 
 #### For Windows: 
 
-Someone please tell me how to install the build tools on windows  
+We don't seem to need any additional tools installed on Windows 10.  This will be updated is we find we need something for earlier versions of windows, as needed.
 
 ### doxygen
 
