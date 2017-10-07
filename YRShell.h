@@ -55,8 +55,8 @@ public:
     virtual ~YRShellBase( ) { }
     virtual uint32_t shellSize( void) { return sizeof( *this); }
     virtual const char* shellClass( void) { return "YRShellBase"; }
-
 };
+
 
 /** \brief YRShell - interactive
  

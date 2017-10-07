@@ -5,6 +5,7 @@
 #include "processorGlobal.h"
 #endif
 
+#include "Sliceable.h"
 #include "CircularQ.h"
 #include "IntervalTimer.h"
 #include "Dictionary.h"
@@ -19,7 +20,7 @@
  Details on what YRShellInterpreter is
  
  */
-class YRShellInterpreter {
+class YRShellInterpreter : public Sliceable {
 public:
 /** \brief Used by YRShellInterpreter to map to the native functions.
 
@@ -132,7 +133,18 @@ enum SI_CC_functions {
     SI_CC_setCommandEcho,
     SI_CC_setExpandCR,
 
-#ifdef YRSHELL_INTERPRETER_FLOATING_POINT
+    SI_CC_systicks,
+    SI_CC_micros,
+    SI_CC_millis,
+
+    SI_CC_bang,
+    SI_CC_at,
+
+    SI_CC_clearStats,
+    SI_CC_sliceStats,
+    SI_CC_printSliceName,
+
+ #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     SI_CC_dotf,
     SI_CC_dote,
     SI_CC_fLessThan,
@@ -212,6 +224,7 @@ protected:
     virtual void executeFunction( uint16_t n);
     virtual uint32_t shellSize( void) { return sizeof( *this); }
     virtual const char* shellClass( void) { return "YRShellInterpreter"; }
+    virtual const char* sliceName( ) { return shellClass(); }
     
     void nextState(YRShellState n);
     void fillPad( char c);

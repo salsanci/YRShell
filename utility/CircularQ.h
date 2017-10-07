@@ -5,6 +5,8 @@
 #include "processorGlobal.h"
 #endif
 
+#include "Sliceable.h"
+#include "YRShellInterpreter.h"
 #include <stdint.h>
 #include <string.h>
 
@@ -27,7 +29,7 @@
  
  */
 template<class TYPE>
-class CircularQBase {
+class CircularQBase : public Sliceable {
 
 public:
 	CircularQBase() {
@@ -89,6 +91,8 @@ protected:
 	uint16_t m_tail; /**< Index to the next value that will be read from the queue. If equal to m_head the queue is empty. */
 	TYPE m_buf[SIZE]; /**< Storage for the items in the queue. */
 public:
+	virtual const char* sliceName( ) { return "CircularQ"; }
+
 	/** \brief Constructor.
 
 	 Default constructor, no parameters are required.
@@ -318,6 +322,69 @@ public:
 		return rc;
 	}
 };
+
+#if !defined(__linux__) && !defined(__APPLE__) && !defined( NOTARDUINO_AC6)
+
+#include "Arduino.h"
+
+/** \brief BufferedSerial - wrapper arouns the Arduino HardwareSerial class to interface to queues
+
+ Wrapper arouns the Arduino HardwareSerial class to interface to queues.
+
+ */
+class BufferedSerial : public Sliceable {
+protected:
+  HardwareSerial *m_hs; /**< Pointer to the HardwareSerial object */
+  CircularQBase<char>* m_nextQ; /**< Pointer to the queue which will receive data from the HardwareSerial object */
+  CircularQBase<char>* m_previousQ; /**< Pointer to the queue which will supply data to the HardwareSerial object */
+  
+public:
+   virtual const char* sliceName( ) { return "BufferedSerial"; }
+/** \brief BufferedSerial - constructor
+
+ Constructor
+
+ */
+  BufferedSerial( HardwareSerial* hs) {
+    m_hs = hs; 
+  }
+/** \brief init - sets up the queues
+
+ Sets up the queues. A null value is permissible to indicate there is no queue
+
+ */
+  void init(  CircularQBase<char>& nq, CircularQBase<char>& pq) {
+    m_nextQ = &nq;
+    m_previousQ = &pq;
+  }
+/** \brief slice - move data from the HardwareSerial object to / from the queues
+
+ Move data from the HardwareSerial object to / from the queues
+
+ */
+  void slice( void) {
+    uint16_t s1, s2;
+    if( m_nextQ != NULL) {
+      s1 = m_nextQ->getLinearWriteBufferSize();
+      s2 = m_hs->available();
+      s1 = s1 <= s2 ? s1 : s2;
+      if( s1 > 0) {
+        m_hs->readBytes( m_nextQ->getLinearWriteBuffer(), s1);
+        m_nextQ->append( s1);
+      }
+    }
+    if( m_previousQ != NULL) {
+      s1 = m_previousQ->getLinearReadBufferSize();
+      s2 = m_hs->availableForWrite();
+      s1 = s1 <= s2 ? s1 : s2;
+      if( s1 > 0) {
+        m_hs->write( m_previousQ->getLinearReadBuffer(), s1);
+        m_previousQ->drop( s1);
+      }
+    }
+  }
+};
+#endif
 
 #endif
 

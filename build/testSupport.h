@@ -1,6 +1,7 @@
 #ifndef TestSupport_h
 #define TestSupport_h
 #include "../YRShell.h"
+
 class ShellRunner {
 protected:
     YRShell m_shell;

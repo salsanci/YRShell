@@ -1,8 +1,8 @@
 
 #include "YRShellInterpreter.h"
-
 /*
  
+
  : ps? s' PARAMETER STACK: ' .str psd? 0!= [ psd? { dup ps@ . 1 - dup 0== } drop ] cr
  : rs? s'    RETURN STACK: ' .str rsd? 0!= [ rsd? 1 - { dup rs@ . 1 - dup -1 == } drop ] cr
  : cs? s'   COMPILE STACK: ' .str csd? 0!= [ csd? 1 - { dup cs@ . 1 - dup -1 == } drop ] cr
@@ -45,48 +45,135 @@
  : _infb s' Dictionary used free: ' .str dictionarySize getCurrentDictionaryEnd dup . - . cr
  : info printShellClass cr  _inf0 _inf1 _inf2 _inf3 _inf4 _inf5 _inf6 _inf7 _inf8 _inf9 _infa _infb
  
- 
- 
- 
- 
+ : _ts0 s'       COUNT' .str
+ : _ts1 s'          MIN' .str
+ : _ts2 s'         MAX' .str
+ : _ts3 s'       AVERAGE' .str
+ : _ts4 _ts0 _ts1 _ts2 _ts3 cr cr
+ : _ts5 dup sliceStats dup >r [ . . . . ] r> dup [ over printSliceName ] cr
+ : runStats _ts4 0 { _ts5 [ 1 + 0 ][ -1 ] } drop
+ : resetStats 0 { dup clearStats [ 1 + 0 ][ -1 ] } drop
+
+ : _dr0  dup numRegisters < [  dup @ . 1 + ]
+ : _dr1 dup . s' : ' .str  dup @ . _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 cr
+ : regs 0 { _dr1 dup numRegisters >= } drop
+
+
+
+
 YRShell Version 0.1
-s3> : ps? s' PARAMETER STACK: ' .str psd? 0!= [ psd? { dup ps@ . 1 - dup 0== } drop ] cr
-s3> : rs? s'    RETURN STACK: ' .str rsd? 0!= [ rsd? 1 - { dup rs@ . 1 - dup -1 == } drop ] cr
-s3> : cs? s'   COMPILE STACK: ' .str csd? 0!= [ csd? 1 - { dup cs@ . 1 - dup -1 == } drop ] cr
-s3> : st? ps? rs? cs?
-s3> : _cd0 s' \rstatic uint16_t ' .str
-s3> : _cd1 _cd0 s' compiledDictionaryData[] = {\r' .str
-s3> : _cx1 _cd0 s' compiledExtensionDictionaryData[] = {\r' .str
-s3> : _cd2 dup 0xF & 0== [ cr s' // ' .str dup .wx cr ]
-s3> : _cd3 0 { _cd2 dup getCurrentDictionary .wx s' , ' .str 1 + dup getCurrentDictionaryEnd >= } drop
-s3> : _cd4 getCurrentDictionaryEnd 0!= [ _cd3 crlf ] s' };\r' .str
-s3> : _cd5 s' CompiledDictionary ' .str
-s3> : _cd6 s' interpreterCompiledDictionary( compiledDictionaryData, ' .str
-s3> : _cx6 s' compiledExtensionDictionary( compiledExtensionDictionaryData, ' .str
-s3> : _cd7 getCurrentDictionaryLastWord .wx s' , ' .str getCurrentDictionaryEnd .wx
-s3> : _cd8 _cd1 _cd4 _cd5 _cd6 _cd7  s' , YRSHELL_DICTIONARY_INTERPRETER_COMPILED);\r' .str
-s3> : _cx8 _cx1 _cd4 _cd5 _cx6 _cd7 s' , YRSHELL_DICTIONARY_EXTENSION_COMPILED);\r' .str
-s3> : compileInterpreterDictionary _cd8
-s3> : compileExtensionDictionary _cx8
-s3> : spaces dup [ { space 1 - dup 0== } ] drop 
-s3> : dictInvalid 0xFFFF
-s3> : _wl2 rot dup [ cr ] 0== rot rot dup dictInvalid ==
-s3> : _wl3 .entryName 40 swap - spaces
-s3> : wl 0 0 dictInvalid { nextEntry over .bx dup .wx 2dup entryToken .wx 2dup _wl3 _wl2 } 2drop drop cr
-s3> : _inf0 s'      DICTIONARY_SIZE: ' .str dictionarySize . cr
-s3> : _inf1 s'             PAD_SIZE: ' .str padSize . cr
-s3> : _inf2 s'        NUM_REGISTERS: ' .str numRegisters . cr
-s3> : _inf3 s' PARAMETER_STACK_SIZE: ' .str parameterStackSize . cr
-s3> : _inf4 s'    RETURN_STACK_SIZE: ' .str returnStackSize . cr
-s3> : _inf5 s'   COMPILE_STACK_SIZE: ' .str compileStackSize . cr
-s3> : _inf6 s'             INQ_SIZE: ' .str inqSize . cr
-s3> : _inf7 s'         AUX_INQ_SIZE: ' .str auxInqSize . cr
-s3> : _inf8 s'            OUTQ_SIZE: ' .str outqSize . cr
-s3> : _inf9 s'        AUX_OUTQ_SIZE: ' .str auxOutqSize . cr
-s3> : _infa s'           Shell Size: ' .str shellSize . cr
-s3> : _infb s' Dictionary used free: ' .str dictionarySize getCurrentDictionaryEnd dup . - . cr
-s3> : info printShellClass cr  _inf0 _inf1 _inf2 _inf3 _inf4 _inf5 _inf6 _inf7 _inf8 _inf9 _infa _infb
-s3>compileInterpreterDictionary
+bShell>
+ : ps? s' PARAMETER STACK: ' .str psd? 0!= [ psd? { dup ps@ . 1 - dup 0== } drop ] cr
+ : rs? s'    RETURN STACK: ' .str rsd? 0!= [ rsd? 1 - { dup rs@ . 1 - dup -1 == } drop ] cr
+ : cs? s'   COMPILE STACK: ' .str csd? 0!= [ csd? 1 - { dup cs@ . 1 - dup -1 == } drop ] cr
+ : st? ps? rs? cs?
+ 
+ : _cd0 s' \rstatic uint16_t ' .str
+ : _cd1 _cd0 s' compiledDictionaryData[] = {\r' .str
+ : _cx1 _cd0 s' compiledExtensionDictionaryData[] = {\r' .str
+ : _cd2 dup 0xF & 0== [ cr s' // ' .str dup .wx cr ]
+ : _cd3 0 { _cd2 dup getCurrentDictionary .wx s' , ' .str 1 + dup getCurrentDictionaryEnd >= } drop
+ : _cd4 getCurrentDictionaryEnd 0!= [ _cd3 crlf ] s' };\r' .str
+ : _cd5 s' CompiledDictionary ' .str
+ 
+ : _cd6 s' interpreterCompiledDictionary( compiledDictionaryData, ' .str
+ : _cx6 s' compiledExtensionDictionary( compiledExtensionDictionaryData, ' .str
+ : _cd7 getCurrentDictionaryLastWord .wx s' , ' .str getCurrentDictionaryEnd .wx
+ : _cd8 _cd1 _cd4 _cd5 _cd6 _cd7  s' , YRSHELL_DICTIONARY_INTERPRETER_COMPILED);\r' .str
+ : _cx8 _cx1 _cd4 _cd5 _cx6 _cd7 s' , YRSHELL_DICTIONARY_EXTENSION_COMPILED);\r' .str
+ : compileInterpreterDictionary _cd8
+ : compileExtensionDictionary _cx8
+ 
+ : spaces dup [ { space 1 - dup 0== } ] drop 
+ : dictInvalid 0xFFFF
+ : _wl2 rot dup [ cr ] 0== rot rot dup dictInvalid ==
+ : _wl3 .entryName 40 swap - spaces
+ : wl 0 0 dictInvalid { nextEntry over .bx dup .wx 2dup entryToken .wx 2dup _wl3 _wl2 } 2drop drop cr
+ 
+ : _inf0 s'      DICTIONARY_SIZE: ' .str dictionarySize . cr
+ : _inf1 s'             PAD_SIZE: ' .str padSize . cr
+ : _inf2 s'        NUM_REGISTERS: ' .str numRegisters . cr
+ : _inf3 s' PARAMETER_STACK_SIZE: ' .str parameterStackSize . cr
+ : _inf4 s'    RETURN_STACK_SIZE: ' .str returnStackSize . cr
+ : _inf5 s'   COMPILE_STACK_SIZE: ' .str compileStackSize . cr
+ : _inf6 s'             INQ_SIZE: ' .str inqSize . cr
+
+ : _inf7 s'         AUX_INQ_SIZE: ' .str auxInqSize . cr
+ : _inf8 s'            OUTQ_SIZE: ' .str outqSize . cr
+ : _inf9 s'        AUX_OUTQ_SIZE: ' .str auxOutqSize . cr
+ : _infa s'           Shell Size: ' .str shellSize . cr
+ : _infb s' Dictionary used free: ' .str dictionarySize getCurrentDictionaryEnd dup . - . cr
+ : info printShellClass cr  _inf0 _inf1 _inf2 _inf3 _inf4 _inf5 _inf6 _inf7 _inf8 _inf9 _infa _infb
+ 
+ : _ts0 s'       COUNT' .str
+ : _ts1 s'          MIN' .str
+ : _ts2 s'         MAX' .str
+ : _ts3 s'       AVERAGE' .str
+ : _ts4 _ts0 _ts1 _ts2 _ts3 cr cr
+ : _ts5 dup sliceStats dup >r [ . . . . ] r> dup [ over printSliceName ] cr
+ : runStats _ts4 0 { _ts5 [ 1 + 0 ][ -1 ] } drop
+ : resetStats 0 { dup clearStats [ 1 + 0 ][ -1 ] } drop
+
+ : _dr0  dup numRegisters < [  dup @ . 1 + ]
+ : _dr1 dup . s' : ' .str  dup @ . _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 cr
+ : regs 0 { _dr1 dup numRegisters >= } drop
+
+bShell> : ps? s' PARAMETER STACK: ' .str psd? 0!= [ psd? { dup ps@ . 1 - dup 0== } drop ] cr
+bShell> : rs? s'    RETURN STACK: ' .str rsd? 0!= [ rsd? 1 - { dup rs@ . 1 - dup -1 == } drop ] cr
+bShell> : cs? s'   COMPILE STACK: ' .str csd? 0!= [ csd? 1 - { dup cs@ . 1 - dup -1 == } drop ] cr
+bShell> : st? ps? rs? cs?
+bShell> 
+bShell> : _cd0 s' \rstatic uint16_t ' .str
+bShell> : _cd1 _cd0 s' compiledDictionaryData[] = {\r' .str
+bShell> : _cx1 _cd0 s' compiledExtensionDictionaryData[] = {\r' .str
+bShell> : _cd2 dup 0xF & 0== [ cr s' // ' .str dup .wx cr ]
+bShell> : _cd3 0 { _cd2 dup getCurrentDictionary .wx s' , ' .str 1 + dup getCurrentDictionaryEnd >= } drop
+bShell> : _cd4 getCurrentDictionaryEnd 0!= [ _cd3 crlf ] s' };\r' .str
+bShell> : _cd5 s' CompiledDictionary ' .str
+bShell> 
+bShell> : _cd6 s' interpreterCompiledDictionary( compiledDictionaryData, ' .str
+bShell> : _cx6 s' compiledExtensionDictionary( compiledExtensionDictionaryData, ' .str
+bShell> : _cd7 getCurrentDictionaryLastWord .wx s' , ' .str getCurrentDictionaryEnd .wx
+bShell> : _cd8 _cd1 _cd4 _cd5 _cd6 _cd7  s' , YRSHELL_DICTIONARY_INTERPRETER_COMPILED);\r' .str
+bShell> : _cx8 _cx1 _cd4 _cd5 _cx6 _cd7 s' , YRSHELL_DICTIONARY_EXTENSION_COMPILED);\r' .str
+bShell> : compileInterpreterDictionary _cd8
+bShell> : compileExtensionDictionary _cx8
+bShell> 
+bShell> : spaces dup [ { space 1 - dup 0== } ] drop 
+bShell> : dictInvalid 0xFFFF
+bShell> : _wl2 rot dup [ cr ] 0== rot rot dup dictInvalid ==
+bShell> : _wl3 .entryName 40 swap - spaces
+bShell> : wl 0 0 dictInvalid { nextEntry over .bx dup .wx 2dup entryToken .wx 2dup _wl3 _wl2 } 2drop drop cr
+bShell> 
+bShell> : _inf0 s'      DICTIONARY_SIZE: ' .str dictionarySize . cr
+bShell> : _inf1 s'             PAD_SIZE: ' .str padSize . cr
+bShell> : _inf2 s'        NUM_REGISTERS: ' .str numRegisters . cr
+bShell> : _inf3 s' PARAMETER_STACK_SIZE: ' .str parameterStackSize . cr
+bShell> : _inf4 s'    RETURN_STACK_SIZE: ' .str returnStackSize . cr
+bShell> : _inf5 s'   COMPILE_STACK_SIZE: ' .str compileStackSize . cr
+bShell> : _inf6 s'             INQ_SIZE: ' .str inqSize . cr
+bShell>
+bShell> : _inf7 s'         AUX_INQ_SIZE: ' .str auxInqSize . cr
+bShell> : _inf8 s'            OUTQ_SIZE: ' .str outqSize . cr
+bShell> : _inf9 s'        AUX_OUTQ_SIZE: ' .str auxOutqSize . cr
+bShell> : _infa s'           Shell Size: ' .str shellSize . cr
+bShell> : _infb s' Dictionary used free: ' .str dictionarySize getCurrentDictionaryEnd dup . - . cr
+bShell> : info printShellClass cr  _inf0 _inf1 _inf2 _inf3 _inf4 _inf5 _inf6 _inf7 _inf8 _inf9 _infa _infb
+bShell> 
+bShell> : _ts0 s'       COUNT' .str
+bShell> : _ts1 s'          MIN' .str
+bShell> : _ts2 s'         MAX' .str
+bShell> : _ts3 s'       AVERAGE' .str
+bShell> : _ts4 _ts0 _ts1 _ts2 _ts3 cr cr
+bShell> : _ts5 dup sliceStats dup >r [ . . . . ] r> dup [ over printSliceName ] cr
+bShell> : runStats _ts4 0 { _ts5 [ 1 + 0 ][ -1 ] } drop
+bShell> : resetStats 0 { dup clearStats [ 1 + 0 ][ -1 ] } drop
+bShell>
+bShell> : _dr0  dup numRegisters < [  dup @ . 1 + ]
+bShell> : _dr1 dup . s' : ' .str  dup @ . _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 cr
+bShell> : regs 0 { _dr1 dup numRegisters >= } drop
+bShell>compileInterpreterDictionary
+compileInterpreterDictionary
 
 static uint16_t compiledDictionaryData[] = {
 
@@ -191,11 +278,35 @@ static uint16_t compiledDictionaryData[] = {
 // 0x0310 
 0x203A , 0x0000 , 0xC012 , 0xC053 , 0xC045 , 0xC01E , 0xC00C , 0xC028 , 0xC00C , 0xC003 , 0xC001 , 0x0301 , 0x6E69 , 0x6F66 , 0x0000 , 0xC052 , 
 // 0x0320 
-0xC003 , 0xE213 , 0xE229 , 0xE23F , 0xE255 , 0xE26B , 0xE281 , 0xE297 , 0xE2AD , 0xE2C3 , 0xE2D9 , 0xE2EF , 0xE305 , 0xC001 , 
+0xC003 , 0xE213 , 0xE229 , 0xE23F , 0xE255 , 0xE26B , 0xE281 , 0xE297 , 0xE2AD , 0xE2C3 , 0xE2D9 , 0xE2EF , 0xE305 , 0xC001 , 0x031B , 0x745F , 
+// 0x0330 
+0x3073 , 0x0000 , 0xC016 , 0x2020 , 0x2020 , 0x2020 , 0x4F43 , 0x4E55 , 0x0054 , 0xC012 , 0xC001 , 0x032E , 0x745F , 0x3173 , 0x0000 , 0xC016 , 
+// 0x0340 
+0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x4D20 , 0x4E49 , 0x0000 , 0xC012 , 0xC001 , 0x033B , 0x745F , 0x3273 , 0x0000 , 0xC016 , 0x2020 , 0x2020 , 
+// 0x0350 
+0x2020 , 0x2020 , 0x414D , 0x0058 , 0xC012 , 0xC001 , 0x0349 , 0x745F , 0x3373 , 0x0000 , 0xC016 , 0x2020 , 0x2020 , 0x2020 , 0x5641 , 0x5245 , 
+// 0x0360 
+0x4741 , 0x0045 , 0xC012 , 0xC001 , 0x0356 , 0x745F , 0x3473 , 0x0000 , 0xE332 , 0xE33F , 0xE34D , 0xE35A , 0xC003 , 0xC003 , 0xC001 , 0x0364 , 
+// 0x0370 
+0x745F , 0x3573 , 0x0000 , 0xC01E , 0xC066 , 0xC01E , 0xC024 , 0xC01D , 0xE37D , 0xC00C , 0xC00C , 0xC00C , 0xC00C , 0xC025 , 0xC01E , 0xC01D , 
+// 0x0380 
+0xE383 , 0xC040 , 0xC067 , 0xC003 , 0xC001 , 0x036F , 0x7572 , 0x536E , 0x6174 , 0x7374 , 0x0000 , 0xE368 , 0xC009 , 0x0000 , 0xE373 , 0xC01D , 
+// 0x0390 
+0xE398 , 0xC009 , 0x0001 , 0xC027 , 0xC009 , 0x0000 , 0xC01C , 0xE39A , 0xC00B , 0xFFFF , 0xC01D , 0xE38E , 0xC022 , 0xC001 , 0x0385 , 0x6572 , 
+// 0x03A0 
+0x6573 , 0x5374 , 0x6174 , 0x7374 , 0x0000 , 0xC009 , 0x0000 , 0xC01E , 0xC065 , 0xC01D , 0xE3B2 , 0xC009 , 0x0001 , 0xC027 , 0xC009 , 0x0000 , 
+// 0x03B0 
+0xC01C , 0xE3B4 , 0xC00B , 0xFFFF , 0xC01D , 0xE3A7 , 0xC022 , 0xC001 , 0x039E , 0x645F , 0x3072 , 0x0000 , 0xC01E , 0xC055 , 0xC02F , 0xC01D , 
+// 0x03C0 
+0xE3C7 , 0xC01E , 0xC064 , 0xC00C , 0xC009 , 0x0001 , 0xC027 , 0xC001 , 0x03B8 , 0x645F , 0x3172 , 0x0000 , 0xC01E , 0xC00C , 0xC016 , 0x203A , 
+// 0x03D0 
+0x0000 , 0xC012 , 0xC01E , 0xC064 , 0xC00C , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xC003 , 0xC001 , 0x03C8 , 
+// 0x03E0 
+0x6572 , 0x7367 , 0x0000 , 0xC009 , 0x0000 , 0xE3CC , 0xC01E , 0xC055 , 0xC033 , 0xC01D , 0xE3E5 , 0xC022 , 0xC001 , 
 
 };
-CompiledDictionary interpreterCompiledDictionary( compiledDictionaryData, 0x031B , 0x032E , YRSHELL_DICTIONARY_INTERPRETER_COMPILED);
-s3>
+CompiledDictionary interpreterCompiledDictionary( compiledDictionaryData, 0x03DF , 0x03ED , YRSHELL_DICTIONARY_INTERPRETER_COMPILED);
+bShell>
 
 
  */
@@ -309,10 +420,35 @@ static uint16_t compiledDictionaryData[] = {
 // 0x0310 
 0x203A , 0x0000 , 0xC012 , 0xC053 , 0xC045 , 0xC01E , 0xC00C , 0xC028 , 0xC00C , 0xC003 , 0xC001 , 0x0301 , 0x6E69 , 0x6F66 , 0x0000 , 0xC052 , 
 // 0x0320 
-0xC003 , 0xE213 , 0xE229 , 0xE23F , 0xE255 , 0xE26B , 0xE281 , 0xE297 , 0xE2AD , 0xE2C3 , 0xE2D9 , 0xE2EF , 0xE305 , 0xC001 , 
+0xC003 , 0xE213 , 0xE229 , 0xE23F , 0xE255 , 0xE26B , 0xE281 , 0xE297 , 0xE2AD , 0xE2C3 , 0xE2D9 , 0xE2EF , 0xE305 , 0xC001 , 0x031B , 0x745F , 
+// 0x0330 
+0x3073 , 0x0000 , 0xC016 , 0x2020 , 0x2020 , 0x2020 , 0x4F43 , 0x4E55 , 0x0054 , 0xC012 , 0xC001 , 0x032E , 0x745F , 0x3173 , 0x0000 , 0xC016 , 
+// 0x0340 
+0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x4D20 , 0x4E49 , 0x0000 , 0xC012 , 0xC001 , 0x033B , 0x745F , 0x3273 , 0x0000 , 0xC016 , 0x2020 , 0x2020 , 
+// 0x0350 
+0x2020 , 0x2020 , 0x414D , 0x0058 , 0xC012 , 0xC001 , 0x0349 , 0x745F , 0x3373 , 0x0000 , 0xC016 , 0x2020 , 0x2020 , 0x2020 , 0x5641 , 0x5245 , 
+// 0x0360 
+0x4741 , 0x0045 , 0xC012 , 0xC001 , 0x0356 , 0x745F , 0x3473 , 0x0000 , 0xE332 , 0xE33F , 0xE34D , 0xE35A , 0xC003 , 0xC003 , 0xC001 , 0x0364 , 
+// 0x0370 
+0x745F , 0x3573 , 0x0000 , 0xC01E , 0xC066 , 0xC01E , 0xC024 , 0xC01D , 0xE37D , 0xC00C , 0xC00C , 0xC00C , 0xC00C , 0xC025 , 0xC01E , 0xC01D , 
+// 0x0380 
+0xE383 , 0xC040 , 0xC067 , 0xC003 , 0xC001 , 0x036F , 0x7572 , 0x536E , 0x6174 , 0x7374 , 0x0000 , 0xE368 , 0xC009 , 0x0000 , 0xE373 , 0xC01D , 
+// 0x0390 
+0xE398 , 0xC009 , 0x0001 , 0xC027 , 0xC009 , 0x0000 , 0xC01C , 0xE39A , 0xC00B , 0xFFFF , 0xC01D , 0xE38E , 0xC022 , 0xC001 , 0x0385 , 0x6572 , 
+// 0x03A0 
+0x6573 , 0x5374 , 0x6174 , 0x7374 , 0x0000 , 0xC009 , 0x0000 , 0xC01E , 0xC065 , 0xC01D , 0xE3B2 , 0xC009 , 0x0001 , 0xC027 , 0xC009 , 0x0000 , 
+// 0x03B0 
+0xC01C , 0xE3B4 , 0xC00B , 0xFFFF , 0xC01D , 0xE3A7 , 0xC022 , 0xC001 , 0x039E , 0x645F , 0x3072 , 0x0000 , 0xC01E , 0xC055 , 0xC02F , 0xC01D , 
+// 0x03C0 
+0xE3C7 , 0xC01E , 0xC064 , 0xC00C , 0xC009 , 0x0001 , 0xC027 , 0xC001 , 0x03B8 , 0x645F , 0x3172 , 0x0000 , 0xC01E , 0xC00C , 0xC016 , 0x203A , 
+// 0x03D0 
+0x0000 , 0xC012 , 0xC01E , 0xC064 , 0xC00C , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xC003 , 0xC001 , 0x03C8 , 
+// 0x03E0 
+0x6572 , 0x7367 , 0x0000 , 0xC009 , 0x0000 , 0xE3CC , 0xC01E , 0xC055 , 0xC033 , 0xC01D , 0xE3E5 , 0xC022 , 0xC001 , 
 
 };
-CompiledDictionary interpreterCompiledDictionary( compiledDictionaryData, 0x031B , 0x032E , YRSHELL_DICTIONARY_INTERPRETER_COMPILED);
+CompiledDictionary interpreterCompiledDictionary( compiledDictionaryData, 0x03DF , 0x03ED , YRSHELL_DICTIONARY_INTERPRETER_COMPILED);
+
 
 static const FunctionEntry interpreterFunctions[] = {
     { (uint16_t)YRShellInterpreter::SI_CC_return,     ""},
@@ -320,6 +456,7 @@ static const FunctionEntry interpreterFunctions[] = {
     { (uint16_t)YRShellInterpreter::SI_CC_cr,         "cr"},
     { (uint16_t)YRShellInterpreter::SI_CC_lf,         "lf"},
     { (uint16_t)YRShellInterpreter::SI_CC_crlf,       "crlf"},
+    { (uint16_t)YRShellInterpreter::SI_CC_reset,      "reset"},
     { (uint16_t)YRShellInterpreter::SI_CC_prompt,     "prompt"},
     { (uint16_t)YRShellInterpreter::SI_CC_clearPad,   "clearPad"},
     { (uint16_t)YRShellInterpreter::SI_CC_dot,        "."},
@@ -406,6 +543,16 @@ static const FunctionEntry interpreterFunctions[] = {
     { (uint16_t)YRShellInterpreter::SI_CC_dictionaryClear,                       "dictClear" },
     { (uint16_t)YRShellInterpreter::SI_CC_setCommandEcho,                        "setCommandEcho" },
     { (uint16_t)YRShellInterpreter::SI_CC_setExpandCR,                           "setExpandCR" },
+    { (uint16_t)YRShellInterpreter::SI_CC_systicks,                              "systicks" },
+    { (uint16_t)YRShellInterpreter::SI_CC_micros,                                "micros" },
+    { (uint16_t)YRShellInterpreter::SI_CC_millis,                                "millis" },
+
+    { (uint16_t)YRShellInterpreter::SI_CC_bang,                                	 "!" },
+    { (uint16_t)YRShellInterpreter::SI_CC_at,                                    "@" },
+    { (uint16_t)YRShellInterpreter::SI_CC_clearStats,                            "clearStats" },
+    { (uint16_t)YRShellInterpreter::SI_CC_sliceStats,                            "sliceStats" },
+    { (uint16_t)YRShellInterpreter::SI_CC_printSliceName,                        "printSliceName" },
+
 
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     { (uint16_t)YRShellInterpreter::SI_CC_dotf,                                   ".f" },
@@ -561,6 +708,17 @@ const char *SIDebugStrings[] = {
     "SI_CC_setCommandEcho",
     "SI_CC_setExpandCR",
 
+    "SI_CC_systicks",
+    "SI_CC_micros",
+    "SI_CC_millis"
+
+   	"SI_CC_bang",
+    "SI_CC_at",
+
+    "SI_CC_clearStats",
+    "SI_CC_sliceStats",
+    "SI_CC_printSliceName",
+
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     "SI_CC_dotf",
     "SI_CC_dote",
@@ -702,6 +860,8 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
     uint32_t v1, v2, v3;
     float f1, f2;
     const char *P;
+    Sliceable *S;
+
 #ifdef YRSHELL_DEBUG
     if( m_debugFlags & YRSHELL_DEBUG_EXECUTE) {
         outString("[");
@@ -1150,6 +1310,62 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             break;
         case SI_CC_setExpandCR:
             m_expandCR = popParameterStack() != 0;
+            break;
+
+        case SI_CC_systicks:
+            pushParameterStack( HiResTimer::getSysticks());
+            break;
+
+        case SI_CC_micros:
+            pushParameterStack( HiResTimer::getMicros());
+            break;
+
+        case SI_CC_bang:
+        	v1 = popParameterStack();
+        	v2 = popParameterStack();
+        	if( v1 < m_numRegisters) {
+        		m_Registers[ v1] = v2;
+        	} else {
+            	reset( __FILE__, __LINE__, "INVALID REGISTER");
+	       	}
+            break;
+        case SI_CC_at:
+        	v1 = popParameterStack();
+        	if( v1 < m_numRegisters) {
+        		pushParameterStack(m_Registers[ v1]);
+        	} else {
+            	reset( __FILE__, __LINE__, "INVALID REGISTER");
+	       	}
+            break;
+         case SI_CC_clearStats:
+        	v1 = popParameterStack();
+        	S = Sliceable::getSlicePointer( v1);
+        	if( S != NULL) {
+        		S->resetTimer();
+        		pushParameterStack( -1);
+         	} else {
+         		pushParameterStack( 0);
+         	}
+            break;
+       case SI_CC_sliceStats:
+        	v1 = popParameterStack();
+        	S = Sliceable::getSlicePointer( v1);
+        	if( S != NULL) {
+        		pushParameterStack( S->getTimerAverage());
+        		pushParameterStack( S->getTimerMax());
+        		pushParameterStack( S->getTimerMin());
+        		pushParameterStack( S->getTimerCount());
+        		pushParameterStack( -1);
+        	} else {
+        		pushParameterStack( 0);
+        	}
+            break;
+        case SI_CC_printSliceName:
+        	v1 = popParameterStack();
+        	S = Sliceable::getSlicePointer( v1);
+        	if( S != NULL) {
+        		outString( S->sliceName() );
+         	}
             break;
 
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
@@ -1645,11 +1861,12 @@ bool YRShellInterpreter::processToken( ){
         } else {
             if( rc == YRSHELL_DICTIONARY_INVALID) {
                 if( !processLiteralToken()) {
-                    outString( "\r\nUNDEFINED [");
+                    outString( "\rUNDEFINED [");
                     outString( m_token);
-                    outString( "]\r\n");
+                    outString( "]\r");
                     interpretReset();
                     nextState( YRSHELL_BEGIN_IDLE);
+                    m_returnTopOfStack = 0;
                     ret = false;
                 }
             } else {

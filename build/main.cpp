@@ -5,13 +5,38 @@
 //  Copyright © 2017 Sal Sanci. All rights reserved.
 //
 
+
 #include <iostream>
 #include <string>
 #include "../YRShell.h"
 #include <pthread.h>
 #include "unistd.h"
 
-CircularQ<char, 4000> keyQ;
+CircularQ<char, 16000> keyQ;
+
+class StdoutQ : public Sliceable {
+private:
+    CircularQBase<char>* m_q;
+public:
+    StdoutQ( ) { }
+    virtual ~StdoutQ( void) { }
+    void init( CircularQBase<char>& q);
+    void slice( void);
+    virtual const char* sliceName( void) { return "StdoutQ"; }
+};
+void StdoutQ::init(CircularQBase<char>& q) {
+    m_q = &q;
+}
+void StdoutQ::slice() {
+    if( m_q->valueAvailable()) {
+        for(int i = 0; i < 256 && m_q->valueAvailable(); i++) {
+            std::cout << m_q->get();
+        }
+    }
+}
+
+StdoutQ out1;
+StdoutQ out2;
 
 IntervalTimer iTimer;
 class derror : public DictionaryError {
@@ -39,7 +64,6 @@ public:
     virtual ~CommonShell( void) { }
     void init(void);
 };
-
 
 class MyYRShell : public virtual YRShell, public virtual CommonShell {
 public:
@@ -83,15 +107,35 @@ public:
     virtual const char* shellClass( void) { return "SmallYRShell"; }
 };
 
+class BigYRShell : public virtual YRShellBase<8192, 256, 16, 16, 16, 8, 16384, 16384, 4096, 4096>, public virtual CommonShell {
+public:
+    /** \brief Used by SmallYRShell to map to the native functions.
+     
+     Used by SmallYRShell to map to the native functions.
+     */
+    enum SE_CC_functions {
+        SE_CC_first = YRSHELL_DICTIONARY_EXTENSION_FUNCTION,
+        SE_CC_timesTwo,
+        SE_CC_timesFour,
+        SE_CC_last
+    };
+protected:
+    virtual void executeFunction( uint16_t n);
+    
+public:
+    BigYRShell() { }
+    void init(void);
+    virtual const char* shellClass( void) { return "BigYRShell"; }
+};
 
+BigYRShell shell0;
 MyYRShell shell1;
 SmallYRShell shell2;
 
-YRShellInterpreter *shellVector[] = {& shell1, &shell2};
+YRShellInterpreter *shellVector[] = { &shell0, & shell1, &shell2};
 uint8_t shellVectorIndex;
 #define NUM_YRSHELLS (sizeof(shellVector)/sizeof( *shellVector))
-YRShellInterpreter *currenYRShell = shellVector[ shellVectorIndex];
-
+YRShellInterpreter *currentYRShell = shellVector[ shellVectorIndex];
 
 static const FunctionEntry shellCommonFunctions[] = {
     { CommonShell::SC_CC_nextYRShell,      ">>>" },
@@ -126,7 +170,9 @@ void CommonShell::executeFunction( uint16_t n ) {
                 if( ++shellVectorIndex >= NUM_YRSHELLS) {
                     shellVectorIndex = 0;
                 }
-                currenYRShell = shellVector[ shellVectorIndex];
+                currentYRShell = shellVector[ shellVectorIndex];
+                out1.init( currentYRShell->getOutq());
+                out2.init(currentYRShell->getAuxOutq());
                 break;
             default:
                 shellERROR(__BASE_FILE__, __LINE__);
@@ -134,9 +180,6 @@ void CommonShell::executeFunction( uint16_t n ) {
         }
     }
 }
-
-
-
 
 static const FunctionEntry shellExtensionFunctions[] = {
     { MyYRShell::SE_CC_timesTwo,       "2*"},
@@ -214,8 +257,35 @@ void SmallYRShell::executeFunction( uint16_t n) {
         }
     }
 }
-
-
+void BigYRShell::init() {
+    CommonShell::init();
+    m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_COMPILED_INDEX] = &compiledExtensionDictionary;
+    m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_FUNCTION_INDEX] = &dictionaryExtensionFunction;
+}
+void BigYRShell::executeFunction( uint16_t n) {
+    if( n <= SE_CC_first || n >= SE_CC_last) {
+        CommonShell::executeFunction(n);
+    } else {
+#ifdef YRSHELL_DEBUG
+        if( m_debugFlags & YRSHELL_DEBUG_EXECUTE) {
+            outString("[");
+            outString(MyYRShellExtensionDebugStrings[n - SE_CC_first]);
+            outString("]");
+        }
+#endif
+        switch( n) {
+            case SE_CC_timesTwo:
+                pushParameterStack(popParameterStack()*2);
+                break;
+            case SE_CC_timesFour:
+                pushParameterStack(popParameterStack()*4);
+                break;
+            default:
+                shellERROR(__BASE_FILE__, __LINE__);
+                break;
+        }
+    }
+}
 
 
 
@@ -226,37 +296,23 @@ void *kscan(void *x_void_ptr) {
         c = getchar();
         if( c != EOF) {
             while( !keyQ.spaceAvailable()) {
-                usleep( 1000);
+                usleep(1000);
             }
             keyQ.put( (char) c);
         }
-        
     }
     return NULL;
 }
 
-class StdoutQ {
-public:
-    StdoutQ( ) { }
-    virtual ~StdoutQ( void) { }
-    void slice( CircularQBase<char>& q);
-};
-void StdoutQ::slice(CircularQBase<char>& q) {
-    if( q.valueAvailable()) {
-        for(int i = 0; i < 256 && q.valueAvailable(); i++) {
-            std::cout << q.get();
-        }
-    }
-}
 
-
-StdoutQ out1;
-StdoutQ out2;
 
 int main(int argc, const char * argv[]) {
+    char c;
     pthread_t kThread;
-    int slowDownFactor, slowDownCounter;
-    
+    uint16_t lastLen= 0;
+
+    std::cout.setf( std::ios_base::unitbuf );
+
     if(pthread_create(&kThread, NULL, kscan, (void*) NULL)) {
         
         fprintf(stderr, "Error creating thread\n");
@@ -264,31 +320,34 @@ int main(int argc, const char * argv[]) {
     }
     Dictionary::s_DictionaryError =  &errd;
 
+    shell0.init();
     shell1.init();
     shell2.init();
-    shell1.setPrompt("\rHELO>");
-    shell2.setPrompt("\rOK>");
-    iTimer.setInterval(10);
-    
+    shell0.setPrompt("bShell>");
+    shell1.setPrompt("HELO>");
+    shell2.setPrompt("OK>");
+    iTimer.setInterval(1);
+    out1.init( currentYRShell->getOutq());
+    out2.init(currentYRShell->getAuxOutq());
+
     std::cout.setf( std::ios_base::unitbuf );
-    
-    slowDownFactor = 1;
-    slowDownCounter = 0;
     while( 1) {
         if( iTimer.hasIntervalElapsed()) {
-            for(int i = 0; i < 32 && keyQ.valueAvailable() && currenYRShell->getInq().spaceAvailable(); i++) {
-                currenYRShell->getInq().put( keyQ.get());
+            for(int i = 0; i < 32 && keyQ.valueAvailable() && currentYRShell->getInq().spaceAvailable(); i++) {
+                c = keyQ.get();
+                currentYRShell->getInq().put( c);
             }
-            iTimer.setInterval(10);
+            iTimer.setInterval(1);
         }
-        shell1.slice();
-        shell2.slice();
-        usleep( 10);
-        if( slowDownCounter++ > slowDownFactor) {
-            slowDownCounter = 0;
-            out1.slice( currenYRShell->getOutq());
-            out2.slice(currenYRShell->getAuxOutq());
+        if( lastLen == keyQ.used()) {
+            Sliceable::sliceAll( );
+            lastLen = keyQ.used();
+        } else {
+            lastLen = keyQ.used();
+            usleep( 5000);
         }
+
+        usleep( 1);
     }
     return 0;
 }
