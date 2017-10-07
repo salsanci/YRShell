@@ -6,11 +6,11 @@
 
 - fix __APPLE_CC__ **
 
- –lpthread for linux **
+ –lpthread for linux **  
 
- - fix Makefile **
+ - fix Makefile **  
 
- - yrshell
+ - yrshell  
  
  /** \page introDocumentation YrShell Introduction to YrShell  
 
@@ -25,70 +25,70 @@ End of introduction
  
  /** \page userDocumentation YrShell user documentation  
  
-YrShell is designed and tested on ST-Microelectronics STM32Nucleo-L476RG micocontroller board. 
-This hardware should be more or ess compatible with ANY Arduino board, 
-but we will not be sure until user confirm or deny specific boards.
+YrShell is designed and tested on ST-Microelectronics STM32Nucleo-L476RG micocontroller board.  
+This hardware should be more or ess compatible with ANY Arduino board,  
+but we will not be sure until user confirm or deny specific boards.  
 For the purpose of this document we will only discuss one hardware board, the STM32Nucleo-L476RG.  
 
 # Setup-Hardware
-- Setup-STM32Nucleo-L476RG
-  1. Remove from package.
-  1.   Find the USB mini cable.
+- Setup-STM32Nucleo-L476RG  
+  1. Remove from package.  
+  1.   Find the USB mini cable.  
   1. Notice there are header pins exposed on both the top and bottom, take precautions so these do not get bent or shorted.  
-  - I found some stanoffs and mounted it in a cookie tin.
-  - You might set it on a clean folder shop towel for the time being.
-  - Aside from physically secring the board, nothing more needs to be done until we are ready to program.
+  - I found some stanoffs and mounted it in a cookie tin.  
+  - You might set it on a clean folder shop towel for the time being.  
+  - Aside from physically secring the board, nothing more needs to be done until we are ready to program.  
   
 ## Setup-PC-hardware  
-PC Hardware needs at least available USB port to use as virtual serial port.
-Old type RS232 serial port is possible but not covered here until requested.  
-### PC-Operating Systems Supported   
-The YrShell development environment is tested on Mac OSX, Linux Mint 18.2, and Windows 10.
-Other versions of MacOSX, Linux (Ubuntu, debian), and Windows should work as expected.
+PC Hardware needs at least available USB port to use as virtual serial port.  
+Old type RS232 serial port is possible but not covered here until requested.   
+### PC-Operating Systems Supported    
+The YrShell development environment is tested on Mac OSX, Linux Mint 18.2, and Windows 10.  
+Other versions of MacOSX, Linux (Ubuntu, debian), and Windows should work as expected.  
 Windows XP is possible but not covered here until requested.   
-1. Plug in USB cable to available USB port on PC.  
-   - Notice that the USB cable prvides power to the Board.
-  1. Plug other end into Nucleo-L476RG board;
-     - You should see a directory window open for 
-     `/media/<user>/NODE_L476RG`   (linux)
-        containing two files, DETAILS.TXT and MBED.HTM
-NOTE: Linux Mint displays the directory, LED1 COM is solid RED
-NOTE: Windows 10 gives an error, LED1 COM flashes RED
-FIRST TIME ONLY:
-  The STM32Nucleo-L476RG ships with a demo software image.
-  Press Button B1 (the blue one) and observe the blink pattern changes.
-  Congratulations! Your board is working correctly.
+1. Plug in USB cable to available USB port on PC.   
+   - Notice that the USB cable prvides power to the Board.  
+  1. Plug other end into Nucleo-L476RG board;  
+     - You should see a directory window open for   
+     `/media/<user>/NODE_L476RG`   (linux)  
+        containing two files, DETAILS.TXT and MBED.HTM  
+NOTE: Linux Mint displays the directory, LED1 COM is solid RED  
+NOTE: Windows 10 gives an error, LED1 COM flashes RED  
+FIRST TIME ONLY:  
+  The STM32Nucleo-L476RG ships with a demo software image.  
+  Press Button B1 (the blue one) and observe the blink pattern changes.  
+  Congratulations! Your board is working correctly.  
       
-# Setup-PC-Software
+# Setup-PC-Software  
 
-There are two parts to the PC software.  These are the gneral PC build tools, and the arduino IDE.
+There are two parts to the PC software.  These are the gneral PC build tools, and the arduino IDE.  
 
-## Setup build tools
+## Setup build tools  
 
-The build tools are the (gnu) build-essential (compiler) build tools and the doxygen documentation tools.
+The build tools are the (gnu) build-essential (compiler) build tools and the doxygen documentation tools.  
 
-### build essential
+### build essential  
 
-We need the build tools for compilation and and testing.  Your installation may or may not need these tools for the Arduino IDE. If you wish to perform automatic testing on the PC side, you will likely need the build tools.
+We need the build tools for compilation and and testing.  Your installation may or may not need these tools for the Arduino IDE. If you wish to perform automatic testing on the PC side, you will likely need the build tools.  
 
-#### For Linux and OSX:
+#### For Linux and OSX:  
 
 `sudo apt-get update`  
 `sudo apt-get install build-essential`  
 
 #### For Windows: 
 
-We don't seem to need any additional tools installed on Windows 10.  This will be updated is we find we need something for earlier versions of windows, as needed.
+We don't seem to need any additional tools installed on Windows 10.  This will be updated is we find we need something for earlier versions of windows, as needed.  
 
 ### doxygen
 
-Sal is using doxygen to generate the documentation for the source code.  If you want to use the same pro-tools as Sal, and/or wish to contribute to this project (optional) you can download and install from the author.
+Sal is using doxygen to generate the documentation for the source code.  If you want to use the same pro-tools as Sal, and/or wish to contribute to this project (optional) you can download and install from the author.  
 
-http://www.stack.nl/~dimitri/doxygen/download.html
+http://www.stack.nl/~dimitri/doxygen/download.html  
 
-NOTE: you are not required or expected to install or use doxygen, it is inclided here for completeness.
+NOTE: you are not required or expected to install or use doxygen, it is inclided here for completeness.  
 
-## Setup-Arduino-IDE
+## Setup-Arduino-IDE  
   Start with the instructions https://github.com/stm32duino/wiki/wiki/Getting-Started  
 
 STEP 1:  
@@ -96,18 +96,18 @@ STEP 1:
   - Mac OSX used  https://www.arduino.cc/download_handler.php?f=/arduino-1.8.4-macosx.zip  
   - Linux (Ubuntu, Mint) used  https://www.arduino.cc/download_handler.php?f=/arduino-1.8.4-linux64.tar.xz  
       
-- Follow the istruction until you the Arduino IDE icon on your desktop]  
-  - Extract the contents of the archive (I did "extract here" in Downloads)
-  - Find Install.sh (linux)  Execute this script, it puts the icon on the desktop,  but does not yet put an Arduino directory in your home folder
+- Follow the istruction until you the Arduino IDE icon on your desktop]   
+  - Extract the contents of the archive (I did "extract here" in Downloads)  
+  - Find Install.sh (linux)  Execute this script, it puts the icon on the desktop,  but does not yet put an Arduino directory in your home folder  
     
 STEP 2:
 - The second step of the instructions we are following take us to the Board Manager  
       https://github.com/stm32duino/wiki/wiki/Boards-Manager  
-      The board manager adds definitions for the STM32L476RG board we will be using.
+      The board manager adds definitions for the STM32L476RG board we will be using.  
 - Start the Arduino IDE  
       Arduino IDE > File > Preferences > Settings > Additional Boards Manager URL: 
         https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json  
-     `Tools > Board Manager > Select "STM32 Cores" ` from the bottom of the list
+     `Tools > Board Manager > Select "STM32 Cores" ` from the bottom of the list  
      OK  
      Close    
 
