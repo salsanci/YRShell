@@ -6,8 +6,8 @@ else
 	CXXFLAGS= -I . -I /usr/include -std=c++11
 endif
 
-COMMON_DEPS =  ../YRShell.h ../utility/CircularQ.h ../utility/IntervalTimer.h ../utility/Dictionary.h ../utility/YRShellDefines.h ../utility/YRShellInterpreter.h
-COMMON_OBJ = ../YRShell.o ../utility/IntervalTimer.o  ../utility/Dictionary.o ../utility/YRShellInterpreter.o
+COMMON_DEPS =  ../YRShell.h ../utility/CircularQ.h ../utility/IntervalTimer.h ../utility/Dictionary.h ../utility/YRShellDefines.h ../utility/YRShellInterpreter.h ../utility/HiResTimer.h ../utility/Sliceable.h
+COMMON_OBJ = ../YRShell.o ../utility/IntervalTimer.o  ../utility/Dictionary.o ../utility/YRShellInterpreter.o ../utility/Sliceable.o ../utility/HiResTimer.o
 SHELL_DEPS = $(COMMON_DEPS)
 SHELL_OBJ = main.o  $(COMMON_OBJ)
 TEST_DEPS = catch.h testSupport.h $(COMMON_DEPS)

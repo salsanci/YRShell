@@ -13,6 +13,11 @@
 
 class YRShellInterpreter;
 
+class DictionaryError {
+public:
+    virtual void shellERROR( const char* name, unsigned line);
+};
+
 /** \brief Base class for all the dictionaries used by the interpreter
  
 This class is not meant to be instatiated. 
@@ -20,9 +25,10 @@ This class is not meant to be instatiated.
 class Dictionary {
 protected:
     uint16_t                m_mask;             /**< The mask applied to the tokens in this dictionary. */
-    YRShellInterpreter      *M_interpreter;     /**< The interpreter object this dictionary belongs to. */
     
 public:
+    static  DictionaryError*    s_DictionaryError; /**< The global error reporting object for dictionaires. */
+    
     /** \brief Constructor.
 
     Default constructor, no parameters are required.
@@ -73,25 +79,15 @@ public:
     Will be handled by subclasses as applicable.
     */
     virtual uint16_t find( const char* name) =0;
-    /** \brief Should not be called.
-
-    Dispatches an error to M_interpreter. This is a generalized error reporting call for all the dictionary classes. 
-    */
-    virtual void yrshellERROR( const char* file, unsigned line);
-    /** \brief Should not be called.
-
-    Dispatches an error to M_interpreter. This is a generalized error reporting call for all the dictionary classes. 
-    */
-    virtual void yrshellERROR( const char* file, unsigned line, const char* message);  
-    /** \brief Sets the intrepreter for this dictionary object.
-
-    Not necessary for main functionality. Used to provide an error reporting path.
-    */
-    virtual void setInterpreter( YRShellInterpreter* shell);   
-    /** \brief Returns the length rquired to store ths string in uin16_t words.
-
-    All strings (includes trminating 0) in the dictionaries are stored as a sequence uint16_t words. This returns the number of words necessary to store the string.
-    */
+    /** \brief Error routine for dictionaries
+     
+     Error routine for dictionaries.
+     */
+    void shellERROR( const char* name, unsigned line);
+    /** \brief Returns the length required to store ths string in uin16_t words.
+     
+     All strings (includes trminating 0) in the dictionaries are stored as a sequence uint16_t words. This returns the number of words necessary to store the string.
+     */
     static uint16_t nameLength( const char* name) { size_t len = strlen( name) + 1; return (uint16_t) (len/2 + (len & 1)); }
 };
 
@@ -169,6 +165,7 @@ protected:
 public:
     CompiledDictionary( void);
     CompiledDictionary( uint16_t* dict, uint16_t lastWord, uint16_t size, uint16_t mask);
+    uint16_t getSize( void) { return m_size; }
     
     /** \brief Returns an index pointing to the first dictionary entry.
 
@@ -253,6 +250,8 @@ public:
     inline uint16_t getBackupLastWord( void) { return m_dictionaryBackupLastWord; }
     inline uint16_t getBackupWordEnd( void) { return m_dictionaryBackupWordEnd; }
     
+    virtual void reset( void);
+
 };
 
 template<unsigned SHELL_DICTIONARY_SIZE>
@@ -261,13 +260,13 @@ protected:
     uint16_t    m_dictionaryBuffer[ SHELL_DICTIONARY_SIZE];
 public:
     CurrentDictionary( void) {
+        reset();
+    }
+    virtual void reset( void) {
         m_mask = YRSHELL_DICTIONARY_CURRENT;
         m_size = SHELL_DICTIONARY_SIZE;
         m_dictionary = m_dictionaryBuffer;
-        m_dictionaryBackupWordEnd = 0;
-        m_dictionaryBackupLastWord = 0;
-        m_dictionaryCurrentWordEnd = 0;
-        m_lastWord = YRSHELL_DICTIONARY_INVALID;
+        CurrentVariableDictionary::reset( );
     }
     
 };

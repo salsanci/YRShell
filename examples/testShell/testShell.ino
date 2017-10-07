@@ -3,6 +3,7 @@
 #include <YRShell.h>
 
 bool ledControl;
+BufferedSerial bs( &Serial );
 
 typedef enum {
     SE_CC_first = YRSHELL_DICTIONARY_EXTENSION_FUNCTION,
@@ -33,7 +34,6 @@ CompiledDictionary compiledExtensionDictionary( NULL, 0xFFFF , 0x0000 , YRSHELL_
 class MyYRShell : public YRShell {
 protected:
     virtual void executeFunction( uint16_t n);
-    virtual uint16_t find( const char* name);
 
 public:
     MyYRShell();
@@ -57,15 +57,10 @@ MyYRShell::MyYRShell( ){
 }
 void MyYRShell::init() {
     YRShell::init();
-    compiledExtensionDictionary.setInterpreter(this);
-    dictionaryExtensionFunction.setInterpreter(this);
     m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_COMPILED_INDEX] = &compiledExtensionDictionary;
     m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_FUNCTION_INDEX] = &dictionaryExtensionFunction;
 }
 
-uint16_t MyYRShell::find( const char* name) {
-    return YRShell::find( name);
-}
 void MyYRShell::executeFunction( uint16_t n) {
     if( n <= SE_CC_first || n >= SE_CC_last) {
         YRShell::executeFunction(n);
@@ -121,6 +116,7 @@ void setup()
   pinMode(LED_BUILTIN, OUTPUT);
   it.setInterval( 0);
   myShell.init();
+  bs.init( myShell.getInq(), myShell.getOutq());
 }
 
 void loop()
@@ -137,14 +133,5 @@ void loop()
     }
     state = !state;
   }
-  for( int i = 0; i < 32 && Serial.available(); i++) {
-    if( myShell.getInq().spaceAvailable()) {
-        myShell.getInq().put( Serial.read());
-    }
-  }
-  for( int i = 0; i < YRSHELL_OUTQ_SIZE && myShell.getOutq().valueAvailable(); i++) {
-    Serial.write( myShell.getOutq().get());
-  }
-  
-  myShell.slice();
+  Sliceable::sliceAll( );
 }

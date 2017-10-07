@@ -5,6 +5,7 @@
 #include "processorGlobal.h"
 #endif
 
+#include "Sliceable.h"
 #include "CircularQ.h"
 #include "IntervalTimer.h"
 #include "Dictionary.h"
@@ -18,9 +19,8 @@
  
  Details on what YRShellInterpreter is
  
- 
  */
-class YRShellInterpreter {
+class YRShellInterpreter : public Sliceable {
 public:
 /** \brief Used by YRShellInterpreter to map to the native functions.
 
@@ -115,7 +115,36 @@ enum SI_CC_functions {
     SI_CC_emit,
     SI_CC_auxEmit,
     
-#ifdef YRSHELL_INTERPRETER_FLOATING_POINT
+    SI_CC_shellSize,
+    SI_CC_printShellClass,
+    
+    SI_CC_dictionarySize,
+    SI_CC_padSize,
+    SI_CC_numRegisters,
+    SI_CC_parameterStackSize,
+    SI_CC_returnStackSize,
+    SI_CC_compileStackSize,
+    SI_CC_inqSize,
+    SI_CC_auxInqSize,
+    SI_CC_outqSize,
+    SI_CC_auxOutqSize,
+
+    SI_CC_dictionaryClear,
+    SI_CC_setCommandEcho,
+    SI_CC_setExpandCR,
+
+    SI_CC_systicks,
+    SI_CC_micros,
+    SI_CC_millis,
+
+    SI_CC_bang,
+    SI_CC_at,
+
+    SI_CC_clearStats,
+    SI_CC_sliceStats,
+    SI_CC_printSliceName,
+
+ #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     SI_CC_dotf,
     SI_CC_dote,
     SI_CC_fLessThan,
@@ -147,17 +176,17 @@ enum SI_CC_functions {
 };
 
 protected:
-   YRShellState                             m_lastState, m_state;
-   CircularQ<char, YRSHELL_INQ_SIZE>        m_inq;
-   CircularQ<char, YRSHELL_AUX_INQ_SIZE>    m_auxInq;
+    YRShellState                            m_lastState, m_state;
 
-    Dictionary *m_dictionaryList[ YRSHELL_DICTIONARY_LAST_INDEX];
+    Dictionary                              *m_dictionaryList[ YRSHELL_DICTIONARY_LAST_INDEX];
+
+    CircularQBase<char>                     *m_Inq, *m_AuxInq, *m_Outq, *m_AuxOutq;
     
-   CircularQ<char, YRSHELL_OUTQ_SIZE>       m_outq;
-   CircularQ<char, YRSHELL_AUX_INQ_SIZE>    m_auxOutq;
 #ifdef YRSHELL_DEBUG
     unsigned    m_debugFlags;
 #endif
+    bool        m_commandEcho;
+    bool        m_expandCR;
     bool        m_hexMode;
     bool        m_useAuxQueues;
 
@@ -165,20 +194,23 @@ protected:
     IntervalTimer m_outputTimeout;
     IntervalTimer m_delayTimer;
     
-    char        m_pad[ YRSHELL_PAD_SIZE];
+    char        *m_Pad;
     uint16_t    m_padCount;
+    uint16_t    m_padSize;
+
+    uint32_t*   m_Registers;
+    uint16_t    m_numRegisters;
+
+    uint32_t    *m_ParameterStack, *m_ReturnStack, *m_CompileStack;
+    uint8_t     m_parameterStackSize, m_returnStackSize, m_compileStackSize;
     
-    uint32_t    m_parameterStack[ YRSHELL_PARAMETER_STACK_SIZE];
-    uint32_t    m_returnStack[ YRSHELL_RETURN_STACK_SIZE];
-    uint32_t    m_compileStack[ YRSHELL_COMPILE_STACK_SIZE];
-    uint32_t    m_registers[ YRSHELL_NUM_REGISTERS];
     uint8_t     m_topOfStack;
     uint8_t     m_returnTopOfStack;
     uint8_t     m_compileTopOfStack;
     
     char *m_token, *m_saveptr;
     uint32_t m_PC;
-    const char* m_prompt = "\r\n>";
+    const char* m_prompt = ">";
     
     CurrentVariableDictionary* m_DictionaryCurrent;
     
@@ -190,7 +222,9 @@ protected:
     virtual bool isCompileToken( void);
     
     virtual void executeFunction( uint16_t n);
-
+    virtual uint32_t shellSize( void) { return sizeof( *this); }
+    virtual const char* shellClass( void) { return "YRShellInterpreter"; }
+    virtual const char* sliceName( ) { return shellClass(); }
     
     void nextState(YRShellState n);
     void fillPad( char c);
@@ -218,7 +252,7 @@ protected:
     uint16_t fetchCurrentToken( void);
     void executeToken( uint16_t token);
     void beginParsing( void);
-    void processToken( void);
+    bool processToken( void);
     bool processLiteralToken( void);
     void executing( void);
     
@@ -237,11 +271,11 @@ public:
     virtual ~YRShellInterpreter();
     void init( void);
     
+    static const char* getFileName( const char* P);
     virtual void shellERROR( const char* file, unsigned line);
     virtual void shellERROR( const char* file, unsigned line, const char* message);
     
-
-    virtual void setPrompt( const char* prompt ) = 0;
+    void setPrompt( const char* prompt );
     
     void slice( void);
     CircularQBase<char>& getInq( void);

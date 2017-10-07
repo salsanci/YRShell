@@ -1,56 +1,52 @@
 #include "YRShellInterpreter.h"
 #include "Dictionary.h"
 
+void DictionaryError::shellERROR( const char* name, unsigned line) {
+    
+}
+
+DictionaryError* Dictionary::s_DictionaryError = NULL;
+
 Dictionary::Dictionary( ) {
     m_mask = 0;
-    M_interpreter = NULL;
 }
 Dictionary::~Dictionary( ) {
-    yrshellERROR(__FILE__, __LINE__);
+    shellERROR(__FILE__, __LINE__);
 }
 uint16_t Dictionary::getFirstEntry( ) {
-    yrshellERROR(__FILE__, __LINE__);
+    shellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
 uint16_t Dictionary::getNextEntry( uint16_t index){
-    yrshellERROR(__FILE__, __LINE__);
+    shellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
 uint16_t Dictionary::getToken( uint16_t index){
-    yrshellERROR(__FILE__, __LINE__);
+    shellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
 uint16_t Dictionary::getNameAddressToken( uint16_t index){
-    yrshellERROR(__FILE__, __LINE__);
+    shellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
 uint16_t Dictionary::getWord( uint16_t index) {
-    yrshellERROR(__FILE__, __LINE__);
+    shellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
 const char* Dictionary::getAddress( uint16_t index){
-    yrshellERROR(__FILE__, __LINE__);
+    shellERROR(__FILE__, __LINE__);
     return NULL;
 }
 uint16_t Dictionary::find( const char* name) {
-    yrshellERROR(__FILE__, __LINE__);
+    shellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;
 }
-void Dictionary::yrshellERROR( const char* file, unsigned line) {
-    if( M_interpreter != NULL) {
-        M_interpreter->shellERROR(file, line);
+void Dictionary::shellERROR( const char* name, unsigned line) {
+    DictionaryError* t = s_DictionaryError;
+    if( t != NULL) {
+        t->shellERROR(name, line);
     }
 }
-void Dictionary::yrshellERROR( const char* file, unsigned line, const char* message) {
-    if( M_interpreter != NULL) {
-        M_interpreter->shellERROR(file, line, message);
-    }
-}
-void Dictionary::setInterpreter( YRShellInterpreter* shell) {
-    M_interpreter = shell;
-}
-
-
 
 FunctionDictionary::FunctionDictionary( const FunctionEntry* dict, uint16_t mask) {
     M_dictionary = dict;
@@ -160,22 +156,20 @@ CurrentVariableDictionary::CurrentVariableDictionary() {
     m_mask = 0;
     m_size = 0;
     m_dictionary = NULL;
-    m_dictionaryBackupWordEnd = 0;
-    m_dictionaryBackupLastWord = 0;
-    m_dictionaryCurrentWordEnd = 0;
-    m_lastWord = YRSHELL_DICTIONARY_INVALID;
-    
+    reset( );
 }
 CurrentVariableDictionary::CurrentVariableDictionary( uint16_t* dict, uint16_t size)  {
     m_mask = YRSHELL_DICTIONARY_CURRENT;
     m_size = size;
     m_dictionary = dict;
+    reset( );
+}
+void CurrentVariableDictionary::reset() {
     m_dictionaryBackupWordEnd = 0;
     m_dictionaryBackupLastWord = 0;
     m_dictionaryCurrentWordEnd = 0;
     m_lastWord = YRSHELL_DICTIONARY_INVALID;
 }
-
 
 bool CurrentVariableDictionary::setToken( uint16_t address, uint16_t token){
     bool rc = false;

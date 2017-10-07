@@ -12,7 +12,7 @@ bool ShellRunner::init() {
 bool ShellRunner::runCommand( const char* Setup,  const char *Command) {
     IntervalTimer timeout;
     char *P, *Lim, *Input, *FirstOutput = NULL, *SecondOutput = NULL;
-    char buf[ YRSHELL_PAD_SIZE];
+    char buf[ 8192];
     bool inputDoneFlag = false;
 
     int c = 0;

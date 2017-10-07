@@ -1,5 +1,454 @@
 
 #include "YRShellInterpreter.h"
+/*
+ 
+
+ : ps? s' PARAMETER STACK: ' .str psd? 0!= [ psd? { dup ps@ . 1 - dup 0== } drop ] cr
+ : rs? s'    RETURN STACK: ' .str rsd? 0!= [ rsd? 1 - { dup rs@ . 1 - dup -1 == } drop ] cr
+ : cs? s'   COMPILE STACK: ' .str csd? 0!= [ csd? 1 - { dup cs@ . 1 - dup -1 == } drop ] cr
+ : st? ps? rs? cs?
+ 
+ : _cd0 s' \rstatic uint16_t ' .str
+ : _cd1 _cd0 s' compiledDictionaryData[] = {\r' .str
+ : _cx1 _cd0 s' compiledExtensionDictionaryData[] = {\r' .str
+ : _cd2 dup 0xF & 0== [ cr s' // ' .str dup .wx cr ]
+ : _cd3 0 { _cd2 dup getCurrentDictionary .wx s' , ' .str 1 + dup getCurrentDictionaryEnd >= } drop
+ : _cd4 getCurrentDictionaryEnd 0!= [ _cd3 crlf ] s' };\r' .str
+ : _cd5 s' CompiledDictionary ' .str
+ 
+ : _cd6 s' interpreterCompiledDictionary( compiledDictionaryData, ' .str
+ : _cx6 s' compiledExtensionDictionary( compiledExtensionDictionaryData, ' .str
+ : _cd7 getCurrentDictionaryLastWord .wx s' , ' .str getCurrentDictionaryEnd .wx
+ : _cd8 _cd1 _cd4 _cd5 _cd6 _cd7  s' , YRSHELL_DICTIONARY_INTERPRETER_COMPILED);\r' .str
+ : _cx8 _cx1 _cd4 _cd5 _cx6 _cd7 s' , YRSHELL_DICTIONARY_EXTENSION_COMPILED);\r' .str
+ : compileInterpreterDictionary _cd8
+ : compileExtensionDictionary _cx8
+ 
+ : spaces dup [ { space 1 - dup 0== } ] drop 
+ : dictInvalid 0xFFFF
+ : _wl2 rot dup [ cr ] 0== rot rot dup dictInvalid ==
+ : _wl3 .entryName 40 swap - spaces
+ : wl 0 0 dictInvalid { nextEntry over .bx dup .wx 2dup entryToken .wx 2dup _wl3 _wl2 } 2drop drop cr
+ 
+ : _inf0 s'      DICTIONARY_SIZE: ' .str dictionarySize . cr
+ : _inf1 s'             PAD_SIZE: ' .str padSize . cr
+ : _inf2 s'        NUM_REGISTERS: ' .str numRegisters . cr
+ : _inf3 s' PARAMETER_STACK_SIZE: ' .str parameterStackSize . cr
+ : _inf4 s'    RETURN_STACK_SIZE: ' .str returnStackSize . cr
+ : _inf5 s'   COMPILE_STACK_SIZE: ' .str compileStackSize . cr
+ : _inf6 s'             INQ_SIZE: ' .str inqSize . cr
+
+ : _inf7 s'         AUX_INQ_SIZE: ' .str auxInqSize . cr
+ : _inf8 s'            OUTQ_SIZE: ' .str outqSize . cr
+ : _inf9 s'        AUX_OUTQ_SIZE: ' .str auxOutqSize . cr
+ : _infa s'           Shell Size: ' .str shellSize . cr
+ : _infb s' Dictionary used free: ' .str dictionarySize getCurrentDictionaryEnd dup . - . cr
+ : info printShellClass cr  _inf0 _inf1 _inf2 _inf3 _inf4 _inf5 _inf6 _inf7 _inf8 _inf9 _infa _infb
+ 
+ : _ts0 s'       COUNT' .str
+ : _ts1 s'          MIN' .str
+ : _ts2 s'         MAX' .str
+ : _ts3 s'       AVERAGE' .str
+ : _ts4 _ts0 _ts1 _ts2 _ts3 cr cr
+ : _ts5 dup sliceStats dup >r [ . . . . ] r> dup [ over printSliceName ] cr
+ : runStats _ts4 0 { _ts5 [ 1 + 0 ][ -1 ] } drop
+ : resetStats 0 { dup clearStats [ 1 + 0 ][ -1 ] } drop
+
+ : _dr0  dup numRegisters < [  dup @ . 1 + ]
+ : _dr1 dup . s' : ' .str  dup @ . _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 cr
+ : regs 0 { _dr1 dup numRegisters >= } drop
+
+
+
+
+YRShell Version 0.1
+bShell>
+ : ps? s' PARAMETER STACK: ' .str psd? 0!= [ psd? { dup ps@ . 1 - dup 0== } drop ] cr
+ : rs? s'    RETURN STACK: ' .str rsd? 0!= [ rsd? 1 - { dup rs@ . 1 - dup -1 == } drop ] cr
+ : cs? s'   COMPILE STACK: ' .str csd? 0!= [ csd? 1 - { dup cs@ . 1 - dup -1 == } drop ] cr
+ : st? ps? rs? cs?
+ 
+ : _cd0 s' \rstatic uint16_t ' .str
+ : _cd1 _cd0 s' compiledDictionaryData[] = {\r' .str
+ : _cx1 _cd0 s' compiledExtensionDictionaryData[] = {\r' .str
+ : _cd2 dup 0xF & 0== [ cr s' // ' .str dup .wx cr ]
+ : _cd3 0 { _cd2 dup getCurrentDictionary .wx s' , ' .str 1 + dup getCurrentDictionaryEnd >= } drop
+ : _cd4 getCurrentDictionaryEnd 0!= [ _cd3 crlf ] s' };\r' .str
+ : _cd5 s' CompiledDictionary ' .str
+ 
+ : _cd6 s' interpreterCompiledDictionary( compiledDictionaryData, ' .str
+ : _cx6 s' compiledExtensionDictionary( compiledExtensionDictionaryData, ' .str
+ : _cd7 getCurrentDictionaryLastWord .wx s' , ' .str getCurrentDictionaryEnd .wx
+ : _cd8 _cd1 _cd4 _cd5 _cd6 _cd7  s' , YRSHELL_DICTIONARY_INTERPRETER_COMPILED);\r' .str
+ : _cx8 _cx1 _cd4 _cd5 _cx6 _cd7 s' , YRSHELL_DICTIONARY_EXTENSION_COMPILED);\r' .str
+ : compileInterpreterDictionary _cd8
+ : compileExtensionDictionary _cx8
+ 
+ : spaces dup [ { space 1 - dup 0== } ] drop 
+ : dictInvalid 0xFFFF
+ : _wl2 rot dup [ cr ] 0== rot rot dup dictInvalid ==
+ : _wl3 .entryName 40 swap - spaces
+ : wl 0 0 dictInvalid { nextEntry over .bx dup .wx 2dup entryToken .wx 2dup _wl3 _wl2 } 2drop drop cr
+ 
+ : _inf0 s'      DICTIONARY_SIZE: ' .str dictionarySize . cr
+ : _inf1 s'             PAD_SIZE: ' .str padSize . cr
+ : _inf2 s'        NUM_REGISTERS: ' .str numRegisters . cr
+ : _inf3 s' PARAMETER_STACK_SIZE: ' .str parameterStackSize . cr
+ : _inf4 s'    RETURN_STACK_SIZE: ' .str returnStackSize . cr
+ : _inf5 s'   COMPILE_STACK_SIZE: ' .str compileStackSize . cr
+ : _inf6 s'             INQ_SIZE: ' .str inqSize . cr
+
+ : _inf7 s'         AUX_INQ_SIZE: ' .str auxInqSize . cr
+ : _inf8 s'            OUTQ_SIZE: ' .str outqSize . cr
+ : _inf9 s'        AUX_OUTQ_SIZE: ' .str auxOutqSize . cr
+ : _infa s'           Shell Size: ' .str shellSize . cr
+ : _infb s' Dictionary used free: ' .str dictionarySize getCurrentDictionaryEnd dup . - . cr
+ : info printShellClass cr  _inf0 _inf1 _inf2 _inf3 _inf4 _inf5 _inf6 _inf7 _inf8 _inf9 _infa _infb
+ 
+ : _ts0 s'       COUNT' .str
+ : _ts1 s'          MIN' .str
+ : _ts2 s'         MAX' .str
+ : _ts3 s'       AVERAGE' .str
+ : _ts4 _ts0 _ts1 _ts2 _ts3 cr cr
+ : _ts5 dup sliceStats dup >r [ . . . . ] r> dup [ over printSliceName ] cr
+ : runStats _ts4 0 { _ts5 [ 1 + 0 ][ -1 ] } drop
+ : resetStats 0 { dup clearStats [ 1 + 0 ][ -1 ] } drop
+
+ : _dr0  dup numRegisters < [  dup @ . 1 + ]
+ : _dr1 dup . s' : ' .str  dup @ . _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 cr
+ : regs 0 { _dr1 dup numRegisters >= } drop
+
+bShell> : ps? s' PARAMETER STACK: ' .str psd? 0!= [ psd? { dup ps@ . 1 - dup 0== } drop ] cr
+bShell> : rs? s'    RETURN STACK: ' .str rsd? 0!= [ rsd? 1 - { dup rs@ . 1 - dup -1 == } drop ] cr
+bShell> : cs? s'   COMPILE STACK: ' .str csd? 0!= [ csd? 1 - { dup cs@ . 1 - dup -1 == } drop ] cr
+bShell> : st? ps? rs? cs?
+bShell> 
+bShell> : _cd0 s' \rstatic uint16_t ' .str
+bShell> : _cd1 _cd0 s' compiledDictionaryData[] = {\r' .str
+bShell> : _cx1 _cd0 s' compiledExtensionDictionaryData[] = {\r' .str
+bShell> : _cd2 dup 0xF & 0== [ cr s' // ' .str dup .wx cr ]
+bShell> : _cd3 0 { _cd2 dup getCurrentDictionary .wx s' , ' .str 1 + dup getCurrentDictionaryEnd >= } drop
+bShell> : _cd4 getCurrentDictionaryEnd 0!= [ _cd3 crlf ] s' };\r' .str
+bShell> : _cd5 s' CompiledDictionary ' .str
+bShell> 
+bShell> : _cd6 s' interpreterCompiledDictionary( compiledDictionaryData, ' .str
+bShell> : _cx6 s' compiledExtensionDictionary( compiledExtensionDictionaryData, ' .str
+bShell> : _cd7 getCurrentDictionaryLastWord .wx s' , ' .str getCurrentDictionaryEnd .wx
+bShell> : _cd8 _cd1 _cd4 _cd5 _cd6 _cd7  s' , YRSHELL_DICTIONARY_INTERPRETER_COMPILED);\r' .str
+bShell> : _cx8 _cx1 _cd4 _cd5 _cx6 _cd7 s' , YRSHELL_DICTIONARY_EXTENSION_COMPILED);\r' .str
+bShell> : compileInterpreterDictionary _cd8
+bShell> : compileExtensionDictionary _cx8
+bShell> 
+bShell> : spaces dup [ { space 1 - dup 0== } ] drop 
+bShell> : dictInvalid 0xFFFF
+bShell> : _wl2 rot dup [ cr ] 0== rot rot dup dictInvalid ==
+bShell> : _wl3 .entryName 40 swap - spaces
+bShell> : wl 0 0 dictInvalid { nextEntry over .bx dup .wx 2dup entryToken .wx 2dup _wl3 _wl2 } 2drop drop cr
+bShell> 
+bShell> : _inf0 s'      DICTIONARY_SIZE: ' .str dictionarySize . cr
+bShell> : _inf1 s'             PAD_SIZE: ' .str padSize . cr
+bShell> : _inf2 s'        NUM_REGISTERS: ' .str numRegisters . cr
+bShell> : _inf3 s' PARAMETER_STACK_SIZE: ' .str parameterStackSize . cr
+bShell> : _inf4 s'    RETURN_STACK_SIZE: ' .str returnStackSize . cr
+bShell> : _inf5 s'   COMPILE_STACK_SIZE: ' .str compileStackSize . cr
+bShell> : _inf6 s'             INQ_SIZE: ' .str inqSize . cr
+bShell>
+bShell> : _inf7 s'         AUX_INQ_SIZE: ' .str auxInqSize . cr
+bShell> : _inf8 s'            OUTQ_SIZE: ' .str outqSize . cr
+bShell> : _inf9 s'        AUX_OUTQ_SIZE: ' .str auxOutqSize . cr
+bShell> : _infa s'           Shell Size: ' .str shellSize . cr
+bShell> : _infb s' Dictionary used free: ' .str dictionarySize getCurrentDictionaryEnd dup . - . cr
+bShell> : info printShellClass cr  _inf0 _inf1 _inf2 _inf3 _inf4 _inf5 _inf6 _inf7 _inf8 _inf9 _infa _infb
+bShell> 
+bShell> : _ts0 s'       COUNT' .str
+bShell> : _ts1 s'          MIN' .str
+bShell> : _ts2 s'         MAX' .str
+bShell> : _ts3 s'       AVERAGE' .str
+bShell> : _ts4 _ts0 _ts1 _ts2 _ts3 cr cr
+bShell> : _ts5 dup sliceStats dup >r [ . . . . ] r> dup [ over printSliceName ] cr
+bShell> : runStats _ts4 0 { _ts5 [ 1 + 0 ][ -1 ] } drop
+bShell> : resetStats 0 { dup clearStats [ 1 + 0 ][ -1 ] } drop
+bShell>
+bShell> : _dr0  dup numRegisters < [  dup @ . 1 + ]
+bShell> : _dr1 dup . s' : ' .str  dup @ . _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 cr
+bShell> : regs 0 { _dr1 dup numRegisters >= } drop
+bShell>compileInterpreterDictionary
+compileInterpreterDictionary
+
+static uint16_t compiledDictionaryData[] = {
+
+// 0x0000 
+0xFFFF , 0x7370 , 0x003F , 0xC016 , 0x4150 , 0x4152 , 0x454D , 0x4554 , 0x2052 , 0x5453 , 0x4341 , 0x3A4B , 0x0020 , 0xC012 , 0xC037 , 0xC03F , 
+// 0x0010 
+0xC01D , 0xE01E , 0xC037 , 0xC01E , 0xC03A , 0xC00C , 0xC009 , 0x0001 , 0xC028 , 0xC01E , 0xC03E , 0xC01D , 0xE013 , 0xC022 , 0xC003 , 0xC001 , 
+// 0x0020 
+0x0000 , 0x7372 , 0x003F , 0xC016 , 0x2020 , 0x5220 , 0x5445 , 0x5255 , 0x204E , 0x5453 , 0x4341 , 0x3A4B , 0x0020 , 0xC012 , 0xC038 , 0xC03F , 
+// 0x0030 
+0xC01D , 0xE043 , 0xC038 , 0xC009 , 0x0001 , 0xC028 , 0xC01E , 0xC03B , 0xC00C , 0xC009 , 0x0001 , 0xC028 , 0xC01E , 0xC00B , 0xFFFF , 0xC031 , 
+// 0x0040 
+0xC01D , 0xE036 , 0xC022 , 0xC003 , 0xC001 , 0x0020 , 0x7363 , 0x003F , 0xC016 , 0x2020 , 0x4F43 , 0x504D , 0x4C49 , 0x2045 , 0x5453 , 0x4341 , 
+// 0x0050 
+0x3A4B , 0x0020 , 0xC012 , 0xC039 , 0xC03F , 0xC01D , 0xE068 , 0xC039 , 0xC009 , 0x0001 , 0xC028 , 0xC01E , 0xC03C , 0xC00C , 0xC009 , 0x0001 , 
+// 0x0060 
+0xC028 , 0xC01E , 0xC00B , 0xFFFF , 0xC031 , 0xC01D , 0xE05B , 0xC022 , 0xC003 , 0xC001 , 0x0045 , 0x7473 , 0x003F , 0xE003 , 0xE023 , 0xE048 , 
+// 0x0070 
+0xC001 , 0x006A , 0x635F , 0x3064 , 0x0000 , 0xC016 , 0x730D , 0x6174 , 0x6974 , 0x2063 , 0x6975 , 0x746E , 0x3631 , 0x745F , 0x0020 , 0xC012 , 
+// 0x0080 
+0xC001 , 0x0071 , 0x635F , 0x3164 , 0x0000 , 0xE075 , 0xC016 , 0x6F63 , 0x706D , 0x6C69 , 0x6465 , 0x6944 , 0x7463 , 0x6F69 , 0x616E , 0x7972 , 
+// 0x0090 
+0x6144 , 0x6174 , 0x5D5B , 0x3D20 , 0x7B20 , 0x000D , 0xC012 , 0xC001 , 0x0081 , 0x635F , 0x3178 , 0x0000 , 0xE075 , 0xC016 , 0x6F63 , 0x706D , 
+// 0x00A0 
+0x6C69 , 0x6465 , 0x7845 , 0x6574 , 0x736E , 0x6F69 , 0x446E , 0x6369 , 0x6974 , 0x6E6F , 0x7261 , 0x4479 , 0x7461 , 0x5B61 , 0x205D , 0x203D , 
+// 0x00B0 
+0x0D7B , 0x0000 , 0xC012 , 0xC001 , 0x0098 , 0x635F , 0x3264 , 0x0000 , 0xC01E , 0xC009 , 0x000F , 0xC02C , 0xC03E , 0xC01D , 0xE0C7 , 0xC003 , 
+// 0x00C0 
+0xC016 , 0x2F2F , 0x0020 , 0xC012 , 0xC01E , 0xC011 , 0xC003 , 0xC001 , 0x00B4 , 0x635F , 0x3364 , 0x0000 , 0xC009 , 0x0000 , 0xE0B8 , 0xC01E , 
+// 0x00D0 
+0xC044 , 0xC011 , 0xC016 , 0x202C , 0x0000 , 0xC012 , 0xC009 , 0x0001 , 0xC027 , 0xC01E , 0xC045 , 0xC033 , 0xC01D , 0xE0CE , 0xC022 , 0xC001 , 
+// 0x00E0 
+0x00C8 , 0x635F , 0x3464 , 0x0000 , 0xC045 , 0xC03F , 0xC01D , 0xE0EA , 0xE0CC , 0xC005 , 0xC016 , 0x3B7D , 0x000D , 0xC012 , 0xC001 , 0x00E0 , 
+// 0x00F0 
+0x635F , 0x3564 , 0x0000 , 0xC016 , 0x6F43 , 0x706D , 0x6C69 , 0x6465 , 0x6944 , 0x7463 , 0x6F69 , 0x616E , 0x7972 , 0x0020 , 0xC012 , 0xC001 , 
+// 0x0100 
+0x00EF , 0x635F , 0x3664 , 0x0000 , 0xC016 , 0x6E69 , 0x6574 , 0x7072 , 0x6572 , 0x6574 , 0x4372 , 0x6D6F , 0x6970 , 0x656C , 0x4464 , 0x6369 , 
+// 0x0110 
+0x6974 , 0x6E6F , 0x7261 , 0x2879 , 0x6320 , 0x6D6F , 0x6970 , 0x656C , 0x4464 , 0x6369 , 0x6974 , 0x6E6F , 0x7261 , 0x4479 , 0x7461 , 0x2C61 , 
+// 0x0120 
+0x0020 , 0xC012 , 0xC001 , 0x0100 , 0x635F , 0x3678 , 0x0000 , 0xC016 , 0x6F63 , 0x706D , 0x6C69 , 0x6465 , 0x7845 , 0x6574 , 0x736E , 0x6F69 , 
+// 0x0130 
+0x446E , 0x6369 , 0x6974 , 0x6E6F , 0x7261 , 0x2879 , 0x6320 , 0x6D6F , 0x6970 , 0x656C , 0x4564 , 0x7478 , 0x6E65 , 0x6973 , 0x6E6F , 0x6944 , 
+// 0x0140 
+0x7463 , 0x6F69 , 0x616E , 0x7972 , 0x6144 , 0x6174 , 0x202C , 0x0000 , 0xC012 , 0xC001 , 0x0123 , 0x635F , 0x3764 , 0x0000 , 0xC046 , 0xC011 , 
+// 0x0150 
+0xC016 , 0x202C , 0x0000 , 0xC012 , 0xC045 , 0xC011 , 0xC001 , 0x014A , 0x635F , 0x3864 , 0x0000 , 0xE085 , 0xE0E4 , 0xE0F3 , 0xE104 , 0xE14E , 
+// 0x0160 
+0xC016 , 0x202C , 0x5259 , 0x4853 , 0x4C45 , 0x5F4C , 0x4944 , 0x5443 , 0x4F49 , 0x414E , 0x5952 , 0x495F , 0x544E , 0x5245 , 0x5250 , 0x5445 , 
+// 0x0170 
+0x5245 , 0x435F , 0x4D4F , 0x4950 , 0x454C , 0x2944 , 0x0D3B , 0x0000 , 0xC012 , 0xC001 , 0x0157 , 0x635F , 0x3878 , 0x0000 , 0xE09C , 0xE0E4 , 
+// 0x0180 
+0xE0F3 , 0xE127 , 0xE14E , 0xC016 , 0x202C , 0x5259 , 0x4853 , 0x4C45 , 0x5F4C , 0x4944 , 0x5443 , 0x4F49 , 0x414E , 0x5952 , 0x455F , 0x5458 , 
+// 0x0190 
+0x4E45 , 0x4953 , 0x4E4F , 0x435F , 0x4D4F , 0x4950 , 0x454C , 0x2944 , 0x0D3B , 0x0000 , 0xC012 , 0xC001 , 0x017A , 0x6F63 , 0x706D , 0x6C69 , 
+// 0x01A0 
+0x4965 , 0x746E , 0x7265 , 0x7270 , 0x7465 , 0x7265 , 0x6944 , 0x7463 , 0x6F69 , 0x616E , 0x7972 , 0x0000 , 0xE15B , 0xC001 , 0x019C , 0x6F63 , 
+// 0x01B0 
+0x706D , 0x6C69 , 0x4565 , 0x7478 , 0x6E65 , 0x6973 , 0x6E6F , 0x6944 , 0x7463 , 0x6F69 , 0x616E , 0x7972 , 0x0000 , 0xE17E , 0xC001 , 0x01AE , 
+// 0x01C0 
+0x7073 , 0x6361 , 0x7365 , 0x0000 , 0xC01E , 0xC01D , 0xE1CF , 0xC002 , 0xC009 , 0x0001 , 0xC028 , 0xC01E , 0xC03E , 0xC01D , 0xE1C7 , 0xC022 , 
+// 0x01D0 
+0xC001 , 0x01BF , 0x6964 , 0x7463 , 0x6E49 , 0x6176 , 0x696C , 0x0064 , 0xC009 , 0xFFFF , 0xC001 , 0x01D1 , 0x775F , 0x326C , 0x0000 , 0xC023 , 
+// 0x01E0 
+0xC01E , 0xC01D , 0xE1E4 , 0xC003 , 0xC03E , 0xC023 , 0xC023 , 0xC01E , 0xE1D8 , 0xC031 , 0xC001 , 0x01DB , 0x775F , 0x336C , 0x0000 , 0xC049 , 
+// 0x01F0 
+0xC009 , 0x0028 , 0xC01F , 0xC028 , 0xE1C4 , 0xC001 , 0x01EB , 0x6C77 , 0x0000 , 0xC009 , 0x0000 , 0xC009 , 0x0000 , 0xE1D8 , 0xC048 , 0xC040 , 
+// 0x0200 
+0xC010 , 0xC01E , 0xC011 , 0xC041 , 0xC04A , 0xC011 , 0xC041 , 0xE1EF , 0xE1DF , 0xC01D , 0xE1FE , 0xC042 , 0xC022 , 0xC003 , 0xC001 , 0x01F6 , 
+// 0x0210 
+0x695F , 0x666E , 0x0030 , 0xC016 , 0x2020 , 0x2020 , 0x4420 , 0x4349 , 0x4954 , 0x4E4F , 0x5241 , 0x5F59 , 0x4953 , 0x455A , 0x203A , 0x0000 , 
+// 0x0220 
+0xC012 , 0xC053 , 0xC00C , 0xC003 , 0xC001 , 0x020F , 0x695F , 0x666E , 0x0031 , 0xC016 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 
+// 0x0230 
+0x4150 , 0x5F44 , 0x4953 , 0x455A , 0x203A , 0x0000 , 0xC012 , 0xC054 , 0xC00C , 0xC003 , 0xC001 , 0x0225 , 0x695F , 0x666E , 0x0032 , 0xC016 , 
+// 0x0240 
+0x2020 , 0x2020 , 0x2020 , 0x4E20 , 0x4D55 , 0x525F , 0x4745 , 0x5349 , 0x4554 , 0x5352 , 0x203A , 0x0000 , 0xC012 , 0xC055 , 0xC00C , 0xC003 , 
+// 0x0250 
+0xC001 , 0x023B , 0x695F , 0x666E , 0x0033 , 0xC016 , 0x4150 , 0x4152 , 0x454D , 0x4554 , 0x5F52 , 0x5453 , 0x4341 , 0x5F4B , 0x4953 , 0x455A , 
+// 0x0260 
+0x203A , 0x0000 , 0xC012 , 0xC056 , 0xC00C , 0xC003 , 0xC001 , 0x0251 , 0x695F , 0x666E , 0x0034 , 0xC016 , 0x2020 , 0x5220 , 0x5445 , 0x5255 , 
+// 0x0270 
+0x5F4E , 0x5453 , 0x4341 , 0x5F4B , 0x4953 , 0x455A , 0x203A , 0x0000 , 0xC012 , 0xC057 , 0xC00C , 0xC003 , 0xC001 , 0x0267 , 0x695F , 0x666E , 
+// 0x0280 
+0x0035 , 0xC016 , 0x2020 , 0x4F43 , 0x504D , 0x4C49 , 0x5F45 , 0x5453 , 0x4341 , 0x5F4B , 0x4953 , 0x455A , 0x203A , 0x0000 , 0xC012 , 0xC058 , 
+// 0x0290 
+0xC00C , 0xC003 , 0xC001 , 0x027D , 0x695F , 0x666E , 0x0036 , 0xC016 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x4E49 , 0x5F51 , 
+// 0x02A0 
+0x4953 , 0x455A , 0x203A , 0x0000 , 0xC012 , 0xC059 , 0xC00C , 0xC003 , 0xC001 , 0x0293 , 0x695F , 0x666E , 0x0037 , 0xC016 , 0x2020 , 0x2020 , 
+// 0x02B0 
+0x2020 , 0x2020 , 0x5541 , 0x5F58 , 0x4E49 , 0x5F51 , 0x4953 , 0x455A , 0x203A , 0x0000 , 0xC012 , 0xC05A , 0xC00C , 0xC003 , 0xC001 , 0x02A9 , 
+// 0x02C0 
+0x695F , 0x666E , 0x0038 , 0xC016 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x4F20 , 0x5455 , 0x5F51 , 0x4953 , 0x455A , 0x203A , 0x0000 , 
+// 0x02D0 
+0xC012 , 0xC05B , 0xC00C , 0xC003 , 0xC001 , 0x02BF , 0x695F , 0x666E , 0x0039 , 0xC016 , 0x2020 , 0x2020 , 0x2020 , 0x4120 , 0x5855 , 0x4F5F , 
+// 0x02E0 
+0x5455 , 0x5F51 , 0x4953 , 0x455A , 0x203A , 0x0000 , 0xC012 , 0xC05C , 0xC00C , 0xC003 , 0xC001 , 0x02D5 , 0x695F , 0x666E , 0x0061 , 0xC016 , 
+// 0x02F0 
+0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x6853 , 0x6C65 , 0x206C , 0x6953 , 0x657A , 0x203A , 0x0000 , 0xC012 , 0xC051 , 0xC00C , 0xC003 , 
+// 0x0300 
+0xC001 , 0x02EB , 0x695F , 0x666E , 0x0062 , 0xC016 , 0x6944 , 0x7463 , 0x6F69 , 0x616E , 0x7972 , 0x7520 , 0x6573 , 0x2064 , 0x7266 , 0x6565 , 
+// 0x0310 
+0x203A , 0x0000 , 0xC012 , 0xC053 , 0xC045 , 0xC01E , 0xC00C , 0xC028 , 0xC00C , 0xC003 , 0xC001 , 0x0301 , 0x6E69 , 0x6F66 , 0x0000 , 0xC052 , 
+// 0x0320 
+0xC003 , 0xE213 , 0xE229 , 0xE23F , 0xE255 , 0xE26B , 0xE281 , 0xE297 , 0xE2AD , 0xE2C3 , 0xE2D9 , 0xE2EF , 0xE305 , 0xC001 , 0x031B , 0x745F , 
+// 0x0330 
+0x3073 , 0x0000 , 0xC016 , 0x2020 , 0x2020 , 0x2020 , 0x4F43 , 0x4E55 , 0x0054 , 0xC012 , 0xC001 , 0x032E , 0x745F , 0x3173 , 0x0000 , 0xC016 , 
+// 0x0340 
+0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x4D20 , 0x4E49 , 0x0000 , 0xC012 , 0xC001 , 0x033B , 0x745F , 0x3273 , 0x0000 , 0xC016 , 0x2020 , 0x2020 , 
+// 0x0350 
+0x2020 , 0x2020 , 0x414D , 0x0058 , 0xC012 , 0xC001 , 0x0349 , 0x745F , 0x3373 , 0x0000 , 0xC016 , 0x2020 , 0x2020 , 0x2020 , 0x5641 , 0x5245 , 
+// 0x0360 
+0x4741 , 0x0045 , 0xC012 , 0xC001 , 0x0356 , 0x745F , 0x3473 , 0x0000 , 0xE332 , 0xE33F , 0xE34D , 0xE35A , 0xC003 , 0xC003 , 0xC001 , 0x0364 , 
+// 0x0370 
+0x745F , 0x3573 , 0x0000 , 0xC01E , 0xC066 , 0xC01E , 0xC024 , 0xC01D , 0xE37D , 0xC00C , 0xC00C , 0xC00C , 0xC00C , 0xC025 , 0xC01E , 0xC01D , 
+// 0x0380 
+0xE383 , 0xC040 , 0xC067 , 0xC003 , 0xC001 , 0x036F , 0x7572 , 0x536E , 0x6174 , 0x7374 , 0x0000 , 0xE368 , 0xC009 , 0x0000 , 0xE373 , 0xC01D , 
+// 0x0390 
+0xE398 , 0xC009 , 0x0001 , 0xC027 , 0xC009 , 0x0000 , 0xC01C , 0xE39A , 0xC00B , 0xFFFF , 0xC01D , 0xE38E , 0xC022 , 0xC001 , 0x0385 , 0x6572 , 
+// 0x03A0 
+0x6573 , 0x5374 , 0x6174 , 0x7374 , 0x0000 , 0xC009 , 0x0000 , 0xC01E , 0xC065 , 0xC01D , 0xE3B2 , 0xC009 , 0x0001 , 0xC027 , 0xC009 , 0x0000 , 
+// 0x03B0 
+0xC01C , 0xE3B4 , 0xC00B , 0xFFFF , 0xC01D , 0xE3A7 , 0xC022 , 0xC001 , 0x039E , 0x645F , 0x3072 , 0x0000 , 0xC01E , 0xC055 , 0xC02F , 0xC01D , 
+// 0x03C0 
+0xE3C7 , 0xC01E , 0xC064 , 0xC00C , 0xC009 , 0x0001 , 0xC027 , 0xC001 , 0x03B8 , 0x645F , 0x3172 , 0x0000 , 0xC01E , 0xC00C , 0xC016 , 0x203A , 
+// 0x03D0 
+0x0000 , 0xC012 , 0xC01E , 0xC064 , 0xC00C , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xC003 , 0xC001 , 0x03C8 , 
+// 0x03E0 
+0x6572 , 0x7367 , 0x0000 , 0xC009 , 0x0000 , 0xE3CC , 0xC01E , 0xC055 , 0xC033 , 0xC01D , 0xE3E5 , 0xC022 , 0xC001 , 
+
+};
+CompiledDictionary interpreterCompiledDictionary( compiledDictionaryData, 0x03DF , 0x03ED , YRSHELL_DICTIONARY_INTERPRETER_COMPILED);
+bShell>
+
+
+ */
+
+/*
+static uint16_t compiledDictionaryData[] = {
+};
+YRShellCompiledDictionary compiledDictionary( compiledDictionaryData, 0xFFFF , 0x0000 , YRSHELL_DICTIONARY_COMPILED);
+*/
+
+static uint16_t compiledDictionaryData[] = {
+
+// 0x0000 
+0xFFFF , 0x7370 , 0x003F , 0xC016 , 0x4150 , 0x4152 , 0x454D , 0x4554 , 0x2052 , 0x5453 , 0x4341 , 0x3A4B , 0x0020 , 0xC012 , 0xC037 , 0xC03F , 
+// 0x0010 
+0xC01D , 0xE01E , 0xC037 , 0xC01E , 0xC03A , 0xC00C , 0xC009 , 0x0001 , 0xC028 , 0xC01E , 0xC03E , 0xC01D , 0xE013 , 0xC022 , 0xC003 , 0xC001 , 
+// 0x0020 
+0x0000 , 0x7372 , 0x003F , 0xC016 , 0x2020 , 0x5220 , 0x5445 , 0x5255 , 0x204E , 0x5453 , 0x4341 , 0x3A4B , 0x0020 , 0xC012 , 0xC038 , 0xC03F , 
+// 0x0030 
+0xC01D , 0xE043 , 0xC038 , 0xC009 , 0x0001 , 0xC028 , 0xC01E , 0xC03B , 0xC00C , 0xC009 , 0x0001 , 0xC028 , 0xC01E , 0xC00B , 0xFFFF , 0xC031 , 
+// 0x0040 
+0xC01D , 0xE036 , 0xC022 , 0xC003 , 0xC001 , 0x0020 , 0x7363 , 0x003F , 0xC016 , 0x2020 , 0x4F43 , 0x504D , 0x4C49 , 0x2045 , 0x5453 , 0x4341 , 
+// 0x0050 
+0x3A4B , 0x0020 , 0xC012 , 0xC039 , 0xC03F , 0xC01D , 0xE068 , 0xC039 , 0xC009 , 0x0001 , 0xC028 , 0xC01E , 0xC03C , 0xC00C , 0xC009 , 0x0001 , 
+// 0x0060 
+0xC028 , 0xC01E , 0xC00B , 0xFFFF , 0xC031 , 0xC01D , 0xE05B , 0xC022 , 0xC003 , 0xC001 , 0x0045 , 0x7473 , 0x003F , 0xE003 , 0xE023 , 0xE048 , 
+// 0x0070 
+0xC001 , 0x006A , 0x635F , 0x3064 , 0x0000 , 0xC016 , 0x730D , 0x6174 , 0x6974 , 0x2063 , 0x6975 , 0x746E , 0x3631 , 0x745F , 0x0020 , 0xC012 , 
+// 0x0080 
+0xC001 , 0x0071 , 0x635F , 0x3164 , 0x0000 , 0xE075 , 0xC016 , 0x6F63 , 0x706D , 0x6C69 , 0x6465 , 0x6944 , 0x7463 , 0x6F69 , 0x616E , 0x7972 , 
+// 0x0090 
+0x6144 , 0x6174 , 0x5D5B , 0x3D20 , 0x7B20 , 0x000D , 0xC012 , 0xC001 , 0x0081 , 0x635F , 0x3178 , 0x0000 , 0xE075 , 0xC016 , 0x6F63 , 0x706D , 
+// 0x00A0 
+0x6C69 , 0x6465 , 0x7845 , 0x6574 , 0x736E , 0x6F69 , 0x446E , 0x6369 , 0x6974 , 0x6E6F , 0x7261 , 0x4479 , 0x7461 , 0x5B61 , 0x205D , 0x203D , 
+// 0x00B0 
+0x0D7B , 0x0000 , 0xC012 , 0xC001 , 0x0098 , 0x635F , 0x3264 , 0x0000 , 0xC01E , 0xC009 , 0x000F , 0xC02C , 0xC03E , 0xC01D , 0xE0C7 , 0xC003 , 
+// 0x00C0 
+0xC016 , 0x2F2F , 0x0020 , 0xC012 , 0xC01E , 0xC011 , 0xC003 , 0xC001 , 0x00B4 , 0x635F , 0x3364 , 0x0000 , 0xC009 , 0x0000 , 0xE0B8 , 0xC01E , 
+// 0x00D0 
+0xC044 , 0xC011 , 0xC016 , 0x202C , 0x0000 , 0xC012 , 0xC009 , 0x0001 , 0xC027 , 0xC01E , 0xC045 , 0xC033 , 0xC01D , 0xE0CE , 0xC022 , 0xC001 , 
+// 0x00E0 
+0x00C8 , 0x635F , 0x3464 , 0x0000 , 0xC045 , 0xC03F , 0xC01D , 0xE0EA , 0xE0CC , 0xC005 , 0xC016 , 0x3B7D , 0x000D , 0xC012 , 0xC001 , 0x00E0 , 
+// 0x00F0 
+0x635F , 0x3564 , 0x0000 , 0xC016 , 0x6F43 , 0x706D , 0x6C69 , 0x6465 , 0x6944 , 0x7463 , 0x6F69 , 0x616E , 0x7972 , 0x0020 , 0xC012 , 0xC001 , 
+// 0x0100 
+0x00EF , 0x635F , 0x3664 , 0x0000 , 0xC016 , 0x6E69 , 0x6574 , 0x7072 , 0x6572 , 0x6574 , 0x4372 , 0x6D6F , 0x6970 , 0x656C , 0x4464 , 0x6369 , 
+// 0x0110 
+0x6974 , 0x6E6F , 0x7261 , 0x2879 , 0x6320 , 0x6D6F , 0x6970 , 0x656C , 0x4464 , 0x6369 , 0x6974 , 0x6E6F , 0x7261 , 0x4479 , 0x7461 , 0x2C61 , 
+// 0x0120 
+0x0020 , 0xC012 , 0xC001 , 0x0100 , 0x635F , 0x3678 , 0x0000 , 0xC016 , 0x6F63 , 0x706D , 0x6C69 , 0x6465 , 0x7845 , 0x6574 , 0x736E , 0x6F69 , 
+// 0x0130 
+0x446E , 0x6369 , 0x6974 , 0x6E6F , 0x7261 , 0x2879 , 0x6320 , 0x6D6F , 0x6970 , 0x656C , 0x4564 , 0x7478 , 0x6E65 , 0x6973 , 0x6E6F , 0x6944 , 
+// 0x0140 
+0x7463 , 0x6F69 , 0x616E , 0x7972 , 0x6144 , 0x6174 , 0x202C , 0x0000 , 0xC012 , 0xC001 , 0x0123 , 0x635F , 0x3764 , 0x0000 , 0xC046 , 0xC011 , 
+// 0x0150 
+0xC016 , 0x202C , 0x0000 , 0xC012 , 0xC045 , 0xC011 , 0xC001 , 0x014A , 0x635F , 0x3864 , 0x0000 , 0xE085 , 0xE0E4 , 0xE0F3 , 0xE104 , 0xE14E , 
+// 0x0160 
+0xC016 , 0x202C , 0x5259 , 0x4853 , 0x4C45 , 0x5F4C , 0x4944 , 0x5443 , 0x4F49 , 0x414E , 0x5952 , 0x495F , 0x544E , 0x5245 , 0x5250 , 0x5445 , 
+// 0x0170 
+0x5245 , 0x435F , 0x4D4F , 0x4950 , 0x454C , 0x2944 , 0x0D3B , 0x0000 , 0xC012 , 0xC001 , 0x0157 , 0x635F , 0x3878 , 0x0000 , 0xE09C , 0xE0E4 , 
+// 0x0180 
+0xE0F3 , 0xE127 , 0xE14E , 0xC016 , 0x202C , 0x5259 , 0x4853 , 0x4C45 , 0x5F4C , 0x4944 , 0x5443 , 0x4F49 , 0x414E , 0x5952 , 0x455F , 0x5458 , 
+// 0x0190 
+0x4E45 , 0x4953 , 0x4E4F , 0x435F , 0x4D4F , 0x4950 , 0x454C , 0x2944 , 0x0D3B , 0x0000 , 0xC012 , 0xC001 , 0x017A , 0x6F63 , 0x706D , 0x6C69 , 
+// 0x01A0 
+0x4965 , 0x746E , 0x7265 , 0x7270 , 0x7465 , 0x7265 , 0x6944 , 0x7463 , 0x6F69 , 0x616E , 0x7972 , 0x0000 , 0xE15B , 0xC001 , 0x019C , 0x6F63 , 
+// 0x01B0 
+0x706D , 0x6C69 , 0x4565 , 0x7478 , 0x6E65 , 0x6973 , 0x6E6F , 0x6944 , 0x7463 , 0x6F69 , 0x616E , 0x7972 , 0x0000 , 0xE17E , 0xC001 , 0x01AE , 
+// 0x01C0 
+0x7073 , 0x6361 , 0x7365 , 0x0000 , 0xC01E , 0xC01D , 0xE1CF , 0xC002 , 0xC009 , 0x0001 , 0xC028 , 0xC01E , 0xC03E , 0xC01D , 0xE1C7 , 0xC022 , 
+// 0x01D0 
+0xC001 , 0x01BF , 0x6964 , 0x7463 , 0x6E49 , 0x6176 , 0x696C , 0x0064 , 0xC009 , 0xFFFF , 0xC001 , 0x01D1 , 0x775F , 0x326C , 0x0000 , 0xC023 , 
+// 0x01E0 
+0xC01E , 0xC01D , 0xE1E4 , 0xC003 , 0xC03E , 0xC023 , 0xC023 , 0xC01E , 0xE1D8 , 0xC031 , 0xC001 , 0x01DB , 0x775F , 0x336C , 0x0000 , 0xC049 , 
+// 0x01F0 
+0xC009 , 0x0028 , 0xC01F , 0xC028 , 0xE1C4 , 0xC001 , 0x01EB , 0x6C77 , 0x0000 , 0xC009 , 0x0000 , 0xC009 , 0x0000 , 0xE1D8 , 0xC048 , 0xC040 , 
+// 0x0200 
+0xC010 , 0xC01E , 0xC011 , 0xC041 , 0xC04A , 0xC011 , 0xC041 , 0xE1EF , 0xE1DF , 0xC01D , 0xE1FE , 0xC042 , 0xC022 , 0xC003 , 0xC001 , 0x01F6 , 
+// 0x0210 
+0x695F , 0x666E , 0x0030 , 0xC016 , 0x2020 , 0x2020 , 0x4420 , 0x4349 , 0x4954 , 0x4E4F , 0x5241 , 0x5F59 , 0x4953 , 0x455A , 0x203A , 0x0000 , 
+// 0x0220 
+0xC012 , 0xC053 , 0xC00C , 0xC003 , 0xC001 , 0x020F , 0x695F , 0x666E , 0x0031 , 0xC016 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 
+// 0x0230 
+0x4150 , 0x5F44 , 0x4953 , 0x455A , 0x203A , 0x0000 , 0xC012 , 0xC054 , 0xC00C , 0xC003 , 0xC001 , 0x0225 , 0x695F , 0x666E , 0x0032 , 0xC016 , 
+// 0x0240 
+0x2020 , 0x2020 , 0x2020 , 0x4E20 , 0x4D55 , 0x525F , 0x4745 , 0x5349 , 0x4554 , 0x5352 , 0x203A , 0x0000 , 0xC012 , 0xC055 , 0xC00C , 0xC003 , 
+// 0x0250 
+0xC001 , 0x023B , 0x695F , 0x666E , 0x0033 , 0xC016 , 0x4150 , 0x4152 , 0x454D , 0x4554 , 0x5F52 , 0x5453 , 0x4341 , 0x5F4B , 0x4953 , 0x455A , 
+// 0x0260 
+0x203A , 0x0000 , 0xC012 , 0xC056 , 0xC00C , 0xC003 , 0xC001 , 0x0251 , 0x695F , 0x666E , 0x0034 , 0xC016 , 0x2020 , 0x5220 , 0x5445 , 0x5255 , 
+// 0x0270 
+0x5F4E , 0x5453 , 0x4341 , 0x5F4B , 0x4953 , 0x455A , 0x203A , 0x0000 , 0xC012 , 0xC057 , 0xC00C , 0xC003 , 0xC001 , 0x0267 , 0x695F , 0x666E , 
+// 0x0280 
+0x0035 , 0xC016 , 0x2020 , 0x4F43 , 0x504D , 0x4C49 , 0x5F45 , 0x5453 , 0x4341 , 0x5F4B , 0x4953 , 0x455A , 0x203A , 0x0000 , 0xC012 , 0xC058 , 
+// 0x0290 
+0xC00C , 0xC003 , 0xC001 , 0x027D , 0x695F , 0x666E , 0x0036 , 0xC016 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x4E49 , 0x5F51 , 
+// 0x02A0 
+0x4953 , 0x455A , 0x203A , 0x0000 , 0xC012 , 0xC059 , 0xC00C , 0xC003 , 0xC001 , 0x0293 , 0x695F , 0x666E , 0x0037 , 0xC016 , 0x2020 , 0x2020 , 
+// 0x02B0 
+0x2020 , 0x2020 , 0x5541 , 0x5F58 , 0x4E49 , 0x5F51 , 0x4953 , 0x455A , 0x203A , 0x0000 , 0xC012 , 0xC05A , 0xC00C , 0xC003 , 0xC001 , 0x02A9 , 
+// 0x02C0 
+0x695F , 0x666E , 0x0038 , 0xC016 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x4F20 , 0x5455 , 0x5F51 , 0x4953 , 0x455A , 0x203A , 0x0000 , 
+// 0x02D0 
+0xC012 , 0xC05B , 0xC00C , 0xC003 , 0xC001 , 0x02BF , 0x695F , 0x666E , 0x0039 , 0xC016 , 0x2020 , 0x2020 , 0x2020 , 0x4120 , 0x5855 , 0x4F5F , 
+// 0x02E0 
+0x5455 , 0x5F51 , 0x4953 , 0x455A , 0x203A , 0x0000 , 0xC012 , 0xC05C , 0xC00C , 0xC003 , 0xC001 , 0x02D5 , 0x695F , 0x666E , 0x0061 , 0xC016 , 
+// 0x02F0 
+0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x6853 , 0x6C65 , 0x206C , 0x6953 , 0x657A , 0x203A , 0x0000 , 0xC012 , 0xC051 , 0xC00C , 0xC003 , 
+// 0x0300 
+0xC001 , 0x02EB , 0x695F , 0x666E , 0x0062 , 0xC016 , 0x6944 , 0x7463 , 0x6F69 , 0x616E , 0x7972 , 0x7520 , 0x6573 , 0x2064 , 0x7266 , 0x6565 , 
+// 0x0310 
+0x203A , 0x0000 , 0xC012 , 0xC053 , 0xC045 , 0xC01E , 0xC00C , 0xC028 , 0xC00C , 0xC003 , 0xC001 , 0x0301 , 0x6E69 , 0x6F66 , 0x0000 , 0xC052 , 
+// 0x0320 
+0xC003 , 0xE213 , 0xE229 , 0xE23F , 0xE255 , 0xE26B , 0xE281 , 0xE297 , 0xE2AD , 0xE2C3 , 0xE2D9 , 0xE2EF , 0xE305 , 0xC001 , 0x031B , 0x745F , 
+// 0x0330 
+0x3073 , 0x0000 , 0xC016 , 0x2020 , 0x2020 , 0x2020 , 0x4F43 , 0x4E55 , 0x0054 , 0xC012 , 0xC001 , 0x032E , 0x745F , 0x3173 , 0x0000 , 0xC016 , 
+// 0x0340 
+0x2020 , 0x2020 , 0x2020 , 0x2020 , 0x4D20 , 0x4E49 , 0x0000 , 0xC012 , 0xC001 , 0x033B , 0x745F , 0x3273 , 0x0000 , 0xC016 , 0x2020 , 0x2020 , 
+// 0x0350 
+0x2020 , 0x2020 , 0x414D , 0x0058 , 0xC012 , 0xC001 , 0x0349 , 0x745F , 0x3373 , 0x0000 , 0xC016 , 0x2020 , 0x2020 , 0x2020 , 0x5641 , 0x5245 , 
+// 0x0360 
+0x4741 , 0x0045 , 0xC012 , 0xC001 , 0x0356 , 0x745F , 0x3473 , 0x0000 , 0xE332 , 0xE33F , 0xE34D , 0xE35A , 0xC003 , 0xC003 , 0xC001 , 0x0364 , 
+// 0x0370 
+0x745F , 0x3573 , 0x0000 , 0xC01E , 0xC066 , 0xC01E , 0xC024 , 0xC01D , 0xE37D , 0xC00C , 0xC00C , 0xC00C , 0xC00C , 0xC025 , 0xC01E , 0xC01D , 
+// 0x0380 
+0xE383 , 0xC040 , 0xC067 , 0xC003 , 0xC001 , 0x036F , 0x7572 , 0x536E , 0x6174 , 0x7374 , 0x0000 , 0xE368 , 0xC009 , 0x0000 , 0xE373 , 0xC01D , 
+// 0x0390 
+0xE398 , 0xC009 , 0x0001 , 0xC027 , 0xC009 , 0x0000 , 0xC01C , 0xE39A , 0xC00B , 0xFFFF , 0xC01D , 0xE38E , 0xC022 , 0xC001 , 0x0385 , 0x6572 , 
+// 0x03A0 
+0x6573 , 0x5374 , 0x6174 , 0x7374 , 0x0000 , 0xC009 , 0x0000 , 0xC01E , 0xC065 , 0xC01D , 0xE3B2 , 0xC009 , 0x0001 , 0xC027 , 0xC009 , 0x0000 , 
+// 0x03B0 
+0xC01C , 0xE3B4 , 0xC00B , 0xFFFF , 0xC01D , 0xE3A7 , 0xC022 , 0xC001 , 0x039E , 0x645F , 0x3072 , 0x0000 , 0xC01E , 0xC055 , 0xC02F , 0xC01D , 
+// 0x03C0 
+0xE3C7 , 0xC01E , 0xC064 , 0xC00C , 0xC009 , 0x0001 , 0xC027 , 0xC001 , 0x03B8 , 0x645F , 0x3172 , 0x0000 , 0xC01E , 0xC00C , 0xC016 , 0x203A , 
+// 0x03D0 
+0x0000 , 0xC012 , 0xC01E , 0xC064 , 0xC00C , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xE3BC , 0xC003 , 0xC001 , 0x03C8 , 
+// 0x03E0 
+0x6572 , 0x7367 , 0x0000 , 0xC009 , 0x0000 , 0xE3CC , 0xC01E , 0xC055 , 0xC033 , 0xC01D , 0xE3E5 , 0xC022 , 0xC001 , 
+
+};
+CompiledDictionary interpreterCompiledDictionary( compiledDictionaryData, 0x03DF , 0x03ED , YRSHELL_DICTIONARY_INTERPRETER_COMPILED);
+
 
 static const FunctionEntry interpreterFunctions[] = {
     { (uint16_t)YRShellInterpreter::SI_CC_return,     ""},
@@ -7,6 +456,7 @@ static const FunctionEntry interpreterFunctions[] = {
     { (uint16_t)YRShellInterpreter::SI_CC_cr,         "cr"},
     { (uint16_t)YRShellInterpreter::SI_CC_lf,         "lf"},
     { (uint16_t)YRShellInterpreter::SI_CC_crlf,       "crlf"},
+    { (uint16_t)YRShellInterpreter::SI_CC_reset,      "reset"},
     { (uint16_t)YRShellInterpreter::SI_CC_prompt,     "prompt"},
     { (uint16_t)YRShellInterpreter::SI_CC_clearPad,   "clearPad"},
     { (uint16_t)YRShellInterpreter::SI_CC_dot,        "."},
@@ -77,6 +527,33 @@ static const FunctionEntry interpreterFunctions[] = {
     { (uint16_t)YRShellInterpreter::SI_CC_emit,                                   "emit" },
     { (uint16_t)YRShellInterpreter::SI_CC_auxEmit,                                "auxEmit" },
 
+    { (uint16_t)YRShellInterpreter::SI_CC_shellSize,                              "shellSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_printShellClass,                        "printShellClass" },
+    
+    { (uint16_t)YRShellInterpreter::SI_CC_dictionarySize,                        "dictionarySize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_padSize,                               "padSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_numRegisters,                          "numRegisters" },
+    { (uint16_t)YRShellInterpreter::SI_CC_parameterStackSize,                    "parameterStackSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_returnStackSize,                       "returnStackSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_compileStackSize,                      "compileStackSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_inqSize,                               "inqSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_auxInqSize,                            "auxInqSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_outqSize,                              "outqSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_auxOutqSize,                           "auxOutqSize" },
+    { (uint16_t)YRShellInterpreter::SI_CC_dictionaryClear,                       "dictClear" },
+    { (uint16_t)YRShellInterpreter::SI_CC_setCommandEcho,                        "setCommandEcho" },
+    { (uint16_t)YRShellInterpreter::SI_CC_setExpandCR,                           "setExpandCR" },
+    { (uint16_t)YRShellInterpreter::SI_CC_systicks,                              "systicks" },
+    { (uint16_t)YRShellInterpreter::SI_CC_micros,                                "micros" },
+    { (uint16_t)YRShellInterpreter::SI_CC_millis,                                "millis" },
+
+    { (uint16_t)YRShellInterpreter::SI_CC_bang,                                	 "!" },
+    { (uint16_t)YRShellInterpreter::SI_CC_at,                                    "@" },
+    { (uint16_t)YRShellInterpreter::SI_CC_clearStats,                            "clearStats" },
+    { (uint16_t)YRShellInterpreter::SI_CC_sliceStats,                            "sliceStats" },
+    { (uint16_t)YRShellInterpreter::SI_CC_printSliceName,                        "printSliceName" },
+
+
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     { (uint16_t)YRShellInterpreter::SI_CC_dotf,                                   ".f" },
     { (uint16_t)YRShellInterpreter::SI_CC_dote,                                   ".e" },
@@ -104,7 +581,7 @@ static const FunctionEntry interpreterFunctions[] = {
     { (uint16_t)YRShellInterpreter::SI_CC_fRound,                                 "fround" },
     { (uint16_t)YRShellInterpreter::SI_CC_floatToInt,                             "f>i" },
     { (uint16_t)YRShellInterpreter::SI_CC_intToFloat,                             "i>f" },
-    
+ 
 #endif
     { (uint16_t)0, NULL}
 };
@@ -212,7 +689,36 @@ const char *SIDebugStrings[] = {
     "SI_CC_mainIO",
     "SI_CC_emit",
     "SI_CC_auxEmit",
-   
+
+    "SI_CC_shellSize",
+    "SI_CC_printShellClass",
+
+    "SI_CC_dictionarySize",
+    "SI_CC_padSize",
+    "SI_CC_numRegisters",
+    "SI_CC_parameterStackSize",
+    "SI_CC_returnStackSize",
+    "SI_CC_compileStackSize",
+    "SI_CC_inqSize",
+    "SI_CC_auxInqSize",
+    "SI_CC_outqSize",
+    "SI_CC_auxOutqSize",
+ 
+    "SI_CC_dictionaryClear",
+    "SI_CC_setCommandEcho",
+    "SI_CC_setExpandCR",
+
+    "SI_CC_systicks",
+    "SI_CC_micros",
+    "SI_CC_millis"
+
+   	"SI_CC_bang",
+    "SI_CC_at",
+
+    "SI_CC_clearStats",
+    "SI_CC_sliceStats",
+    "SI_CC_printSliceName",
+
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     "SI_CC_dotf",
     "SI_CC_dote",
@@ -251,25 +757,31 @@ CompiledDictionary emptyDictionary;
 void YRShellInterpreter::init( ) {
     reset();
     
-    emptyDictionary.setInterpreter( this);
-    m_DictionaryCurrent->setInterpreter(this);
-    dictionaryInterpreterFunction.setInterpreter(this);
     m_dictionaryList[ YRSHELL_DICTIONARY_DUMMY_INDEX] = &emptyDictionary;
     m_dictionaryList[ YRSHELL_DICTIONARY_CURRENT_INDEX] = m_DictionaryCurrent;
     m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_COMPILED_INDEX] = NULL;
     m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_FUNCTION_INDEX] = NULL;
-    m_dictionaryList[ YRSHELL_DICTIONARY_COMPILED_INDEX] = NULL;
-    m_dictionaryList[ YRSHELL_DICTIONARY_FUNCTION_INDEX] = NULL;
+    m_dictionaryList[ YRSHELL_DICTIONARY_INTERPRETER_COMPILED_INDEX] = &interpreterCompiledDictionary;
+    m_dictionaryList[ YRSHELL_DICTIONARY_COMMON_FUNCTION_INDEX] = NULL;
     m_dictionaryList[ YRSHELL_DICTIONARY_INTERPRETER_FUNCTION_INDEX] =  &dictionaryInterpreterFunction;
 }
 YRShellInterpreter::YRShellInterpreter() {
     m_DictionaryCurrent = NULL;
+    m_Inq = m_AuxInq = m_Outq = m_AuxOutq = NULL;
+    m_ParameterStack = m_ReturnStack = m_CompileStack = NULL;
+    m_parameterStackSize = m_returnStackSize = m_compileStackSize = 0;
+    m_commandEcho = m_expandCR = true;
+
+    m_Pad = NULL;
+    m_Registers = NULL;
+    m_numRegisters = 0;
 	m_compileTopOfStack = 0;
 	m_debugFlags = 0;
 	m_hexMode = false;
 	m_lastState = YRSHELL_INVALID_STATE;
 	m_outputTimeoutInMilliseconds = 1000;
 	m_padCount = 0;
+    m_padSize = 0;
 	m_PC = YRSHELL_DICTIONARY_INVALID;
 	m_returnTopOfStack = 0;
 	m_saveptr = NULL;
@@ -280,6 +792,7 @@ YRShellInterpreter::YRShellInterpreter() {
 }
 YRShellInterpreter::~YRShellInterpreter() {
 }
+
 bool YRShellInterpreter::isCompileToken() {
     return m_token != NULL && (!strcmp( m_token, "s'") || !strcmp( m_token, "[") || !strcmp( m_token, "][") || !strcmp( m_token, "]") || !strcmp( m_token, "{") || !strcmp( m_token, "}") );
 }
@@ -292,11 +805,21 @@ uint16_t YRShellInterpreter::find( const char* name) {
     }
     return rc;
 }
+const char* YRShellInterpreter::getFileName( const char* P) {
+    const char* R = P;
+    while( *P++ != '\0') {
+        if( *P == '/' || *P == '\'') {
+            R = ++P;
+        }
+    }
+    return R;
+}
+
 void YRShellInterpreter::shellERROR( const char* file, unsigned line) {
-    reset( file, line);
+    reset( getFileName(file), line);
 }
 void YRShellInterpreter::shellERROR( const char* file, unsigned line, const char* message) {
-    reset( file, line, message);
+    reset( getFileName(file), line, message);
 }
 void YRShellInterpreter::CC_nextEntry( ) {
     uint32_t v1 = popParameterStack();
@@ -337,6 +860,8 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
     uint32_t v1, v2, v3;
     float f1, f2;
     const char *P;
+    Sliceable *S;
+
 #ifdef YRSHELL_DEBUG
     if( m_debugFlags & YRSHELL_DEBUG_EXECUTE) {
         outString("[");
@@ -605,7 +1130,7 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             if( v1 >= m_topOfStack) {
                 shellERROR( __FILE__, __LINE__, "BAD STACK ACCESS");
             } else {
-                pushParameterStack( m_parameterStack[ v1]);
+                pushParameterStack( m_ParameterStack[ v1]);
             }
             break;
             
@@ -614,7 +1139,7 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             if( v1 >= m_returnTopOfStack) {
                 shellERROR( __FILE__, __LINE__, "BAD RETURN STACK ACCESS");
             } else {
-                pushParameterStack( m_returnStack[ v1]);
+                pushParameterStack( m_ReturnStack[ v1]);
             }
             break;
         case SI_CC_compileStackAt:
@@ -622,7 +1147,7 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             if( v1 >= m_compileTopOfStack) {
                 shellERROR( __FILE__, __LINE__, "BAD COMPILE STACK ACCESS");
             } else {
-                pushParameterStack( m_compileStack[ v1]);
+                pushParameterStack( m_CompileStack[ v1]);
             }
             break;
         case SI_CC_notEqual:
@@ -689,12 +1214,9 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
                 v1 = m_dictionaryList[ v2]->getNameAddressToken(v1);
                 P = getAddressFromToken( v1);
                 outString( P);
-                v1 = (uint32_t) strlen( P);
-                if( v1 < 40) {
-                    for( v1 = 40 - v1; v1; v1--) {
-                        outChar( ' ');
-                    }
-                }
+                pushParameterStack((uint32_t) strlen( P));
+            } else {
+                pushParameterStack(0);
             }
             break;
         case SI_CC_entryToken:
@@ -707,8 +1229,8 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             }
             break;
         case SI_CC_keyQ:
-            if( m_inq.valueAvailable()) {
-                pushParameterStack( m_inq.get());
+            if( m_Inq->valueAvailable()) {
+                pushParameterStack( m_Inq->get());
                 pushParameterStack( -1);
             } else {
                 pushParameterStack( 0);
@@ -716,8 +1238,8 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             }
             break;
         case SI_CC_auxKeyQ:
-            if( m_auxInq.valueAvailable()) {
-                pushParameterStack( m_auxInq.get());
+            if( m_AuxInq->valueAvailable()) {
+                pushParameterStack( m_AuxInq->get());
                 pushParameterStack( -1);
             } else {
                 pushParameterStack( 0);
@@ -738,6 +1260,112 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             m_useAuxQueues = true;
             outChar( popParameterStack());
             m_useAuxQueues = b;
+            break;
+            
+        case SI_CC_shellSize:
+            pushParameterStack( shellSize());
+            break;
+        case SI_CC_printShellClass:
+            outString( shellClass());
+            break;
+
+        case SI_CC_dictionarySize:
+            pushParameterStack( m_DictionaryCurrent->getSize());
+            break;
+        case SI_CC_padSize:
+            pushParameterStack( m_padSize);
+            break;
+        case SI_CC_numRegisters:
+            pushParameterStack( m_numRegisters);
+            break;
+        case SI_CC_parameterStackSize:
+            pushParameterStack( m_parameterStackSize);
+            break;
+        case SI_CC_returnStackSize:
+            pushParameterStack( m_returnStackSize);
+            break;
+        case SI_CC_compileStackSize:
+            pushParameterStack( m_compileStackSize);
+            break;
+        case SI_CC_inqSize:
+            pushParameterStack( m_Inq->size());
+            break;
+        case SI_CC_auxInqSize:
+            pushParameterStack( m_AuxInq->size());
+            break;
+        case SI_CC_outqSize:
+            pushParameterStack( m_Outq->size());
+            break;
+        case SI_CC_auxOutqSize:
+            pushParameterStack( m_AuxOutq->size());
+            break;
+ 
+        case SI_CC_dictionaryClear:
+            m_DictionaryCurrent->reset();
+            nextState( YRSHELL_BEGIN_IDLE);
+            break;
+ 
+        case SI_CC_setCommandEcho:
+            m_commandEcho = popParameterStack() != 0;
+            break;
+        case SI_CC_setExpandCR:
+            m_expandCR = popParameterStack() != 0;
+            break;
+
+        case SI_CC_systicks:
+            pushParameterStack( HiResTimer::getSysticks());
+            break;
+
+        case SI_CC_micros:
+            pushParameterStack( HiResTimer::getMicros());
+            break;
+
+        case SI_CC_bang:
+        	v1 = popParameterStack();
+        	v2 = popParameterStack();
+        	if( v1 < m_numRegisters) {
+        		m_Registers[ v1] = v2;
+        	} else {
+            	reset( __FILE__, __LINE__, "INVALID REGISTER");
+	       	}
+            break;
+        case SI_CC_at:
+        	v1 = popParameterStack();
+        	if( v1 < m_numRegisters) {
+        		pushParameterStack(m_Registers[ v1]);
+        	} else {
+            	reset( __FILE__, __LINE__, "INVALID REGISTER");
+	       	}
+            break;
+         case SI_CC_clearStats:
+        	v1 = popParameterStack();
+        	S = Sliceable::getSlicePointer( v1);
+        	if( S != NULL) {
+        		S->resetTimer();
+        		pushParameterStack( -1);
+         	} else {
+         		pushParameterStack( 0);
+         	}
+            break;
+       case SI_CC_sliceStats:
+        	v1 = popParameterStack();
+        	S = Sliceable::getSlicePointer( v1);
+        	if( S != NULL) {
+        		pushParameterStack( S->getTimerAverage());
+        		pushParameterStack( S->getTimerMax());
+        		pushParameterStack( S->getTimerMin());
+        		pushParameterStack( S->getTimerCount());
+        		pushParameterStack( -1);
+        	} else {
+        		pushParameterStack( 0);
+        	}
+            break;
+        case SI_CC_printSliceName:
+        	v1 = popParameterStack();
+        	S = Sliceable::getSlicePointer( v1);
+        	if( S != NULL) {
+        		outString( S->sliceName() );
+         	}
             break;
 
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
@@ -965,10 +1593,10 @@ void YRShellInterpreter::interpretReset( ) {
 void YRShellInterpreter::reset( ) {
     if( m_state != YRSHELL_INRESET) {
 
-        m_inq.reset();
-        m_auxInq.reset();
-        m_outq.reset();
-        m_auxOutq.reset();
+        m_Inq->reset();
+        m_AuxInq->reset();
+        m_Outq->reset();
+        m_AuxOutq->reset();
     
 #ifdef YRSHELL_DEBUG
         //m_debugFlags = YRSHELL_DEBUG_STATE | YRSHELL_DEBUG_INPUT | YRSHELL_DEBUG_TOKEN;
@@ -988,30 +1616,26 @@ void YRShellInterpreter::reset( ) {
         m_useAuxQueues = false;
     
         m_PC = 0;
-        m_outputTimeoutInMilliseconds = YRSHELL_OUTPUT_TIMEOUT_IN_MILLISECONDS;
+        m_outputTimeoutInMilliseconds = 1000;
     
-        outString("\r\n");;
+        outChar( '\r');
         outString( YRSHELL_VERSION);
     }
 }
 void YRShellInterpreter::reset( const char* file, unsigned line) {
     reset();
-    outString("\r\n");;
     outString( file);
-    outString( " Line: ");
     outUint32(line);
-    outString("\r\n");;
-    
+    outChar( '\r');
+   
 }
 void YRShellInterpreter::reset( const char* file, unsigned line, const char* message) {
     reset();
-    outString("\r\n");;
     outString( file);
-    outString( " Line: ");
     outUint32(line);
-    outString( " Message: ");
+    outString( " ");
     outString( message);
-    outString("\r\n");;
+    outChar( '\r');
 }
 void YRShellInterpreter::nextState(YRShellState n) {
 #ifdef YRSHELL_DEBUG
@@ -1034,20 +1658,17 @@ void YRShellInterpreter::fillPad( char c) {
         outChar( ']');
     }
 #endif
-    if( YRSHELL_COMMAND_ECHO) {
+    if( m_commandEcho) {
         outChar( c);
-        if( YRSHELL_COMMAND_ECHO_EXPAND_CR && c == '\x0D') {
-            outChar( '\n');
-        }
     }
-    if( m_padCount > (YRSHELL_PAD_SIZE - 2)) {
+    if( m_padCount > (m_padSize - 2)) {
         reset( __FILE__, __LINE__, "INPUT BUFFER OVERFLOW");
     } else {
         if( c == '\r' || c == '\n') {
             nextState( YRSHELL_BEGIN_PARSING);
         } else {
-            m_pad[ m_padCount++] = c;
-            m_pad[ m_padCount] = '\0';
+            m_Pad[ m_padCount++] = c;
+            m_Pad[ m_padCount] = '\0';
         }
     }
 }
@@ -1062,7 +1683,7 @@ void YRShellInterpreter::debugToken() {
 #endif
 void YRShellInterpreter::beginParsing(void) {
     m_saveptr = NULL;
-    m_token = strtok_r(m_pad, "\t ", &m_saveptr);
+    m_token = strtok_r(m_Pad, "\t ", &m_saveptr);
     if( m_token == NULL) {
         nextState( YRSHELL_BEGIN_IDLE  );
     } else {
@@ -1078,8 +1699,9 @@ void YRShellInterpreter::beginParsing(void) {
 #ifdef YRSHELL_DEBUG
             debugToken();
 #endif
-            processToken();
-            nextState( YRSHELL_PARSING);
+            if( processToken()) {
+            	nextState( YRSHELL_PARSING);
+            }
         } else {
             m_token = strtok_r( NULL, "\t ", &m_saveptr);
             if( m_token == NULL) {
@@ -1103,7 +1725,7 @@ void YRShellInterpreter::beginParsing(void) {
 
 void YRShellInterpreter::slice(void) {
     char c;
-    if( ( (m_outq.free() < (m_outq.size()/2)) || (m_auxOutq.free() < (m_auxOutq.size()/2)) ) && m_state != YRSHELL_WAIT_FOR_OUTPUT_SPACE) {
+    if( ( (m_Outq->free() < (m_Outq->size()/2)) || (m_AuxOutq->free() < (m_AuxOutq->size()/2)) ) && m_state != YRSHELL_WAIT_FOR_OUTPUT_SPACE) {
         nextState( YRSHELL_WAIT_FOR_OUTPUT_SPACE);
         m_outputTimeout.setInterval(m_outputTimeoutInMilliseconds);
     }
@@ -1116,24 +1738,24 @@ void YRShellInterpreter::slice(void) {
             break;
         case YRSHELL_IDLE:
             if( m_useAuxQueues) {
-                if( m_auxInq.valueAvailable()) {
+                if( m_AuxInq->valueAvailable()) {
                     nextState( YRSHELL_FILLING_AUXPAD);
                 }
             } else {
-                if( m_inq.valueAvailable()) {
+                if( m_Inq->valueAvailable()) {
                     nextState( YRSHELL_FILLING_PAD);
                 }
             }
             break;
         case YRSHELL_FILLING_PAD:
-            if( m_inq.valueAvailable() ) {
-                c = m_inq.get();
+            if( m_Inq->valueAvailable() ) {
+                c = m_Inq->get();
                 fillPad( c);
             }
             break;
         case YRSHELL_FILLING_AUXPAD:
-            if( m_auxInq.valueAvailable() ) {
-                c = m_auxInq.get();
+            if( m_AuxInq->valueAvailable() ) {
+                c = m_AuxInq->get();
                 fillPad( c);
             }
             break;
@@ -1170,7 +1792,7 @@ void YRShellInterpreter::slice(void) {
             executing();
             break;
         case YRSHELL_WAIT_FOR_OUTPUT_SPACE:
-            if( m_outq.used() < (m_outq.size()/2) && m_auxOutq.used() < (m_auxOutq.size()/2) ) {
+            if( m_Outq->used() < (m_Outq->size()/2) && m_AuxOutq->used() < (m_AuxOutq->size()/2) ) {
                 nextState( m_lastState);
             } else if( m_outputTimeout.hasIntervalElapsed()) {
                 shellERROR( __FILE__, __LINE__, "OUTPUT WAIT FOR SPACE TIMEOUT");
@@ -1226,7 +1848,8 @@ bool YRShellInterpreter::processLiteralToken( ){
     }
     return rc;
 }
-void YRShellInterpreter::processToken( ){
+bool YRShellInterpreter::processToken( ){
+	bool ret = true;
     if( m_token == NULL) {
         if( !m_DictionaryCurrent->addToken( SI_CC_return)) {
             shellERROR( __FILE__, __LINE__,  "DICTIONARY FULL");
@@ -1238,10 +1861,13 @@ void YRShellInterpreter::processToken( ){
         } else {
             if( rc == YRSHELL_DICTIONARY_INVALID) {
                 if( !processLiteralToken()) {
-                    outString( "\r\nUNDEFINED [");
+                    outString( "\rUNDEFINED [");
                     outString( m_token);
-                    outString( "]\r\n");
+                    outString( "]\r");
                     interpretReset();
+                    nextState( YRSHELL_BEGIN_IDLE);
+                    m_returnTopOfStack = 0;
+                    ret = false;
                 }
             } else {
                 if( (rc & YRSHELL_DICTIONARY_MASK) == YRSHELL_DICTIONARY_CURRENT) {
@@ -1254,6 +1880,7 @@ void YRShellInterpreter::processToken( ){
             }
         }
     }
+    return ret;
 }
 void YRShellInterpreter::executing( ) {
     if( (m_PC & YRSHELL_DICTIONARY_ADDRESS_MASK) == 0) {
@@ -1320,9 +1947,9 @@ uint16_t YRShellInterpreter::fetchCurrentToken( ) {
 void YRShellInterpreter::executeToken( uint16_t token ) {
     uint16_t mask = YRSHELL_DICTIONARY_MASK & token;
     switch( mask) {
-        case YRSHELL_DICTIONARY_COMPILED:
+        case YRSHELL_DICTIONARY_INTERPRETER_COMPILED:
             pushReturnStack( m_PC);
-            m_PC = token | YRSHELL_DICTIONARY_COMPILED_RELATIVE;
+            m_PC = token | YRSHELL_DICTIONARY_INTERPRETER_COMPILED_RELATIVE;
             break;
         case YRSHELL_DICTIONARY_EXTENSION_COMPILED:
             pushReturnStack( m_PC);
@@ -1338,9 +1965,9 @@ void YRShellInterpreter::executeToken( uint16_t token ) {
                     pushReturnStack( m_PC);
                     m_PC = token | YRSHELL_DICTIONARY_CURRENT_RELATIVE;
                     break;
-                case YRSHELL_DICTIONARY_COMPILED_RELATIVE:
+                case YRSHELL_DICTIONARY_INTERPRETER_COMPILED_RELATIVE:
                     pushReturnStack( m_PC);
-                    m_PC = token | YRSHELL_DICTIONARY_COMPILED_RELATIVE;
+                    m_PC = token | YRSHELL_DICTIONARY_INTERPRETER_COMPILED_RELATIVE;
                     break;
                 case YRSHELL_DICTIONARY_EXTENSION_COMPILED_RELATIVE:
                     pushReturnStack( m_PC);
@@ -1353,7 +1980,7 @@ void YRShellInterpreter::executeToken( uint16_t token ) {
         case YRSHELL_DICTIONARY_INTERPRETER_FUNCTION:
             executeFunction(token);
             break;
-        case YRSHELL_DICTIONARY_FUNCTION:
+        case YRSHELL_DICTIONARY_COMMON_FUNCTION:
             executeFunction(token);
             break;
         case YRSHELL_DICTIONARY_EXTENSION_FUNCTION:
@@ -1365,27 +1992,30 @@ void YRShellInterpreter::executeToken( uint16_t token ) {
     }
 }
 CircularQBase<char>& YRShellInterpreter::getInq() {
-    return m_inq;
+    return *m_Inq;
 }
 CircularQBase<char>& YRShellInterpreter::getAuxInq() {
-    return m_auxInq;
+    return *m_AuxInq;
 }
 CircularQBase<char>& YRShellInterpreter::getOutq() {
-    return m_outq;
+    return *m_Outq;
 }
 CircularQBase<char>& YRShellInterpreter::getAuxOutq() {
-    return m_auxOutq;
+    return *m_AuxOutq;
 }
 
 void YRShellInterpreter::outChar( const char c) {
     if( m_useAuxQueues) {
-        if( !m_auxOutq.put( c) && m_state != YRSHELL_INRESET) {
+        if( !m_AuxOutq->put( c) && m_state != YRSHELL_INRESET) {
             shellERROR( __FILE__, __LINE__, "OUTPUT BUFFER OVERFLOW");
         }
     } else {
-        if( !m_outq.put( c) && m_state != YRSHELL_INRESET) {
+        if( !m_Outq->put( c) && m_state != YRSHELL_INRESET) {
             shellERROR( __FILE__, __LINE__, "OUTPUT BUFFER OVERFLOW");
         }
+    }
+    if( m_expandCR && c == '\x0D') {
+        outChar( '\n');
     }
 }
 
@@ -1692,7 +2322,7 @@ void YRShellInterpreter::outInt32( int32_t v) {
 uint32_t YRShellInterpreter::popParameterStack( ) {
     uint32_t rc = 0;
     if(m_topOfStack > 0) {
-        rc = m_parameterStack[ --m_topOfStack];
+        rc = m_ParameterStack[ --m_topOfStack];
     } else {
         shellERROR( __FILE__, __LINE__, "STACK UNDERFLOW\r\n");
     }
@@ -1701,7 +2331,7 @@ uint32_t YRShellInterpreter::popParameterStack( ) {
 uint32_t YRShellInterpreter::popReturnStack( ) {
     uint32_t rc = 0;
     if(m_returnTopOfStack > 0) {
-        rc = m_returnStack[ --m_returnTopOfStack];
+        rc = m_ReturnStack[ --m_returnTopOfStack];
     } else {
         shellERROR( __FILE__, __LINE__, "RETURN STACK UNDERFLOW\r\n");
     }
@@ -1710,35 +2340,37 @@ uint32_t YRShellInterpreter::popReturnStack( ) {
 uint32_t YRShellInterpreter::popCompileStack( ) {
     uint32_t rc = 0;
     if(m_compileTopOfStack > 0) {
-        rc = m_compileStack[ --m_compileTopOfStack];
+        rc = m_CompileStack[ --m_compileTopOfStack];
     } else {
         shellERROR( __FILE__, __LINE__, "COMPILE STACK UNDERFLOW\r\n");
     }
     return rc;
 }
 void YRShellInterpreter::pushParameterStack( uint32_t v) {
-    if( m_topOfStack < YRSHELL_PARAMETER_STACK_SIZE){
-        m_parameterStack[ m_topOfStack++] = v;
+    if( m_topOfStack < m_parameterStackSize){
+        m_ParameterStack[ m_topOfStack++] = v;
     } else {
         shellERROR( __FILE__, __LINE__, "STACK OVERFLOW\r\n");
     }
 }
 void YRShellInterpreter::pushReturnStack( uint32_t v) {
-    if( m_returnTopOfStack < YRSHELL_RETURN_STACK_SIZE){
-        m_returnStack[ m_returnTopOfStack++] = v;
+    if( m_returnTopOfStack < m_returnStackSize){
+        m_ReturnStack[ m_returnTopOfStack++] = v;
     } else {
         shellERROR( __FILE__, __LINE__, "RETURN STACK OVERFLOW\r\n");
     }
 }
 void YRShellInterpreter::pushCompileStack( uint32_t v) {
-    if( m_compileTopOfStack < YRSHELL_COMPILE_STACK_SIZE){
-        m_compileStack[ m_compileTopOfStack++] = v;
+    if( m_compileTopOfStack < m_compileStackSize){
+        m_CompileStack[ m_compileTopOfStack++] = v;
     } else {
         shellERROR( __FILE__, __LINE__, "RETURN STACK OVERFLOW\r\n");
     }
 }
 void YRShellInterpreter::CC_clearPad() {
-    memset(m_pad, '\0', sizeof( m_pad));
-    m_pad[ sizeof(m_pad)-1] = '\0';
+    memset(m_Pad, '\0',  m_padSize);
+}
+void YRShellInterpreter::setPrompt( const char* prompt ) {
+    m_prompt = prompt;
 }
 
