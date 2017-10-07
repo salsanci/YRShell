@@ -102,11 +102,11 @@ STEP 1:
     
 STEP 2:
 - The second step of the instructions we are following take us to the Board Manager  
-      https://github.com/stm32duino/wiki/wiki/Boards-Manager
+      https://github.com/stm32duino/wiki/wiki/Boards-Manager  
       The board manager adds definitions for the STM32L476RG board we will be using.
 - Start the Arduino IDE  
       Arduino IDE > File > Preferences > Settings > Additional Boards Manager URL: 
-        https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json
+        https://github.com/stm32duino/BoardManagerFiles/raw/master/STM32/package_stm_index.json  
      `Tools > Board Manager > Select "STM32 Cores" ` from the bottom of the list
      OK  
      Close    
