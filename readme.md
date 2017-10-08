@@ -197,7 +197,7 @@ Type in
 `wl`  
 and hit enter  
 
-**You should see a display off all currently defined command words.**  Try the various commands such as + - * / to get a feel for how they function.  Try more commands until something blows up.  Hit the reset button to start fresh.  Notice that not all command have a meanings out of context. Avoid executing commands out of context as they often cause undefined behavior.
+**You should see a display off all currently defined command words.**  Try the various commands such as addition `+` subtraction `-` multipliplication `*` and divdision `/` to get a feel for how they function.  Try more commands until something blows up.  Hit the reset button to start fresh.  Notice that not all command have a meanings out of context. Avoid executing commands out of context as they often cause undefined behavior.
 
 YRShell is now set up and ready for action.  
 # End of user documentation for initial setup    
