@@ -28,22 +28,23 @@ YrShell is designed and tested on ST-Microelectronics STM32Nucleo-L476RG micocon
 Note: As of this writing, YrShell has been brought up on:
 - STM32Nucleo-L476RG
 - Arduino Due (ARM Cortex-M3)
-- Arduino Mega 2560 (ATMEGA2560 8 bit controler. It runs, its just slower)
+- Arduino Mega 2560 (ATMEGA2560 8 bit controler. It runs, its just slower) 
 
-- Setup-STM32Nucleo-L476RG  
+## Setup micro controller: STM32Nucleo-L476RG  
   1. Remove from package.  
   1.   Find the USB mini cable.  
   1. Notice there are header pins exposed on both the top and bottom, take precautions so these do not get bent or shorted.  
   - I found some stanoffs and mounted it in a cookie tin.  
-  - You might set it on a clean folder shop towel for the time being.  
-  - Aside from physically secring the board, nothing more needs to be done until we are ready to program.  
+  - You might simply set it on a clean shop towel for the time being.  
+  - Aside from physically securing the board, nothing more needs to be done until we are ready to program.  
   
-## Setup-PC-hardware  
+## Setup: PC hardware  
 PC Hardware needs at least available USB port to use as virtual serial port.  
-Old type RS232 serial port is possible but not covered here until requested.   
-### PC-Operating Systems Supported    
-The YrShell development environment is tested on Mac OSX, Linux Mint 18.2, and Windows 10.  
-Other versions of MacOSX, Linux (Ubuntu, debian), and Windows should work as expected.  
+Old type RS232 serial port is possible but not covered here until requested.  
+
+### PC Operating Systems Supported    
+The YrShell development environment is tested on Mac OSX, Linux Mint 18.2, and Windows 10. 
+Other versions of MacOSX, Linux (Ubuntu, debian), and Windows should work as expected. 
 Windows XP is possible but not covered here until requested.   
 1. Plug in USB cable to available USB port on PC.   
    - Notice that the USB cable prvides power to the Board.  
