@@ -21,11 +21,15 @@ This is a very powerful and dangerous tool. (Muhuhahaha!) On a good day, one of 
 
 YrShell is simillar to, but not the same as, FORTH. That is, the YrShell command line works the same as a FORTH command line.  Under the hood its all different, but we don't care, because we never need to look at that part. (The source code and testing interfaces are provided in case you do want to go there, but then you must be crazy and you're on your own. If this does not discourage you, then maybe you can help with development and testing).
 Back to FORTH, find the Leo Brode tutorial HERE:  http://www.forth.org/tutorials.html  
-End of introduction  
  
-YrShell is designed and tested on ST-Microelectronics STM32Nucleo-L476RG micocontroller board. This hardware should be more or ess compatible with ANY Arduino board, but we will not be sure until user confirm or deny specific boards. For the purpose of this document we will only discuss one hardware board, the STM32Nucleo-L476RG.  
 
 # Setup-Hardware
+YrShell is designed and tested on ST-Microelectronics STM32Nucleo-L476RG micocontroller board. This hardware should be more or ess compatible with ANY Arduino board, but we will not be sure until user confirm or deny specific boards. For the purpose of this document we will only discuss one hardware board, the STM32Nucleo-L476RG.  
+Note: As of this writing, YrShell has been brought up on:
+- STM32Nucleo-L476RG
+- Arduino Due (ARM Cortex-M3)
+- Arduino Mega 2560 (ATMEGA2560 8 bit controler. It runs, its just slower)
+
 - Setup-STM32Nucleo-L476RG  
   1. Remove from package.  
   1.   Find the USB mini cable.  
