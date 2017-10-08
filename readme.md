@@ -61,13 +61,13 @@ FIRST TIME ONLY:
       
 # Setup-PC-Software  
 
-There are two parts to the PC software.  These are the gneral PC build tools, and the arduino IDE.  
+There are two parts to the PC software.  These are the general PC build tools, and the arduino IDE.  
 
-## Setup build tools  
+## Setup PC tools  
 
 The build tools are the (gnu) build-essential (compiler) build tools and the doxygen documentation tools.  
 
-### build essential  
+### PC Tools: build essential  
 
 We need the build tools for compilation and and testing.  Your installation may or may not need these tools for the Arduino IDE. If you wish to perform automatic testing on the PC side, you will likely need the build tools.  
 
@@ -80,13 +80,13 @@ We need the build tools for compilation and and testing.  Your installation may 
 
 We don't seem to need any additional tools installed on Windows 10.  This will be updated is we find we need something for earlier versions of windows, as needed.  
 
-### doxygen
+### PC Tools: doxygen
 
-Sal is using doxygen to generate the documentation for the source code.  If you want to use the same pro-tools as Sal, and/or wish to contribute to this project (optional) you can download and install from the author.  
+Sal is using doxygen (document generator tool) to generate the documentation for the YrShell source code.  If you want to use the same pro-tools as Sal, and/or wish to contribute to this project (optional) you can download and install from the author at the following link.  
 
 http://www.stack.nl/~dimitri/doxygen/download.html  
 
-NOTE: you are not required or expected to install or use doxygen, it is inclided here for completeness.  
+NOTE: you are not required or expected to install or use doxygen, it is included here for completeness.  
 
 ## Setup-Arduino-IDE  
   Start with the instructions https://github.com/stm32duino/wiki/wiki/Getting-Started  
