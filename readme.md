@@ -150,7 +150,8 @@ Now we procede to the YrShell module.
 ## Setup-YrShell
 Clone or Download Fshell from GitHub  `https://github.com/salsanci/YRShell`  
 - copy the directory  
-   `path to YrShell source code`  
+    - Linux/OSX `/home/<yourusername>/YrShell`
+    - Windows 10 `c:/YrShell`
 to  
    `/home/<yourusername>/Arduino/libraries/`  
 The result should look like this:  
