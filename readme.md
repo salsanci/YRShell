@@ -112,8 +112,8 @@ The board manager adds definitions for the STM32L476RG board we will be using.  
      OK  
      Close    
 
-STEP 3: 
-  Select the Nucleo-64 L476RG:
+STEP 3:  
+Select the Nucleo-64 L476RG:
 - Arduino IDE > Tools > Board: > Nucleo-64 (at the bottom of the list)
 - Arduino IDE > Tools > Board number: Nucleo-L476RRG
 - Arduino IDE > Tools > Upload Method: Mass Storage (STLink gives an error)
