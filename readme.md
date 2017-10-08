@@ -137,7 +137,7 @@ You must logout and log in again for this to take affect.
 Verify the Arduino IDE is correctly configured for the STM32-L476RG.  Use the following instructions to compile and load the generic Arudino Blinky LED routine.  Demonstrate that the Blinky rate of the LED can be changed by loading new software.  
  - At the bottom of the Getting-Started page, folllow the link  to the Blink Example  
    https://github.com/stm32duino/wiki/wiki/Blink-example  
- - Verify the blink and button behavior (different blink, button has no effect).  The blink on and blink off time are in milliseconds.   Change the values to long on time (e.g. 1000) and short off time (e.g. 50); compile and load; see that the flashes are as expects.  Switch the short and long times, and verify th blink changes as expected.  
+ - Verify the blink and button behavior (different blink, button has no effect).  The blink on and blink off time are in milliseconds.   Change the values to long on time (e.g. 1000) and short off time (e.g. 50); compile and load; see that the flashes are as expects.  Switch the short and long times, and verify the blink behavior changes as expected.  
  
 At this point, the general Arduino IDE is setup for the STM32Nucleo-L476RG. The IDE has been verified as working by successful compilaction and load of an example program.  
 
