@@ -133,9 +133,9 @@ AT THIS POINT, CHECK GROUPS FOR DIALOUT (FOR OSX and Linux)
 You must logout and log in again for this to take affect.   
 
 ***
-  
-TEST: Verify the Arduino IDE is correctly configured for the STM32-L476RG  
-   (at the bottom of the Getting-Started page, folllow the link  to the Blink Example)  
+# Test to confirm Arduino IDE is setup correctly 
+Verify the Arduino IDE is correctly configured for the STM32-L476RG.  Use the following instructions to compile and load the generic Arudino Blinky LED routine.  Demonstrate that the Blinky rate of the LED can be changed by loading new software.  
+ - At the bottom of the Getting-Started page, folllow the link  to the Blink Example  
    https://github.com/stm32duino/wiki/wiki/Blink-example  
    Verify the blink and button behavior (different blink, button has no effect)  
 At this point, the general Arduino IDE is setup for the STM32Nucleo-L476RG.  
