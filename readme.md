@@ -174,7 +174,7 @@ __Notice line 129 - Serial.begin(115200);__
 Verify and upload the sketch to the Nucleo-L476 using the icons at the top of the arduino IDE.  
   - The LD1 COMM LED on by the USB jack should flash from green to red a couple times. 
   - The green LED LD2 should flash ON for about a half second and OFF for about a second and a half.
-  - Notice Lines 143 and 146.  You can very the blink pattern by changing these intervals.
+  - Notice Lines 182 and 185 in YRShell/multipleShells.ino.  You can very the blink pattern by changing these intervals.
   - Notice that you must upload after each edit for the change to affect the blink pattern.
   - If you can change the blink pattern for example 10 milliseconds on and 1500 millseconds off, you are set up correctly.  
   
