@@ -162,7 +162,7 @@ The YRShell directory should contain several files and subdirectories, such as:
    `/home/<yourusername>/Arduino/libraries/YRShell/utility`  
    
 Plug in the USB cable to the Nucleo-L476 board if it is not already.  
-- Start the ARduino IDE  
+- Start the Arduino IDE  
   `Sketch > Include Library > YRShell` (way at the bottom)
 - Navigate to the Fshell arduino sketch:  
   `File > OPen > /home/<yourusername>/Arduino/libraries/YRShell/examples/multipleShells/multipleShells.ino`  
