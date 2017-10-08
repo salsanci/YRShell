@@ -140,10 +140,9 @@ Verify the Arduino IDE is correctly configured for the STM32-L476RG.  Use the fo
    Verify the blink and button behavior (different blink, button has no effect)  
 At this point, the general Arduino IDE is setup for the STM32Nucleo-L476RG.  
 The IDE has been verified as working by successful compilaction and load of an example program.  
-Now we procedue to the YrShell module.  
-
 ***
-
+Now we procedue to the YrShell module.  
+***
 # Software Setup - YrShell
 **This is the goal of all the preceding steps**
 
