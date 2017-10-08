@@ -142,14 +142,16 @@ Verify the Arduino IDE is correctly configured for the STM32-L476RG.  Use the fo
 At this point, the general Arduino IDE is setup for the STM32Nucleo-L476RG. The IDE has been verified as working by successful compilaction and load of an example program.  
 
 ***
-Now we procedue to the YrShell module.  
+Now we procede to the YrShell module.  
 ***
 # Software Setup - YrShell
-**This is the goal of all the preceding steps**
+**bHere we finally get to loading the YrShell firmware on to the Nucleo-L476RG **
 
 ## Setup-YrShell
-Download Fshell from GitHub  `https://github.com/salsanci/YRShell`  
+Clone or Download Fshell from GitHub  `https://github.com/salsanci/YRShell`  
 - copy the directory 
+   `path to YrShell source code`
+
 to 
    `/home/<yourusername>/Arduino/libraries/`  
 
