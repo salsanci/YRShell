@@ -149,13 +149,11 @@ Now we procede to the YrShell module.
 
 ## Setup-YrShell
 Clone or Download Fshell from GitHub  `https://github.com/salsanci/YRShell`  
-- copy the directory 
+- copy the directory  
    `path to YrShell source code`
-
-to 
+to  
    `/home/<yourusername>/Arduino/libraries/`  
-
-   The result should look like this:
+The result should look like this:
    `/home/<yourusername>/Arduino/libraries/YRShell`
    
 The YRShell directory should contain several files and subdirectories, such as:  
