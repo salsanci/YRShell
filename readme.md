@@ -206,15 +206,11 @@ YRShell is now set up and ready for action.
 
 # Full YRShell source code documentation is generated using DOXYGEN
 
-The documentation beyond inital setup will be generated using `make doxygen` in the build directory. The generated doxygen documentation will be found in the created directory `~/build/html/index.html`
+The documentation beyond inital setup will be generated using `make doxygen` in the build directory. The generated doxygen documentation will be found in the created directory `~/build/html/index.html`  
 
-To Generate the documentation switch to the build directory  
-`cd ~/YRShell/build`  
-run the MAKE utility for doxygen:
-`make doxygen`  
-
-Doxygen will create a directory `html'  
-
+To Generate the documentation switch to the build directory `cd ~/YRShell/build`  
+run the MAKE utility for doxygen: `make doxygen`  
+Doxygen will create a directory `html`  
 Switch to the html directoy:
 
 `cd ~/YRShell/build/html`  
