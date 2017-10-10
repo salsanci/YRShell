@@ -211,7 +211,7 @@ The documentation beyond inital setup will be generated using `make doxygen` in 
 To Generate the documentation switch to the build directory `cd ~/YRShell/build`  
 run the MAKE utility for doxygen: `make doxygen`  
 Doxygen will create a directory `html`  
-Switch to the html directoy:
+Switch to the html directory:
 
 `cd ~/YRShell/build/html`  
 
