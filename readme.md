@@ -191,7 +191,7 @@ in the input field, type in
  `st?`  
 and hit enter.   
 
-**You should see the current stack items displayed.**  Use the period **.** followed by the enter key to take items off the stack, and type numbers separated by spaces and terminated with the enter key to put items on the stack.  Notice how you can cause stack underflow messages when you remove more items than are  present.
+**You should see the current stack items displayed.**`/  Use the period **.** followed by the enter key to take items off the stack, and type numbers separated by spaces and terminated with the enter key to put items on the stack.  Notice how you can cause stack underflow messages when you remove more items than are  present.
 
 Type in  
 `wl`  
@@ -200,6 +200,27 @@ and hit enter
 **You should see a display off all currently defined command words.**  Try the various commands such as addition `+` subtraction `-` multipliplication `*` and divdision `/` to get a feel for how they function.  Try more commands until something blows up.  Hit the reset button to start fresh.  Notice that not all command have a meanings out of context. Avoid executing commands out of context as they often cause undefined behavior.
 
 YRShell is now set up and ready for action.  
+
+
 # End of user documentation for initial setup    
 
+# Full YRShell source code documentation is generated using DOXYGEN
 
+The documentation beyond inital setup will be generated using make doxygen in the build directory. The generated doxygen documentation will be found in the created directory `~/build/html/index.html`
+
+To Generate the documentation switch to the build directory  
+`cd ~/YRShell/build`  
+run the MAKE utility for doxygen:
+`make doxygen`  
+
+Doxygen will create a directory `html'  
+
+Switch to the html directoy:
+
+`cd ~/YRShell/build/html`  
+
+find the file `index.html`
+
+Open index.html in your favorite browser to find the generated documentation for the YRShell source code.
+
+#END
