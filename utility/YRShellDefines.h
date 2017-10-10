@@ -1,7 +1,7 @@
 #ifndef YRShellDefines_h
 #define YRShellDefines_h
 
-#ifdef NOTARDUINO_AC6
+#ifdef PLATFORM_ARDUINO
 #include "processorGlobal.h"
 #endif
 

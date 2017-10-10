@@ -1,7 +1,17 @@
 #ifndef YRShellInterpreter_h
 #define YRShellInterpreter_h
 
-#ifdef NOTARDUINO_AC6
+#if defined(__linux__) || defined(__APPLE__)
+    #define PLATFORM_APPLE
+#else
+    #ifdef NOTARDUINO_AC6
+        #define PLATFORM_AC6
+    #else
+        #define PLATFORM_ARDUINO
+    #endif
+#endif
+
+#ifdef PLATFORM_AC6
 #include "processorGlobal.h"
 #endif
 
@@ -143,7 +153,31 @@ enum SI_CC_functions {
     SI_CC_clearStats,
     SI_CC_sliceStats,
     SI_CC_printSliceName,
+    
+    SI_CC_find,
+    SI_CC_findEntry,
+    SI_CC_fetchToken,
 
+    SI_CC_lshift,
+    SI_CC_irshift,
+    SI_CC_rshift,
+    SI_CC_v_return,
+    SI_CC_v_uint16,
+    SI_CC_v_uint32,
+    SI_CC_v_nint16,
+    
+    SI_CC_noop,
+    SI_CC_x_if,
+    SI_CC_x_else,
+    SI_CC_x_then,
+    SI_CC_x_begin,
+    SI_CC_x_until,
+    SI_CC_v_if,
+    SI_CC_v_else,
+    SI_CC_v_then,
+    SI_CC_v_begin,
+    SI_CC_v_until,
+    
  #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     SI_CC_dotf,
     SI_CC_dote,
@@ -217,8 +251,9 @@ protected:
 #ifdef YRSHELL_DEBUG
     void debugToken( void);
 #endif
+    virtual uint16_t findEntry( const char* name);
     virtual uint16_t find( const char* name);
-    
+
     virtual bool isCompileToken( void);
     
     virtual void executeFunction( uint16_t n);
@@ -247,6 +282,7 @@ protected:
 
     
     uint16_t getAbsoluteAddressToken( void);
+    uint16_t fetchValueToken( uint16_t tok);
     uint16_t fetchCurrentValueToken( void);
     const char* getAddressFromToken( uint16_t token);
     uint16_t fetchCurrentToken( void);

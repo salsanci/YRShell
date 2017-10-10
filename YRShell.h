@@ -1,13 +1,7 @@
 #ifndef Shell_h
 #define Shell_h
 
-#ifdef NOTARDUINO_AC6
-#include "processorGlobal.h"
-#endif
-
 #include "utility/YRShellInterpreter.h"
-
-
 
 /** \brief YRShellBase - interactive
  

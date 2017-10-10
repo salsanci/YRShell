@@ -61,7 +61,29 @@ unsigned HiResTimer::getMillis() {
     return (unsigned) end; 
 }
 #else
+#ifdef NOTARDUINO_AC6
+#include "stm32l4xx_hal.h"
 
+unsigned HiResTimer::getSysticks() {
+    return getMicros();
+}
+unsigned HiResTimer::getMicros() {
+	uint32_t m0 = HAL_GetTick();
+	uint32_t u0 = SysTick->LOAD - SysTick->VAL;
+	uint32_t m1 = HAL_GetTick();
+	uint32_t u1 = SysTick->LOAD - SysTick->VAL;
+
+	if (m1 > m0) {
+		return ( m1 * 1000 + (u1 * 1000) / SysTick->LOAD);
+	} else {
+		return ( m0 * 1000 + (u0 * 1000) / SysTick->LOAD);
+	}
+}
+unsigned HiResTimer::getMillis() {
+    return HAL_GetTick();
+}
+
+#else
 #include "Arduino.h"
 unsigned HiResTimer::getSysticks() {
     return micros(); 
@@ -72,4 +94,5 @@ unsigned HiResTimer::getMicros() {
 unsigned HiResTimer::getMillis() {
     return millis(); 
 } 
+#endif
 #endif

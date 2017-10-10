@@ -552,7 +552,24 @@ static const FunctionEntry interpreterFunctions[] = {
     { (uint16_t)YRShellInterpreter::SI_CC_clearStats,                            "clearStats" },
     { (uint16_t)YRShellInterpreter::SI_CC_sliceStats,                            "sliceStats" },
     { (uint16_t)YRShellInterpreter::SI_CC_printSliceName,                        "printSliceName" },
+    
+    { (uint16_t)YRShellInterpreter::SI_CC_find,                                  "find" },
+    { (uint16_t)YRShellInterpreter::SI_CC_findEntry,                             "findEntry" },
+    { (uint16_t)YRShellInterpreter::SI_CC_fetchToken,                            "fetchToken" },
 
+    { (uint16_t)YRShellInterpreter::SI_CC_lshift,                                "<<" },
+    { (uint16_t)YRShellInterpreter::SI_CC_irshift,                               "i>>" },
+    { (uint16_t)YRShellInterpreter::SI_CC_rshift,                                ">>" },
+    { (uint16_t)YRShellInterpreter::SI_CC_v_return,                              "v_return" },
+    { (uint16_t)YRShellInterpreter::SI_CC_v_uint16,                              "v_uint16" },
+    { (uint16_t)YRShellInterpreter::SI_CC_v_uint32,                              "v_uint32" },
+    { (uint16_t)YRShellInterpreter::SI_CC_v_nint16,                              "v_nint16" },
+
+    { (uint16_t)YRShellInterpreter::SI_CC_noop,                                  "noop" },
+    { (uint16_t)YRShellInterpreter::SI_CC_v_if,                                  "v_if" },
+    { (uint16_t)YRShellInterpreter::SI_CC_v_else,                                "v_else" },
+    { (uint16_t)YRShellInterpreter::SI_CC_v_then,                                "v_then" },
+    { (uint16_t)YRShellInterpreter::SI_CC_v_until,                               "v_until" },
 
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     { (uint16_t)YRShellInterpreter::SI_CC_dotf,                                   ".f" },
@@ -719,6 +736,30 @@ const char *SIDebugStrings[] = {
     "SI_CC_sliceStats",
     "SI_CC_printSliceName",
 
+    "SI_CC_find",
+    "SI_CC_findEntry",
+    "SI_CC_fetchToken",
+    
+    "SI_CC_lshift",
+    "SI_CC_irshift",
+    "SI_CC_rshift",
+    "SI_CC_v_return",
+    "SI_CC_v_uint16",
+    "SI_CC_v_uint32",
+    "SI_CC_v_nint16",
+ 
+    "SI_CC_noop",
+    "SI_CC_x_if",
+    "SI_CC_x_else",
+    "SI_CC_x_then",
+    "SI_CC_x_begin",
+    "SI_CC_x_until",
+    "SI_CC_v_if",
+    "SI_CC_v_else",
+    "SI_CC_v_then",
+    "SI_CC_v_begin",
+    "SI_CC_v_until",
+
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     "SI_CC_dotf",
     "SI_CC_dote",
@@ -801,6 +842,15 @@ uint16_t YRShellInterpreter::find( const char* name) {
     for( uint8_t i = 0; rc == YRSHELL_DICTIONARY_INVALID && i < YRSHELL_DICTIONARY_LAST_INDEX; i++) {
         if( m_dictionaryList[ i] != NULL) {
             rc = m_dictionaryList[ i]->find( name);
+        }
+    }
+    return rc;
+}
+uint16_t YRShellInterpreter::findEntry( const char* name) {
+    uint16_t rc = YRSHELL_DICTIONARY_INVALID;
+    for( uint8_t i = 0; rc == YRSHELL_DICTIONARY_INVALID && i < YRSHELL_DICTIONARY_LAST_INDEX; i++) {
+        if( m_dictionaryList[ i] != NULL) {
+            rc = m_dictionaryList[ i]->findEntry( name);
         }
     }
     return rc;
@@ -977,11 +1027,14 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
         case SI_CC_until:
             CC_until();
             break;
+        case SI_CC_x_else:
         case SI_CC_jmp:
             v1 = fetchCurrentToken();
             m_PC &= YRSHELL_DICTIONARY_RELATIVE_ALL_MASK;
             m_PC |= v1 & ~YRSHELL_DICTIONARY_RELATIVE_ALL_MASK;
             break;
+        case SI_CC_x_if:
+        case SI_CC_x_until:
         case SI_CC_jmpz:
             if( !popParameterStack()) {
                 v1 = fetchCurrentToken();
@@ -1223,7 +1276,8 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             v1 = popParameterStack();
             v2 = popParameterStack();
             if( v1 != YRSHELL_DICTIONARY_INVALID && v2 < YRSHELL_DICTIONARY_LAST_INDEX && m_dictionaryList[ v2] != NULL) {
-                pushParameterStack( m_dictionaryList[ v2]->getToken(v1));
+                v1 = m_dictionaryList[ v2]->getToken(v1);
+                pushParameterStack( v1);
             } else {
                 pushParameterStack(YRSHELL_DICTIONARY_INVALID);
             }
@@ -1367,7 +1421,70 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
         		outString( S->sliceName() );
          	}
             break;
+            
+        case SI_CC_find:
+            P = getAddressFromToken(popParameterStack());
+            pushParameterStack( find( P));
+            break;
+        case SI_CC_findEntry:
+            P = getAddressFromToken(popParameterStack());
+            pushParameterStack( findEntry( P));
+            break;
+        case SI_CC_fetchToken:
+            v1 = popParameterStack( );
+            v2 = fetchValueToken( v1);
+            pushParameterStack( v2);
+            break;
 
+        case SI_CC_lshift:
+            v1 = popParameterStack( );
+            v2 = popParameterStack( );
+            pushParameterStack( v2 << v1);
+            break;
+        case SI_CC_irshift:
+            v1 = popParameterStack( );
+            v2 = popParameterStack( );
+            pushParameterStack( ((int32_t) v2) << ((int32_t) v1) );
+            break;
+        case SI_CC_rshift:
+            v1 = popParameterStack( );
+            v2 = popParameterStack( );
+            pushParameterStack( v2 >> v1);
+            break;
+        case SI_CC_v_return:
+            pushParameterStack( YRShellInterpreter::SI_CC_return);
+            break;
+        case SI_CC_v_uint16:
+            pushParameterStack( YRShellInterpreter::SI_CC_uint16);
+            break;
+        case SI_CC_v_uint32:
+            pushParameterStack( YRShellInterpreter::SI_CC_uint32);
+            break;
+        case SI_CC_v_nint16:
+            pushParameterStack(YRShellInterpreter::SI_CC_nint16);
+            break;
+            
+        case SI_CC_x_begin:
+        case SI_CC_x_then:
+        case SI_CC_noop:
+            break;
+            
+        case SI_CC_v_if:
+            pushParameterStack(YRShellInterpreter::SI_CC_x_if);
+            break;
+        case SI_CC_v_else:
+            pushParameterStack(YRShellInterpreter::SI_CC_x_else);
+            break;
+        case SI_CC_v_then:
+            pushParameterStack(YRShellInterpreter::SI_CC_x_then);
+            break;
+        case SI_CC_v_begin:
+            pushParameterStack(YRShellInterpreter::SI_CC_x_begin);
+            break;
+        case SI_CC_v_until:
+            pushParameterStack(YRShellInterpreter::SI_CC_x_until);
+            break;
+            
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
         case SI_CC_dotf:
             outFloat(popFloat());
@@ -1665,6 +1782,10 @@ void YRShellInterpreter::fillPad( char c) {
         reset( __FILE__, __LINE__, "INPUT BUFFER OVERFLOW");
     } else {
         if( c == '\r' || c == '\n') {
+            if( m_Pad[0] == '/' && m_Pad[1] == '/') {
+                m_padCount = 0;
+                m_Pad[ 0] = '\0';
+            }
             nextState( YRSHELL_BEGIN_PARSING);
         } else {
             m_Pad[ m_padCount++] = c;
@@ -1921,9 +2042,9 @@ uint16_t YRShellInterpreter::getAbsoluteAddressToken( ) {
     return m_dictionaryList[ (m_PC >> YRSHELL_DICTIONARY_NUMBER_TOKEN_BITS) & YRSHELL_DICTIONARY_LAST_INDEX ]->getMask() | (m_PC & YRSHELL_DICTIONARY_ADDRESS_MASK);
 }
 
-uint16_t YRShellInterpreter::fetchCurrentValueToken( ) {
-    uint16_t address = YRSHELL_DICTIONARY_ADDRESS_MASK & m_PC;
-    uint16_t mask = YRSHELL_DICTIONARY_MASK & m_PC;
+uint16_t YRShellInterpreter::fetchValueToken( uint16_t tok) {
+    uint16_t address = YRSHELL_DICTIONARY_ADDRESS_MASK & tok;
+    uint16_t mask = YRSHELL_DICTIONARY_MASK & tok;
     uint16_t index = (mask >> YRSHELL_DICTIONARY_NUMBER_ADDRESS_BITS) & YRSHELL_DICTIONARY_LAST_INDEX;
     uint16_t token = YRSHELL_DICTIONARY_INVALID;
 
@@ -1932,6 +2053,10 @@ uint16_t YRShellInterpreter::fetchCurrentValueToken( ) {
     } else {
         token = m_dictionaryList[ (m_PC >> YRSHELL_DICTIONARY_NUMBER_TOKEN_BITS) & YRSHELL_DICTIONARY_LAST_INDEX ]->getWord( address);
     }
+    return token;
+}
+uint16_t YRShellInterpreter::fetchCurrentValueToken( ) {
+    uint16_t token = fetchValueToken( m_PC);
     m_PC++;
     return token;
 }

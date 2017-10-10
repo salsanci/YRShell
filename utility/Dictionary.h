@@ -1,7 +1,7 @@
 #ifndef Dictionary_h
 #define Dictionary_h
 
-#ifdef NOTARDUINO_AC6
+#ifdef PLATFORM_ARDUINO
 #include "processorGlobal.h"
 #endif
 
@@ -79,6 +79,11 @@ public:
     Will be handled by subclasses as applicable.
     */
     virtual uint16_t find( const char* name) =0;
+    /** \brief Should not be called.
+     
+     Will be handled by subclasses as applicable.
+     */
+    virtual uint16_t findEntry( const char* name) =0;
     /** \brief Error routine for dictionaries
      
      Error routine for dictionaries.
@@ -145,6 +150,11 @@ public:
     Given a name, returns a token for the corresponding entry. Returns YRSHELL_DICTIONARY_INVALID if a corresponding entry is not found.
     */
     uint16_t find( const char* name);
+    /** \brief Given a name, returns a name token for the corresponding entry.
+     
+     Given a name, returns a name token for the corresponding entry. Returns YRSHELL_DICTIONARY_INVALID if a corresponding entry is not found.
+     */
+    uint16_t findEntry( const char* name);
 };
 
 /** \brief A compiled dictionary.
@@ -157,11 +167,16 @@ protected:
     uint16_t    m_lastWord;         /**< Index of the last entry in the dictionary*/
     uint16_t    m_size;             /**< The size of the dictionary. */
     
-    /** \brief Given a name, returns a token for the corresponding entry.
-
-    Given a name, returns a token for the corresponding entry. Returns YRSHELL_DICTIONARY_INVALID if a corresponding entry is not found.
-    */
+    /** \brief Given a name, returns an execution token for the corresponding entry.
+     
+     Given a name, returns an execution token for the corresponding entry. Returns YRSHELL_DICTIONARY_INVALID if a corresponding entry is not found.
+     */
     uint16_t findInternal( const char* name, uint16_t link);
+    /** \brief Given a name, returns a name token for the corresponding entry.
+     
+     Given a name, returns a name token for the corresponding entry. Returns YRSHELL_DICTIONARY_INVALID if a corresponding entry is not found.
+     */
+    uint16_t findInternalEntry( const char* name, uint16_t link);
 public:
     CompiledDictionary( void);
     CompiledDictionary( uint16_t* dict, uint16_t lastWord, uint16_t size, uint16_t mask);
@@ -199,11 +214,16 @@ public:
     Given an index, returns the address for he name.
     */
     const char* getAddress( uint16_t index);
-    /** \brief Given a name, returns a token for the corresponding entry.
+    /** \brief Given a name, returns an execution token for the corresponding entry.
 
-    Given a name, returns a token for the corresponding entry. Returns YRSHELL_DICTIONARY_INVALID if a corresponding entry is not found.
+    Given a name, returns an execution token for the corresponding entry. Returns YRSHELL_DICTIONARY_INVALID if a corresponding entry is not found.
     */
     uint16_t find( const char* name);
+    /** \brief Given a name, returns a name token for the corresponding entry.
+     
+     Given a name, returns a name token for the corresponding entry. Returns YRSHELL_DICTIONARY_INVALID if a corresponding entry is not found.
+     */
+    uint16_t findEntry( const char* name);
     /** \brief Returns an index past the last entry in the dictionary.
 
     Returns an index past the last entry in the dictionary.

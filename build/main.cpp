@@ -115,8 +115,11 @@ public:
      */
     enum SE_CC_functions {
         SE_CC_first = YRSHELL_DICTIONARY_EXTENSION_FUNCTION,
-        SE_CC_timesTwo,
-        SE_CC_timesFour,
+        SE_CC_ledControlShell,
+        SE_CC_ledControlArduino,
+        SE_CC_ledOn,
+        SE_CC_ledOff,
+        SE_CC_setBaud,
         SE_CC_last
     };
 protected:
@@ -190,14 +193,6 @@ static const FunctionEntry shellExtensionFunctions[] = {
 static FunctionDictionary dictionaryExtensionFunction( shellExtensionFunctions, YRSHELL_DICTIONARY_EXTENSION_FUNCTION );
 CompiledDictionary compiledExtensionDictionary( NULL, 0xFFFF , 0x0000 , YRSHELL_DICTIONARY_EXTENSION_COMPILED);
 
-#ifdef YRSHELL_DEBUG
-static const char *MyYRShellExtensionDebugStrings[] = {
-    "SE_CC_first",
-    "SE_CC_timesTwo",
-    "SE_CC_timesFour",
-    "SE_CC_last",
-};
-#endif
 void MyYRShell::init() {
     CommonShell::init();
     m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_COMPILED_INDEX] = &compiledExtensionDictionary;
@@ -207,13 +202,6 @@ void MyYRShell::executeFunction( uint16_t n) {
     if( n <= SE_CC_first || n >= SE_CC_last) {
        CommonShell::executeFunction(n);
     } else {
-#ifdef YRSHELL_DEBUG
-        if( m_debugFlags & YRSHELL_DEBUG_EXECUTE) {
-            outString("[");
-            outString(MyYRShellExtensionDebugStrings[n - SE_CC_first]);
-            outString("]");
-        }
-#endif
         switch( n) {
             case SE_CC_timesTwo:
                 pushParameterStack(popParameterStack()*2);
@@ -237,13 +225,6 @@ void SmallYRShell::executeFunction( uint16_t n) {
     if( n <= SE_CC_first || n >= SE_CC_last) {
         CommonShell::executeFunction(n);
     } else {
-#ifdef YRSHELL_DEBUG
-        if( m_debugFlags & YRSHELL_DEBUG_EXECUTE) {
-            outString("[");
-            outString(MyYRShellExtensionDebugStrings[n - SE_CC_first]);
-            outString("]");
-        }
-#endif
         switch( n) {
             case SE_CC_timesTwo:
                 pushParameterStack(popParameterStack()*2);
@@ -257,31 +238,67 @@ void SmallYRShell::executeFunction( uint16_t n) {
         }
     }
 }
+
+static const FunctionEntry bigShellExtensionFunctions[] = {
+    { BigYRShell::SE_CC_ledControlShell,    "ledControlShell" },
+    { BigYRShell::SE_CC_ledControlArduino,  "ledControlArduino" },
+    { BigYRShell::SE_CC_ledOn,              "ledOn" },
+    { BigYRShell::SE_CC_ledOff,             "ledOff" },
+    { BigYRShell::SE_CC_setBaud,            "setBaud" },
+    { 0, NULL}
+};
+static FunctionDictionary bigShellDictionaryExtensionFunction( bigShellExtensionFunctions, YRSHELL_DICTIONARY_EXTENSION_FUNCTION );
+
 void BigYRShell::init() {
     CommonShell::init();
     m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_COMPILED_INDEX] = &compiledExtensionDictionary;
-    m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_FUNCTION_INDEX] = &dictionaryExtensionFunction;
+    m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_FUNCTION_INDEX] = &bigShellDictionaryExtensionFunction;
 }
 void BigYRShell::executeFunction( uint16_t n) {
+    uint32_t v1, v2;
+    static bool ledControl;
     if( n <= SE_CC_first || n >= SE_CC_last) {
         CommonShell::executeFunction(n);
     } else {
-#ifdef YRSHELL_DEBUG
-        if( m_debugFlags & YRSHELL_DEBUG_EXECUTE) {
-            outString("[");
-            outString(MyYRShellExtensionDebugStrings[n - SE_CC_first]);
-            outString("]");
-        }
-#endif
         switch( n) {
-            case SE_CC_timesTwo:
-                pushParameterStack(popParameterStack()*2);
+            case SE_CC_ledControlShell:
+                ledControl = true;
                 break;
-            case SE_CC_timesFour:
-                pushParameterStack(popParameterStack()*4);
+            case SE_CC_ledControlArduino:
+                ledControl = false;
+                break;
+            case SE_CC_ledOn:
+                if( ledControl) {
+#ifdef PLATFORM_AC6
+                    HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
+#endif
+#ifdef PLATFORM_ARDUINO
+                    digitalWrite(LED_BUILTIN, HIGH);
+#endif
+                }
+                break;
+            case SE_CC_ledOff:
+                if( ledControl) {
+#ifdef PLATFORM_AC6
+                    HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+#endif
+#ifdef PLATFORM_ARDUINO
+                    digitalWrite(LED_BUILTIN, LOW);
+#endif
+                }
+                break;
+            case SE_CC_setBaud:
+                v1 = popParameterStack();
+                v2 = popParameterStack();
+#ifdef PLATFORM_AC6
+                STMSerial::setUartBaudRate( v1, v2);
+#endif
+#ifdef PLATFORM_ARDUINO
+                //TODO FIXME
+#endif
                 break;
             default:
-                shellERROR(__BASE_FILE__, __LINE__);
+                shellERROR(__FILE__, __LINE__);
                 break;
         }
     }

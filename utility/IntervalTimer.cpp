@@ -1,5 +1,6 @@
 
 #include "IntervalTimer.h"
+#include "HiResTimer.h"
 
 
 IntervalTimer::IntervalTimer( unsigned intervalInMilliSeconds) {
@@ -22,13 +23,11 @@ bool IntervalTimer::hasIntervalElapsed( void) {
 }
 #else
 
-#include "Arduino.h"
-
 void IntervalTimer::setInterval( unsigned intervalInMilliSeconds) {
-    m_start = millis();
+    m_start = HiResTimer::getMillis();
     m_interval = intervalInMilliSeconds;
 }
 bool IntervalTimer::hasIntervalElapsed( void) {
-    return (millis() - m_start) >= m_interval;
+    return (HiResTimer::getMillis() - m_start) >= m_interval;
 }
 #endif

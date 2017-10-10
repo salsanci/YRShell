@@ -5,6 +5,16 @@ Sliceable* Sliceable::s_Current = NULL;
 Sliceable* Sliceable::s_Last = NULL;
 uint32_t Sliceable::s_slowCounter = SLICE_SLOW_LIMIT;
 
+// Finish THis
+class SliceAll : public Sliceable {
+    SliceAll( void);
+    ~SliceAll( void);
+    void slice( void);
+};
+SliceAll::SliceAll( void) { }
+SliceAll::~SliceAll( void) { }
+void SliceAll::slice( void) { }
+
 Sliceable::Sliceable() {
 	m_Next = NULL;
 	if( s_First == NULL) {

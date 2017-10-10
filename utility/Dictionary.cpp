@@ -54,7 +54,7 @@ FunctionDictionary::FunctionDictionary( const FunctionEntry* dict, uint16_t mask
     for(  m_size = 0; dict->isValid() && m_size <= ((uint16_t) YRSHELL_DICTIONARY_MAX_ADDRESS); dict++, m_size++) {
     }
 }
-uint16_t FunctionDictionary::find( const char* name) {
+uint16_t FunctionDictionary::findEntry( const char* name) {
     uint16_t rc = YRSHELL_DICTIONARY_INVALID;
     for( const FunctionEntry *S = &M_dictionary[ m_size-1]; S >= M_dictionary; S-- ) {
         if( S->isMatch(name)) {
@@ -65,7 +65,9 @@ uint16_t FunctionDictionary::find( const char* name) {
     }
     return rc;
 }
-
+uint16_t FunctionDictionary::find( const char* name) {
+    return findEntry( name);
+}
 const char* FunctionDictionary::getAddress( uint16_t index) {
     return index < m_size ? (M_dictionary + index)->getName() : NULL;
 }
@@ -98,7 +100,7 @@ CompiledDictionary::CompiledDictionary( uint16_t* dict, uint16_t lastWord, uint1
     m_mask = mask;
 }
 
-uint16_t CompiledDictionary::findInternal( const char* name, uint16_t link) {
+uint16_t CompiledDictionary::findInternalEntry( const char* name, uint16_t link) {
     uint16_t rc = YRSHELL_DICTIONARY_INVALID;
     const char* P;
     while( link != YRSHELL_DICTIONARY_INVALID) {
@@ -106,9 +108,16 @@ uint16_t CompiledDictionary::findInternal( const char* name, uint16_t link) {
         if( strcmp( P, name)) {
             link = m_dictionary[ link];
         } else {
-            rc = m_mask | (link + 1 + Dictionary::nameLength(name));
+            rc = m_mask | (link + 1);
             break;
         }
+    }
+    return rc;
+}
+uint16_t CompiledDictionary::findInternal( const char* name, uint16_t link) {
+    uint16_t rc = findInternalEntry( name, link);
+    if( rc != YRSHELL_DICTIONARY_INVALID) {
+        rc += Dictionary::nameLength(name);
     }
     return rc;
 }
@@ -117,6 +126,14 @@ uint16_t CompiledDictionary::find( const char* name) {
     if( m_lastWord != YRSHELL_DICTIONARY_INVALID) {
         uint16_t link =  m_lastWord;
         rc = findInternal( name, link);
+    }
+    return rc;
+}
+uint16_t CompiledDictionary::findEntry( const char* name) {
+    uint16_t rc = YRSHELL_DICTIONARY_INVALID;
+    if( m_lastWord != YRSHELL_DICTIONARY_INVALID) {
+        uint16_t link =  m_lastWord;
+        rc = findInternalEntry( name, link);
     }
     return rc;
 }
