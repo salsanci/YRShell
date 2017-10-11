@@ -177,7 +177,9 @@ enum SI_CC_functions {
     SI_CC_v_then,
     SI_CC_v_begin,
     SI_CC_v_until,
-    
+    SI_CC_v_string,
+    SI_CC_isFunction,
+
  #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     SI_CC_dotf,
     SI_CC_dote,
