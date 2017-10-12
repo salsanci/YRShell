@@ -39,35 +39,50 @@ The same YRShell code that runs on the Nucleo-L476RG and Ardunio boards (Due,, M
 ## To build YRShell for the PC command line:
 
 Move to the YRShell directoy:  
-`cd /YRShell`  
+`cd /YRShell/build`  
 
 Compile and build the YRShell executable:  
-`make YRShell.cpp`  
+`make`  
 
 After the complier finishes, the YRShell executable should be in the directory.
 
 Execute that YRShell program from the command line:
 
-`./YRShell`
+`./yrshell`
 
 You should see the same YRShell command prompt as was displayed on the arduiino IDE serial monitor.
 
 Try various commands such as word list `wl`  stack display `st?` interger math functions `+` `-` `*` `/`
 
+# Built-in IEEE floating point math
+
 Try the floating point math functions such as:
 
-`5.432 3.217 + .f`
+`5.432 3.217 f+ .f`
 
+Here's something that is a little bit interesting, and reveals how floating point is done on the command line.
+Paste the following into the YRShell command line:  
 
+`4.444 1.111 st? f- st? .f`
 
+Notice that is you enter float numbers and pop them off the stack using the interger stack pop `.` that the float number is display as an interger in IEEE float format.
+The converse is also true.  This means we have to take care if we wish to manipulate both float and interger number on the same stack.
 
+At this writing, there is no command word to perform mixed math (float with interger).
 
+# Compiler stack
+
+In addition to the usual parameter stack and the usual return stack, YRShell has a third stack, the compiler stack.  
+At compile time, this stack is used internally.  At run time this stack is available for the user.  
+Now we can use another stack, without having to worry about the crossing definition boundraies as we would with the return stak. 
+
+The >c word take the value on the top of the parameter stack, and puts it on the compiler stack.
+
+The c> work takes the top value off the compiler stack, and puts it on the parameter stack.
 
 # Build the example Test script
 
-To build the example test script, move to the xxx directory:
-
-`cd xxx`
+Notice that the `make command builds the YRShell command line shell on the pc, and the test script(s).
 
 [continue here]
 
