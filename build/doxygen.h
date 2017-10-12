@@ -7,7 +7,8 @@
 - \subpage customizingDocumentation "YrShell customizing documnetation
 - \subpage developerDocumentation "YrShell developer documentation"
 - \subpage currentStatus "Current Project Status"
-- \subpage examples "Examples"
+- \subpage examples "Examples" 
+- \subpage gitnotes "Notes on using GIT"
  
  */ 
 
@@ -347,6 +348,16 @@ hcProgPin pinlo
 * Copyright@2013 www.bolutek.com. All rights reserved.		   *
 ********************************************************************
 
+
+
+*/
+
+/** \page gitnotes
+
+Notes for commonly used git commands
+
+To set fresh with the project (you have no YRShell directory on your PC and want a fresh one)
+git clone 
 
 
 */
