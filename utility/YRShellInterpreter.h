@@ -179,6 +179,10 @@ enum SI_CC_functions {
     SI_CC_v_until,
     SI_CC_v_string,
     SI_CC_isFunction,
+    SI_CC_v_dictionaryMask,
+    SI_CC_v_dictionaryRelative,
+
+    SI_CC_not,
 
  #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     SI_CC_dotf,
