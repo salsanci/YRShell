@@ -34,7 +34,7 @@ After YRShell is installed using the instructions in ReadMe.md,  continue with t
 
 YRShell is written in the C programming languge.  This means the code can be made to run on any suitable processor that hasa C compiler.  The PC also has a C compiler.  
 
-The same YRShell code that runs on the Nucleo-L476RG and Ardunio boards (Due,, Mefa2564) can also run on the PC.
+The same YRShell code that runs on the Nucleo-L476RG and Ardunio boards (Due, Mega2560) can also run on the PC.
 
 ## To build YRShell for the PC command line:
 
