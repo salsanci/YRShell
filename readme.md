@@ -47,11 +47,12 @@ The YrShell development environment is tested on Mac OSX, Linux Mint 18.2, and W
 Other versions of MacOSX, Linux (Ubuntu, debian), and Windows should work as expected. 
 Windows XP is possible but not covered here until requested.   
 1. Plug in USB cable to available USB port on PC.   
-   - Notice that the USB cable prvides power to the Board.  
-  1. Plug other end into Nucleo-L476RG board;  
-     - You should see a directory window open for   
-     `/media/<user>/NODE_L476RG`   (linux)  
-        containing two files, DETAILS.TXT and MBED.HTM  
+   Notice that the USB cable prvides power to the Board.  
+1. Plug other end into Nucleo-L476RG board  
+   You should see a directory window open for   
+   `/media/<user>/NODE_L476RG`   (linux)  
+   containing two files, DETAILS.TXT and MBED.HTM  
+   
 NOTE: Linux Mint displays the directory, LED1 COM is solid RED  
 NOTE: Windows 10 gives an error, LED1 COM flashes RED  
 FIRST TIME ONLY:  
