@@ -57,10 +57,12 @@
  : _dr0  dup numRegisters < [  dup @ . 1 + ]
  : _dr1 dup . s' : ' .str  dup @ . _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 cr
  : regs 0 { _dr1 dup numRegisters >= } drop
-
+ 
+ 
+ 
  
  //TODO fix dc iFUNCTION
- //TODO dcAll order reverse
+ 
  // resolveRelative ( token_addr token_addr -- token_addr token_addr )
  : resolveRelative dup v_dictionaryMask  & v_dictionaryRelative == [ over v_dictionaryMask & swap v_dictionaryMask ~ & | ]
  
@@ -76,24 +78,24 @@
  : dcwName resolveRelative >c 0 dictInvalid { _dc2 c> dup >c  == [ _dc3 ][ _dc4 ] } c> swap 0== [ _dc5 ][ drop ]
  
  // dcwa ( token_addr token -- token_addr t/f )
- : dcwa dup v_string != [ -1 ][ drop 1 + dup s'  s\' ' .str .str 0x27 emit dup strlen 2 / + 0 ]
+ : dcwa dup v_string != [ -1 ][ drop 1 + dup s'  s\' ' .str .rawStr 0x27 emit dup strlen 2 / + 0 ]
  // dcw8 ( token_addr token -- token_addr t/f )
  : dcw8 dup v_else != [ dup v_then != [ dcwa ][ drop s'  ]' .str 0 ] ][ drop 1 + s'  ][' .str 0 ]
  // dcw6 ( token_addr token -- token_addr t/f )
  : dcw6 dup v_until != [ dup v_if != [ dcw8 ][ drop 1 + s'  [' .str 0 ] ][ drop 1 + s'  }' .str 0 ]
  // dcw4 ( token_addr token -- token_addr t/f )
- : dcw4 dup v_nint16 != [ dup v_begin != [ dcw6 ][ drop s'  {' .str 0 ] ][ drop 1 + dup fetchToken 0xFFFF0000 + space . 0 ]
+ : dcw4 dup v_nint16 != [ dup v_begin != [ dcw6 ][ drop s'  {' .str 0 ] ][ drop 1 + dup fetchToken 0xFFFF0000 + space .n 0 ]
  // dcw3 ( token_addr token -- token_addr t/f )
- : dcw3 dup v_uint32 != [ dcw4 ][ drop 1 + dup fetchToken swap 1 + tuck fetchToken 16 << + space . 0 ]
+ : dcw3 dup v_uint32 != [ dcw4 ][ drop 1 + dup fetchToken swap 1 + tuck fetchToken 16 << + space .n 0 ]
  // dcw1 ( token_addr token -- token_addr t/f )
- : dcw1 dup v_return != [ dup v_uint16 != [ dcw3 ][ drop 1 + dup fetchToken space . 0 ] ][ 0 ]
+ : dcw1 dup v_return != [ dup v_uint16 != [ dcw3 ][ drop 1 + dup fetchToken space .n 0 ] ][ 0 ]
  // dcw ( token_addr -- token_addr )
  : dcw dup fetchToken dcw1 [ dcwName ]
  
  // _dc0 ( token_addr -- )
  : _dc0 { dup fetchToken v_return == [ drop -1 ][ dcw 1 + 0 ] }
  // dc ( string -- )
- : dc s' : ' .str dup .str space find dup 0xFFFF != [ _dc0 ][ _dc5 ] cr
+ : dc s' : ' .str dup .str find dup 0xFFFF != [ _dc0 ][ _dc5 ] cr
  
  // duw2 ( token_addr+256 token_addr -- token_addr+256 token_addr t/f )
  : duw2 dup fetchToken dup .wx v_return == >r 1 + 2dup <= r> |
@@ -103,10 +105,17 @@
  : duw find dup 0xFFFF != [ dup .wx s' : ' .str dup 0x100 + swap duw1 2drop ][ drop ] cr
  
  // _dca ( dict index token --  dict index )
- : _dca dup isFunction [ drop ][ s' : ' .str >c 2dup .entryName drop c> _dc0  cr ]
+ : _dca dup isFunction [ s' // ' .str drop 2dup .entryName drop cr ][ s' : ' .str >c 2dup .entryName drop c> _dc0  cr ]
+ 
+ //dAT ( n -- dict entry)
+ : dAT1 rot 1 + dup >c rot rot c> c> dup >c ==
+ : dAT >c 0 0 dictInvalid { nextEntry dup dictInvalid == [ -1 ][ dAT1 ] } c> drop rot drop
+ 
+ // dcCount( -- count)
+ : dcCount 0 0 dictInvalid { nextEntry dup dictInvalid == [ -1 ][ rot 1 + rot rot  0 ] } 2drop
+ 
  // dcAll ( -- )
- : dcAll 0 dictInvalid { nextEntry dup dictInvalid == [ -1 ][ 2dup entryToken  _dca 0 ] } 2drop
-
+ : dcAll dcCount { dup dAT 2dup entryToken _dca 2drop 1 - dup 0 == }
  
  compileInterpreterDictionary
  
@@ -170,59 +179,6 @@
  : _dr1 dup . s' : ' .str  dup @ . _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 cr
  : regs 0 { _dr1 dup numRegisters >= } drop
  
- 
- //TODO fix dc iFUNCTION
- //TODO dcAll order reverse
- // resolveRelative ( token_addr token_addr -- token_addr token_addr )
- : resolveRelative dup v_dictionaryMask  & v_dictionaryRelative == [ over v_dictionaryMask & swap v_dictionaryMask ~ & | ]
- 
- : _dc5 s'  ERROR[ ' .str . s' ] ' .str
- // _dc4 ( dict index  --  0 -1 | dict index 0)
- : _dc4 dup dictInvalid == [ 2drop 0 -1 ][ 0 ]
- // _dc3 ( dict index -- -1 -1 )
- : _dc3 space .entryName drop -1 -1
- // _dc2 ( dict index -- dict index token)
- : _dc2 nextEntry 2dup entryToken
- 
- // dcwName ( token_addr token -- )
- : dcwName resolveRelative >c 0 dictInvalid { _dc2 c> dup >c  == [ _dc3 ][ _dc4 ] } c> swap 0== [ _dc5 ][ drop ]
- 
- // dcwa ( token_addr token -- token_addr t/f )
- : dcwa dup v_string != [ -1 ][ drop 1 + dup s'  s\' ' .str .str 0x27 emit dup strlen 2 / + 0 ]
- // dcw8 ( token_addr token -- token_addr t/f )
- : dcw8 dup v_else != [ dup v_then != [ dcwa ][ drop s'  ]' .str 0 ] ][ drop 1 + s'  ][' .str 0 ]
- // dcw6 ( token_addr token -- token_addr t/f )
- : dcw6 dup v_until != [ dup v_if != [ dcw8 ][ drop 1 + s'  [' .str 0 ] ][ drop 1 + s'  }' .str 0 ]
- // dcw4 ( token_addr token -- token_addr t/f )
- : dcw4 dup v_nint16 != [ dup v_begin != [ dcw6 ][ drop s'  {' .str 0 ] ][ drop 1 + dup fetchToken 0xFFFF0000 + space . 0 ]
- // dcw3 ( token_addr token -- token_addr t/f )
- : dcw3 dup v_uint32 != [ dcw4 ][ drop 1 + dup fetchToken swap 1 + tuck fetchToken 16 << + space . 0 ]
- // dcw1 ( token_addr token -- token_addr t/f )
- : dcw1 dup v_return != [ dup v_uint16 != [ dcw3 ][ drop 1 + dup fetchToken space . 0 ] ][ 0 ]
- // dcw ( token_addr -- token_addr )
- : dcw dup fetchToken dcw1 [ dcwName ]
- 
- // _dc0 ( token_addr -- )
- : _dc0 { dup fetchToken v_return == [ drop -1 ][ dcw 1 + 0 ] }
- // dc ( string -- )
- : dc s' : ' .str dup .str space find dup 0xFFFF != [ _dc0 ][ _dc5 ] cr
- 
- // duw2 ( token_addr+256 token_addr -- token_addr+256 token_addr t/f )
- : duw2 dup fetchToken dup .wx v_return == >r 1 + 2dup <= r> |
- // duw1 ( token_addr+256 token_addr -- token_addr+256 token_addr t/f )
- : duw1 dup isFunction [ s' iFUNCTION' .str ][ { duw2 } ]
- // duw ( string -- )
- : duw find dup 0xFFFF != [ dup .wx s' : ' .str dup 0x100 + swap duw1 2drop ][ drop ] cr
- 
- // _dca ( dict index token --  dict index )
- : _dca dup isFunction [ drop ][ s' : ' .str >c 2dup .entryName drop c> _dc0  cr ]
- // dcAll ( -- )
- : dcAll 0 dictInvalid { nextEntry dup dictInvalid == [ -1 ][ 2dup entryToken  _dca 0 ] } 2drop
- 
- 
- compileInterpreterDictionary
- 
- 
  bShell> : ps? s' PARAMETER STACK: ' .str psd? 0!= [ psd? { dup ps@ . 1 - dup 0== } drop ] cr
  bShell> : rs? s'    RETURN STACK: ' .str rsd? 0!= [ rsd? 1 - { dup rs@ . 1 - dup -1 == } drop ] cr
  bShell> : cs? s'   COMPILE STACK: ' .str csd? 0!= [ csd? 1 - { dup cs@ . 1 - dup -1 == } drop ] cr
@@ -277,11 +233,62 @@
  bShell> : _dr0  dup numRegisters < [  dup @ . 1 + ]
  bShell> : _dr1 dup . s' : ' .str  dup @ . _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 cr
  bShell> : regs 0 { _dr1 dup numRegisters >= } drop
- bShell>
- bShell>
- bShell> //TODO fix dc iFUNCTION
- bShell> //TODO dcAll order reverse
- bShell> // resolveRelative ( token_addr token_addr -- token_addr token_addr )
+ bShell>// resolveRelative ( token_addr token_addr -- token_addr token_addr )
+ : resolveRelative dup v_dictionaryMask  & v_dictionaryRelative == [ over v_dictionaryMask & swap v_dictionaryMask ~ & | ]
+ 
+ : _dc5 s'  ERROR[ ' .str . s' ] ' .str
+ // _dc4 ( dict index  --  0 -1 | dict index 0)
+ : _dc4 dup dictInvalid == [ 2drop 0 -1 ][ 0 ]
+ // _dc3 ( dict index -- -1 -1 )
+ : _dc3 space .entryName drop -1 -1
+ // _dc2 ( dict index -- dict index token)
+ : _dc2 nextEntry 2dup entryToken
+ 
+ // dcwName ( token_addr token -- )
+ : dcwName resolveRelative >c 0 dictInvalid { _dc2 c> dup >c  == [ _dc3 ][ _dc4 ] } c> swap 0== [ _dc5 ][ drop ]
+ 
+ // dcwa ( token_addr token -- token_addr t/f )
+ : dcwa dup v_string != [ -1 ][ drop 1 + dup s'  s\' ' .str .rawStr 0x27 emit dup strlen 2 / + 0 ]
+ // dcw8 ( token_addr token -- token_addr t/f )
+ : dcw8 dup v_else != [ dup v_then != [ dcwa ][ drop s'  ]' .str 0 ] ][ drop 1 + s'  ][' .str 0 ]
+ // dcw6 ( token_addr token -- token_addr t/f )
+ : dcw6 dup v_until != [ dup v_if != [ dcw8 ][ drop 1 + s'  [' .str 0 ] ][ drop 1 + s'  }' .str 0 ]
+ // dcw4 ( token_addr token -- token_addr t/f )
+ : dcw4 dup v_nint16 != [ dup v_begin != [ dcw6 ][ drop s'  {' .str 0 ] ][ drop 1 + dup fetchToken 0xFFFF0000 + space .n 0 ]
+ // dcw3 ( token_addr token -- token_addr t/f )
+ : dcw3 dup v_uint32 != [ dcw4 ][ drop 1 + dup fetchToken swap 1 + tuck fetchToken 16 << + space .n 0 ]
+ // dcw1 ( token_addr token -- token_addr t/f )
+ : dcw1 dup v_return != [ dup v_uint16 != [ dcw3 ][ drop 1 + dup fetchToken space .n 0 ] ][ 0 ]
+ // dcw ( token_addr -- token_addr )
+ : dcw dup fetchToken dcw1 [ dcwName ]
+ 
+ // _dc0 ( token_addr -- )
+ : _dc0 { dup fetchToken v_return == [ drop -1 ][ dcw 1 + 0 ] }
+ // dc ( string -- )
+ : dc s' : ' .str dup .str find dup 0xFFFF != [ _dc0 ][ _dc5 ] cr
+ 
+ // duw2 ( token_addr+256 token_addr -- token_addr+256 token_addr t/f )
+ : duw2 dup fetchToken dup .wx v_return == >r 1 + 2dup <= r> |
+ // duw1 ( token_addr+256 token_addr -- token_addr+256 token_addr t/f )
+ : duw1 dup isFunction [ s' iFUNCTION' .str ][ { duw2 } ]
+ // duw ( string -- )
+ : duw find dup 0xFFFF != [ dup .wx s' : ' .str dup 0x100 + swap duw1 2drop ][ drop ] cr
+ 
+ // _dca ( dict index token --  dict index )
+ : _dca dup isFunction [ s' // ' .str drop 2dup .entryName drop cr ][ s' : ' .str >c 2dup .entryName drop c> _dc0  cr ]
+ 
+ //dAT ( n -- dict entry)
+ : dAT1 rot 1 + dup >c rot rot c> c> dup >c ==
+ : dAT >c 0 0 dictInvalid { nextEntry dup dictInvalid == [ -1 ][ dAT1 ] } c> drop rot drop
+ 
+ // dcCount( -- count)
+ : dcCount 0 0 dictInvalid { nextEntry dup dictInvalid == [ -1 ][ rot 1 + rot rot  0 ] } 2drop
+ 
+ // dcAll ( -- )
+ : dcAll dcCount { dup dAT 2dup entryToken _dca 2drop 1 - dup 0 == }
+ 
+ compileInterpreterDictionary
+ // resolveRelative ( token_addr token_addr -- token_addr token_addr )
  bShell> : resolveRelative dup v_dictionaryMask  & v_dictionaryRelative == [ over v_dictionaryMask & swap v_dictionaryMask ~ & | ]
  bShell>
  bShell> : _dc5 s'  ERROR[ ' .str . s' ] ' .str
@@ -296,24 +303,24 @@
  bShell> : dcwName resolveRelative >c 0 dictInvalid { _dc2 c> dup >c  == [ _dc3 ][ _dc4 ] } c> swap 0== [ _dc5 ][ drop ]
  bShell>
  bShell> // dcwa ( token_addr token -- token_addr t/f )
- bShell> : dcwa dup v_string != [ -1 ][ drop 1 + dup s'  s\' ' .str .str 0x27 emit dup strlen 2 / + 0 ]
+ bShell> : dcwa dup v_string != [ -1 ][ drop 1 + dup s'  s\' ' .str .rawStr 0x27 emit dup strlen 2 / + 0 ]
  bShell> // dcw8 ( token_addr token -- token_addr t/f )
  bShell> : dcw8 dup v_else != [ dup v_then != [ dcwa ][ drop s'  ]' .str 0 ] ][ drop 1 + s'  ][' .str 0 ]
  bShell> // dcw6 ( token_addr token -- token_addr t/f )
  bShell> : dcw6 dup v_until != [ dup v_if != [ dcw8 ][ drop 1 + s'  [' .str 0 ] ][ drop 1 + s'  }' .str 0 ]
  bShell> // dcw4 ( token_addr token -- token_addr t/f )
- bShell> : dcw4 dup v_nint16 != [ dup v_begin != [ dcw6 ][ drop s'  {' .str 0 ] ][ drop 1 + dup fetchToken 0xFFFF0000 + space . 0 ]
+ bShell> : dcw4 dup v_nint16 != [ dup v_begin != [ dcw6 ][ drop s'  {' .str 0 ] ][ drop 1 + dup fetchToken 0xFFFF0000 + space .n 0 ]
  bShell> // dcw3 ( token_addr token -- token_addr t/f )
- bShell> : dcw3 dup v_uint32 != [ dcw4 ][ drop 1 + dup fetchToken swap 1 + tuck fetchToken 16 << + space . 0 ]
+ bShell> : dcw3 dup v_uint32 != [ dcw4 ][ drop 1 + dup fetchToken swap 1 + tuck fetchToken 16 << + space .n 0 ]
  bShell> // dcw1 ( token_addr token -- token_addr t/f )
- bShell> : dcw1 dup v_return != [ dup v_uint16 != [ dcw3 ][ drop 1 + dup fetchToken space . 0 ] ][ 0 ]
+ bShell> : dcw1 dup v_return != [ dup v_uint16 != [ dcw3 ][ drop 1 + dup fetchToken space .n 0 ] ][ 0 ]
  bShell> // dcw ( token_addr -- token_addr )
  bShell> : dcw dup fetchToken dcw1 [ dcwName ]
  bShell>
  bShell> // _dc0 ( token_addr -- )
  bShell> : _dc0 { dup fetchToken v_return == [ drop -1 ][ dcw 1 + 0 ] }
  bShell> // dc ( string -- )
- bShell> : dc s' : ' .str dup .str space find dup 0xFFFF != [ _dc0 ][ _dc5 ] cr
+ bShell> : dc s' : ' .str dup .str find dup 0xFFFF != [ _dc0 ][ _dc5 ] cr
  bShell>
  bShell> // duw2 ( token_addr+256 token_addr -- token_addr+256 token_addr t/f )
  bShell> : duw2 dup fetchToken dup .wx v_return == >r 1 + 2dup <= r> |
@@ -323,10 +330,17 @@
  bShell> : duw find dup 0xFFFF != [ dup .wx s' : ' .str dup 0x100 + swap duw1 2drop ][ drop ] cr
  bShell>
  bShell> // _dca ( dict index token --  dict index )
- bShell> : _dca dup isFunction [ drop ][ s' : ' .str >c 2dup .entryName drop c> _dc0  cr ]
- bShell> // dcAll ( -- )
- bShell> : dcAll 0 dictInvalid { nextEntry dup dictInvalid == [ -1 ][ 2dup entryToken  _dca 0 ] } 2drop
+ bShell> : _dca dup isFunction [ s' // ' .str drop 2dup .entryName drop cr ][ s' : ' .str >c 2dup .entryName drop c> _dc0  cr ]
  bShell>
+ bShell> //dAT ( n -- dict entry)
+ bShell> : dAT1 rot 1 + dup >c rot rot c> c> dup >c ==
+ bShell> : dAT >c 0 0 dictInvalid { nextEntry dup dictInvalid == [ -1 ][ dAT1 ] } c> drop rot drop
+ bShell>
+ bShell> // dcCount( -- count)
+ bShell> : dcCount 0 0 dictInvalid { nextEntry dup dictInvalid == [ -1 ][ rot 1 + rot rot  0 ] } 2drop
+ bShell>
+ bShell> // dcAll ( -- )
+ bShell> : dcAll dcCount { dup dAT 2dup entryToken _dca 2drop 1 - dup 0 == }
  bShell>
  bShell> compileInterpreterDictionary
  
@@ -479,7 +493,7 @@
  // 0x0480
  0xC073 , 0xE486 , 0xC00B , 0xFFFF , 0xC074 , 0xE49D , 0xC022 , 0xC009 , 0x0001 , 0xC027 , 0xC01E , 0xC016 , 0x7320 , 0x2027 , 0x0000 , 0xC012 ,
  // 0x0490
- 0xC012 , 0xC009 , 0x0027 , 0xC04F , 0xC01E , 0xC043 , 0xC009 , 0x0002 , 0xC02A , 0xC027 , 0xC009 , 0x0000 , 0xC075 , 0xC001 , 0x0479 , 0x6364 ,
+ 0xC082 , 0xC009 , 0x0027 , 0xC04F , 0xC01E , 0xC043 , 0xC009 , 0x0002 , 0xC02A , 0xC027 , 0xC009 , 0x0000 , 0xC075 , 0xC001 , 0x0479 , 0x6364 ,
  // 0x04A0
  0x3877 , 0x0000 , 0xC01E , 0xC079 , 0xC03D , 0xC073 , 0xE4B9 , 0xC01E , 0xC07A , 0xC03D , 0xC073 , 0xE4AF , 0xE47D , 0xC074 , 0xE4B7 , 0xC022 ,
  // 0x04B0
@@ -495,42 +509,52 @@
  // 0x0500
  0xC022 , 0xC016 , 0x7B20 , 0x0000 , 0xC012 , 0xC009 , 0x0000 , 0xC075 , 0xC074 , 0xE518 , 0xC022 , 0xC009 , 0x0001 , 0xC027 , 0xC01E , 0xC06A ,
  // 0x0510
- 0xC00B , 0x0000 , 0xC027 , 0xC002 , 0xC00C , 0xC009 , 0x0000 , 0xC075 , 0xC001 , 0x04EF , 0x6364 , 0x3377 , 0x0000 , 0xC01E , 0xC070 , 0xC03D ,
+ 0xC00B , 0x0000 , 0xC027 , 0xC002 , 0xC083 , 0xC009 , 0x0000 , 0xC075 , 0xC001 , 0x04EF , 0x6364 , 0x3377 , 0x0000 , 0xC01E , 0xC070 , 0xC03D ,
  // 0x0520
  0xC073 , 0xE525 , 0xE4F3 , 0xC074 , 0xE53A , 0xC022 , 0xC009 , 0x0001 , 0xC027 , 0xC01E , 0xC06A , 0xC01F , 0xC009 , 0x0001 , 0xC027 , 0xC021 ,
  // 0x0530
- 0xC06A , 0xC009 , 0x0010 , 0xC06B , 0xC027 , 0xC002 , 0xC00C , 0xC009 , 0x0000 , 0xC075 , 0xC001 , 0x0519 , 0x6364 , 0x3177 , 0x0000 , 0xC01E ,
+ 0xC06A , 0xC009 , 0x0010 , 0xC06B , 0xC027 , 0xC002 , 0xC083 , 0xC009 , 0x0000 , 0xC075 , 0xC001 , 0x0519 , 0x6364 , 0x3177 , 0x0000 , 0xC01E ,
  // 0x0540
  0xC06E , 0xC03D , 0xC073 , 0xE559 , 0xC01E , 0xC06F , 0xC03D , 0xC073 , 0xE54C , 0xE51D , 0xC074 , 0xE557 , 0xC022 , 0xC009 , 0x0001 , 0xC027 ,
  // 0x0550
- 0xC01E , 0xC06A , 0xC002 , 0xC00C , 0xC009 , 0x0000 , 0xC075 , 0xC074 , 0xE55C , 0xC009 , 0x0000 , 0xC075 , 0xC001 , 0x053B , 0x6364 , 0x0077 ,
+ 0xC01E , 0xC06A , 0xC002 , 0xC083 , 0xC009 , 0x0000 , 0xC075 , 0xC074 , 0xE55C , 0xC009 , 0x0000 , 0xC075 , 0xC001 , 0x053B , 0x6364 , 0x0077 ,
  // 0x0560
  0xC01E , 0xC06A , 0xE53F , 0xC073 , 0xE567 , 0xE45A , 0xC075 , 0xC001 , 0x055D , 0x645F , 0x3063 , 0x0000 , 0xC076 , 0xC01E , 0xC06A , 0xC06E ,
  // 0x0570
  0xC031 , 0xC073 , 0xE578 , 0xC022 , 0xC00B , 0xFFFF , 0xC074 , 0xE57F , 0xE560 , 0xC009 , 0x0001 , 0xC027 , 0xC009 , 0x0000 , 0xC075 , 0xC077 ,
  // 0x0580
- 0xE56D , 0xC001 , 0x0568 , 0x6364 , 0x0000 , 0xC016 , 0x203A , 0x0000 , 0xC012 , 0xC01E , 0xC012 , 0xC002 , 0xC068 , 0xC01E , 0xC009 , 0xFFFF ,
+ 0xE56D , 0xC001 , 0x0568 , 0x6364 , 0x0000 , 0xC016 , 0x203A , 0x0000 , 0xC012 , 0xC01E , 0xC012 , 0xC068 , 0xC01E , 0xC009 , 0xFFFF , 0xC03D ,
  // 0x0590
- 0xC03D , 0xC073 , 0xE596 , 0xE56C , 0xC074 , 0xE598 , 0xE420 , 0xC075 , 0xC003 , 0xC001 , 0x0582 , 0x7564 , 0x3277 , 0x0000 , 0xC01E , 0xC06A ,
+ 0xC073 , 0xE595 , 0xE56C , 0xC074 , 0xE597 , 0xE420 , 0xC075 , 0xC003 , 0xC001 , 0x0582 , 0x7564 , 0x3277 , 0x0000 , 0xC01E , 0xC06A , 0xC01E ,
  // 0x05A0
- 0xC01E , 0xC011 , 0xC06E , 0xC031 , 0xC024 , 0xC009 , 0x0001 , 0xC027 , 0xC041 , 0xC030 , 0xC025 , 0xC02D , 0xC001 , 0x059A , 0x7564 , 0x3177 ,
+ 0xC011 , 0xC06E , 0xC031 , 0xC024 , 0xC009 , 0x0001 , 0xC027 , 0xC041 , 0xC030 , 0xC025 , 0xC02D , 0xC001 , 0x0599 , 0x7564 , 0x3177 , 0x0000 ,
  // 0x05B0
- 0x0000 , 0xC01E , 0xC07E , 0xC073 , 0xE5BE , 0xC016 , 0x4669 , 0x4E55 , 0x5443 , 0x4F49 , 0x004E , 0xC012 , 0xC074 , 0xE5C3 , 0xC076 , 0xE59E ,
+ 0xC01E , 0xC07E , 0xC073 , 0xE5BD , 0xC016 , 0x4669 , 0x4E55 , 0x5443 , 0x4F49 , 0x004E , 0xC012 , 0xC074 , 0xE5C2 , 0xC076 , 0xE59D , 0xC077 ,
  // 0x05C0
- 0xC077 , 0xE5BF , 0xC075 , 0xC001 , 0x05AD , 0x7564 , 0x0077 , 0xC068 , 0xC01E , 0xC009 , 0xFFFF , 0xC03D , 0xC073 , 0xE5DD , 0xC01E , 0xC011 ,
+ 0xE5BE , 0xC075 , 0xC001 , 0x05AC , 0x7564 , 0x0077 , 0xC068 , 0xC01E , 0xC009 , 0xFFFF , 0xC03D , 0xC073 , 0xE5DC , 0xC01E , 0xC011 , 0xC016 ,
  // 0x05D0
- 0xC016 , 0x203A , 0x0000 , 0xC012 , 0xC01E , 0xC009 , 0x0100 , 0xC027 , 0xC01F , 0xE5B1 , 0xC042 , 0xC074 , 0xE5DF , 0xC022 , 0xC075 , 0xC003 ,
+ 0x203A , 0x0000 , 0xC012 , 0xC01E , 0xC009 , 0x0100 , 0xC027 , 0xC01F , 0xE5B0 , 0xC042 , 0xC074 , 0xE5DE , 0xC022 , 0xC075 , 0xC003 , 0xC001 ,
  // 0x05E0
- 0xC001 , 0x05C4 , 0x645F , 0x6163 , 0x0000 , 0xC01E , 0xC07E , 0xC073 , 0xE5EC , 0xC022 , 0xC074 , 0xE5F8 , 0xC016 , 0x203A , 0x0000 , 0xC012 ,
+ 0x05C3 , 0x645F , 0x6163 , 0x0000 , 0xC01E , 0xC07E , 0xC073 , 0xE5F3 , 0xC016 , 0x2F2F , 0x0020 , 0xC012 , 0xC022 , 0xC041 , 0xC049 , 0xC022 ,
  // 0x05F0
- 0xC035 , 0xC041 , 0xC049 , 0xC022 , 0xC036 , 0xE56C , 0xC003 , 0xC075 , 0xC001 , 0x05E1 , 0x6364 , 0x6C41 , 0x006C , 0xC009 , 0x0000 , 0xE1E3 ,
+ 0xC003 , 0xC074 , 0xE5FF , 0xC016 , 0x203A , 0x0000 , 0xC012 , 0xC035 , 0xC041 , 0xC049 , 0xC022 , 0xC036 , 0xE56C , 0xC003 , 0xC075 , 0xC001 ,
  // 0x0600
- 0xC076 , 0xC048 , 0xC01E , 0xE1E3 , 0xC031 , 0xC073 , 0xE60B , 0xC00B , 0xFFFF , 0xC074 , 0xE611 , 0xC041 , 0xC04A , 0xE5E5 , 0xC009 , 0x0000 ,
+ 0x05E0 , 0x4164 , 0x3154 , 0x0000 , 0xC023 , 0xC009 , 0x0001 , 0xC027 , 0xC01E , 0xC035 , 0xC023 , 0xC023 , 0xC036 , 0xC036 , 0xC01E , 0xC035 ,
  // 0x0610
- 0xC075 , 0xC077 , 0xE601 , 0xC042 , 0xC001 ,
+ 0xC031 , 0xC001 , 0x0600 , 0x4164 , 0x0054 , 0xC035 , 0xC009 , 0x0000 , 0xC009 , 0x0000 , 0xE1E3 , 0xC076 , 0xC048 , 0xC01E , 0xE1E3 , 0xC031 ,
+ // 0x0620
+ 0xC073 , 0xE626 , 0xC00B , 0xFFFF , 0xC074 , 0xE628 , 0xE604 , 0xC075 , 0xC077 , 0xE61C , 0xC036 , 0xC022 , 0xC023 , 0xC022 , 0xC001 , 0x0612 ,
+ // 0x0630
+ 0x6364 , 0x6F43 , 0x6E75 , 0x0074 , 0xC009 , 0x0000 , 0xC009 , 0x0000 , 0xE1E3 , 0xC076 , 0xC048 , 0xC01E , 0xE1E3 , 0xC031 , 0xC073 , 0xE644 ,
+ // 0x0640
+ 0xC00B , 0xFFFF , 0xC074 , 0xE64D , 0xC023 , 0xC009 , 0x0001 , 0xC027 , 0xC023 , 0xC023 , 0xC009 , 0x0000 , 0xC075 , 0xC077 , 0xE63A , 0xC042 ,
+ // 0x0650
+ 0xC001 , 0x062F , 0x6364 , 0x6C41 , 0x006C , 0xE634 , 0xC076 , 0xC01E , 0xE615 , 0xC041 , 0xC04A , 0xE5E4 , 0xC042 , 0xC009 , 0x0001 , 0xC028 ,
+ // 0x0660
+ 0xC01E , 0xC009 , 0x0000 , 0xC031 , 0xC077 , 0xE657 , 0xC001 ,
  
  };
- CompiledDictionary interpreterCompiledDictionary( compiledDictionaryData, 0x05F9 , 0x0615 , YRSHELL_DICTIONARY_INTERPRETER_COMPILED);
+ CompiledDictionary interpreterCompiledDictionary( compiledDictionaryData, 0x0651 , 0x0667 , YRSHELL_DICTIONARY_INTERPRETER_COMPILED);
  bShell>
 
 
@@ -691,7 +715,7 @@ static uint16_t compiledDictionaryData[] = {
     // 0x0480
     0xC073 , 0xE486 , 0xC00B , 0xFFFF , 0xC074 , 0xE49D , 0xC022 , 0xC009 , 0x0001 , 0xC027 , 0xC01E , 0xC016 , 0x7320 , 0x2027 , 0x0000 , 0xC012 ,
     // 0x0490
-    0xC012 , 0xC009 , 0x0027 , 0xC04F , 0xC01E , 0xC043 , 0xC009 , 0x0002 , 0xC02A , 0xC027 , 0xC009 , 0x0000 , 0xC075 , 0xC001 , 0x0479 , 0x6364 ,
+    0xC082 , 0xC009 , 0x0027 , 0xC04F , 0xC01E , 0xC043 , 0xC009 , 0x0002 , 0xC02A , 0xC027 , 0xC009 , 0x0000 , 0xC075 , 0xC001 , 0x0479 , 0x6364 ,
     // 0x04A0
     0x3877 , 0x0000 , 0xC01E , 0xC079 , 0xC03D , 0xC073 , 0xE4B9 , 0xC01E , 0xC07A , 0xC03D , 0xC073 , 0xE4AF , 0xE47D , 0xC074 , 0xE4B7 , 0xC022 ,
     // 0x04B0
@@ -707,42 +731,52 @@ static uint16_t compiledDictionaryData[] = {
     // 0x0500
     0xC022 , 0xC016 , 0x7B20 , 0x0000 , 0xC012 , 0xC009 , 0x0000 , 0xC075 , 0xC074 , 0xE518 , 0xC022 , 0xC009 , 0x0001 , 0xC027 , 0xC01E , 0xC06A ,
     // 0x0510
-    0xC00B , 0x0000 , 0xC027 , 0xC002 , 0xC00C , 0xC009 , 0x0000 , 0xC075 , 0xC001 , 0x04EF , 0x6364 , 0x3377 , 0x0000 , 0xC01E , 0xC070 , 0xC03D ,
+    0xC00B , 0x0000 , 0xC027 , 0xC002 , 0xC083 , 0xC009 , 0x0000 , 0xC075 , 0xC001 , 0x04EF , 0x6364 , 0x3377 , 0x0000 , 0xC01E , 0xC070 , 0xC03D ,
     // 0x0520
     0xC073 , 0xE525 , 0xE4F3 , 0xC074 , 0xE53A , 0xC022 , 0xC009 , 0x0001 , 0xC027 , 0xC01E , 0xC06A , 0xC01F , 0xC009 , 0x0001 , 0xC027 , 0xC021 ,
     // 0x0530
-    0xC06A , 0xC009 , 0x0010 , 0xC06B , 0xC027 , 0xC002 , 0xC00C , 0xC009 , 0x0000 , 0xC075 , 0xC001 , 0x0519 , 0x6364 , 0x3177 , 0x0000 , 0xC01E ,
+    0xC06A , 0xC009 , 0x0010 , 0xC06B , 0xC027 , 0xC002 , 0xC083 , 0xC009 , 0x0000 , 0xC075 , 0xC001 , 0x0519 , 0x6364 , 0x3177 , 0x0000 , 0xC01E ,
     // 0x0540
     0xC06E , 0xC03D , 0xC073 , 0xE559 , 0xC01E , 0xC06F , 0xC03D , 0xC073 , 0xE54C , 0xE51D , 0xC074 , 0xE557 , 0xC022 , 0xC009 , 0x0001 , 0xC027 ,
     // 0x0550
-    0xC01E , 0xC06A , 0xC002 , 0xC00C , 0xC009 , 0x0000 , 0xC075 , 0xC074 , 0xE55C , 0xC009 , 0x0000 , 0xC075 , 0xC001 , 0x053B , 0x6364 , 0x0077 ,
+    0xC01E , 0xC06A , 0xC002 , 0xC083 , 0xC009 , 0x0000 , 0xC075 , 0xC074 , 0xE55C , 0xC009 , 0x0000 , 0xC075 , 0xC001 , 0x053B , 0x6364 , 0x0077 ,
     // 0x0560
     0xC01E , 0xC06A , 0xE53F , 0xC073 , 0xE567 , 0xE45A , 0xC075 , 0xC001 , 0x055D , 0x645F , 0x3063 , 0x0000 , 0xC076 , 0xC01E , 0xC06A , 0xC06E ,
     // 0x0570
     0xC031 , 0xC073 , 0xE578 , 0xC022 , 0xC00B , 0xFFFF , 0xC074 , 0xE57F , 0xE560 , 0xC009 , 0x0001 , 0xC027 , 0xC009 , 0x0000 , 0xC075 , 0xC077 ,
     // 0x0580
-    0xE56D , 0xC001 , 0x0568 , 0x6364 , 0x0000 , 0xC016 , 0x203A , 0x0000 , 0xC012 , 0xC01E , 0xC012 , 0xC002 , 0xC068 , 0xC01E , 0xC009 , 0xFFFF ,
+    0xE56D , 0xC001 , 0x0568 , 0x6364 , 0x0000 , 0xC016 , 0x203A , 0x0000 , 0xC012 , 0xC01E , 0xC012 , 0xC068 , 0xC01E , 0xC009 , 0xFFFF , 0xC03D ,
     // 0x0590
-    0xC03D , 0xC073 , 0xE596 , 0xE56C , 0xC074 , 0xE598 , 0xE420 , 0xC075 , 0xC003 , 0xC001 , 0x0582 , 0x7564 , 0x3277 , 0x0000 , 0xC01E , 0xC06A ,
+    0xC073 , 0xE595 , 0xE56C , 0xC074 , 0xE597 , 0xE420 , 0xC075 , 0xC003 , 0xC001 , 0x0582 , 0x7564 , 0x3277 , 0x0000 , 0xC01E , 0xC06A , 0xC01E ,
     // 0x05A0
-    0xC01E , 0xC011 , 0xC06E , 0xC031 , 0xC024 , 0xC009 , 0x0001 , 0xC027 , 0xC041 , 0xC030 , 0xC025 , 0xC02D , 0xC001 , 0x059A , 0x7564 , 0x3177 ,
+    0xC011 , 0xC06E , 0xC031 , 0xC024 , 0xC009 , 0x0001 , 0xC027 , 0xC041 , 0xC030 , 0xC025 , 0xC02D , 0xC001 , 0x0599 , 0x7564 , 0x3177 , 0x0000 ,
     // 0x05B0
-    0x0000 , 0xC01E , 0xC07E , 0xC073 , 0xE5BE , 0xC016 , 0x4669 , 0x4E55 , 0x5443 , 0x4F49 , 0x004E , 0xC012 , 0xC074 , 0xE5C3 , 0xC076 , 0xE59E ,
+    0xC01E , 0xC07E , 0xC073 , 0xE5BD , 0xC016 , 0x4669 , 0x4E55 , 0x5443 , 0x4F49 , 0x004E , 0xC012 , 0xC074 , 0xE5C2 , 0xC076 , 0xE59D , 0xC077 ,
     // 0x05C0
-    0xC077 , 0xE5BF , 0xC075 , 0xC001 , 0x05AD , 0x7564 , 0x0077 , 0xC068 , 0xC01E , 0xC009 , 0xFFFF , 0xC03D , 0xC073 , 0xE5DD , 0xC01E , 0xC011 ,
+    0xE5BE , 0xC075 , 0xC001 , 0x05AC , 0x7564 , 0x0077 , 0xC068 , 0xC01E , 0xC009 , 0xFFFF , 0xC03D , 0xC073 , 0xE5DC , 0xC01E , 0xC011 , 0xC016 ,
     // 0x05D0
-    0xC016 , 0x203A , 0x0000 , 0xC012 , 0xC01E , 0xC009 , 0x0100 , 0xC027 , 0xC01F , 0xE5B1 , 0xC042 , 0xC074 , 0xE5DF , 0xC022 , 0xC075 , 0xC003 ,
+    0x203A , 0x0000 , 0xC012 , 0xC01E , 0xC009 , 0x0100 , 0xC027 , 0xC01F , 0xE5B0 , 0xC042 , 0xC074 , 0xE5DE , 0xC022 , 0xC075 , 0xC003 , 0xC001 ,
     // 0x05E0
-    0xC001 , 0x05C4 , 0x645F , 0x6163 , 0x0000 , 0xC01E , 0xC07E , 0xC073 , 0xE5EC , 0xC022 , 0xC074 , 0xE5F8 , 0xC016 , 0x203A , 0x0000 , 0xC012 ,
+    0x05C3 , 0x645F , 0x6163 , 0x0000 , 0xC01E , 0xC07E , 0xC073 , 0xE5F3 , 0xC016 , 0x2F2F , 0x0020 , 0xC012 , 0xC022 , 0xC041 , 0xC049 , 0xC022 ,
     // 0x05F0
-    0xC035 , 0xC041 , 0xC049 , 0xC022 , 0xC036 , 0xE56C , 0xC003 , 0xC075 , 0xC001 , 0x05E1 , 0x6364 , 0x6C41 , 0x006C , 0xC009 , 0x0000 , 0xE1E3 ,
+    0xC003 , 0xC074 , 0xE5FF , 0xC016 , 0x203A , 0x0000 , 0xC012 , 0xC035 , 0xC041 , 0xC049 , 0xC022 , 0xC036 , 0xE56C , 0xC003 , 0xC075 , 0xC001 ,
     // 0x0600
-    0xC076 , 0xC048 , 0xC01E , 0xE1E3 , 0xC031 , 0xC073 , 0xE60B , 0xC00B , 0xFFFF , 0xC074 , 0xE611 , 0xC041 , 0xC04A , 0xE5E5 , 0xC009 , 0x0000 ,
+    0x05E0 , 0x4164 , 0x3154 , 0x0000 , 0xC023 , 0xC009 , 0x0001 , 0xC027 , 0xC01E , 0xC035 , 0xC023 , 0xC023 , 0xC036 , 0xC036 , 0xC01E , 0xC035 ,
     // 0x0610
-    0xC075 , 0xC077 , 0xE601 , 0xC042 , 0xC001 ,
+    0xC031 , 0xC001 , 0x0600 , 0x4164 , 0x0054 , 0xC035 , 0xC009 , 0x0000 , 0xC009 , 0x0000 , 0xE1E3 , 0xC076 , 0xC048 , 0xC01E , 0xE1E3 , 0xC031 ,
+    // 0x0620
+    0xC073 , 0xE626 , 0xC00B , 0xFFFF , 0xC074 , 0xE628 , 0xE604 , 0xC075 , 0xC077 , 0xE61C , 0xC036 , 0xC022 , 0xC023 , 0xC022 , 0xC001 , 0x0612 ,
+    // 0x0630
+    0x6364 , 0x6F43 , 0x6E75 , 0x0074 , 0xC009 , 0x0000 , 0xC009 , 0x0000 , 0xE1E3 , 0xC076 , 0xC048 , 0xC01E , 0xE1E3 , 0xC031 , 0xC073 , 0xE644 ,
+    // 0x0640
+    0xC00B , 0xFFFF , 0xC074 , 0xE64D , 0xC023 , 0xC009 , 0x0001 , 0xC027 , 0xC023 , 0xC023 , 0xC009 , 0x0000 , 0xC075 , 0xC077 , 0xE63A , 0xC042 ,
+    // 0x0650
+    0xC001 , 0x062F , 0x6364 , 0x6C41 , 0x006C , 0xE634 , 0xC076 , 0xC01E , 0xE615 , 0xC041 , 0xC04A , 0xE5E4 , 0xC042 , 0xC009 , 0x0001 , 0xC028 ,
+    // 0x0660
+    0xC01E , 0xC009 , 0x0000 , 0xC031 , 0xC077 , 0xE657 , 0xC001 ,
     
 };
-CompiledDictionary interpreterCompiledDictionary( compiledDictionaryData, 0x05F9 , 0x0615 , YRSHELL_DICTIONARY_INTERPRETER_COMPILED);
+CompiledDictionary interpreterCompiledDictionary( compiledDictionaryData, 0x0651 , 0x0667 , YRSHELL_DICTIONARY_INTERPRETER_COMPILED);
 
 
 static const FunctionEntry interpreterFunctions[] = {
@@ -871,8 +905,10 @@ static const FunctionEntry interpreterFunctions[] = {
     { (uint16_t)YRShellInterpreter::SI_CC_v_dictionaryMask,                      "v_dictionaryMask" },
     { (uint16_t)YRShellInterpreter::SI_CC_v_dictionaryRelative,                  "v_dictionaryRelative" },
 
-    { (uint16_t)YRShellInterpreter::SI_CC_not,                  "~" },
-    
+    { (uint16_t)YRShellInterpreter::SI_CC_not,                                   "~" },
+    { (uint16_t)YRShellInterpreter::SI_CC_dotRawStr,                             ".rawStr" },
+    { (uint16_t)YRShellInterpreter::SI_CC_dotN,                                  ".n" },
+
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     { (uint16_t)YRShellInterpreter::SI_CC_dotf,                                   ".f" },
     { (uint16_t)YRShellInterpreter::SI_CC_dote,                                   ".e" },
@@ -1067,6 +1103,9 @@ const char *SIDebugStrings[] = {
     "SI_CC_v_dictionaryRelative",
     "SI_CC_not",
     
+    "SI_CC_dotRawStr",
+    "SI_CC_dotN",
+
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     "SI_CC_dotf",
     "SI_CC_dote",
@@ -1101,6 +1140,8 @@ const char *SIDebugStrings[] = {
 #endif
 
 CompiledDictionary emptyDictionary;
+
+//TODO control structure message masks undefined word
 
 void YRShellInterpreter::init( ) {
     reset();
@@ -1811,7 +1852,20 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             v2 = ~ v1;
             pushParameterStack(v2);
             break;
-            
+
+        case SI_CC_dotRawStr:
+            P = getAddressFromToken( popParameterStack());
+            outRawString( P );
+            break;
+
+        case SI_CC_dotN:
+            if( m_hexMode) {
+                outUint32Xn( popParameterStack());
+            } else {
+                outInt32n( popParameterStack());
+            }
+            break;
+
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
         case SI_CC_dotf:
             outFloat(popFloat());
@@ -2239,6 +2293,7 @@ void YRShellInterpreter::slice(void) {
             debugToken();
 #endif
             if( m_token == NULL) {
+                //TODO
                 if( m_compileTopOfStack) {
                     m_DictionaryCurrent->rollBack();
                     shellERROR(__FILE__, __LINE__, "INCOMPLETE CONTROL STRUCTURE");
@@ -2327,6 +2382,7 @@ bool YRShellInterpreter::processToken( ){
                     interpretReset();
                     nextState( YRSHELL_BEGIN_IDLE);
                     m_returnTopOfStack = 0;
+                    m_compileTopOfStack = 0;
                     ret = false;
                 }
             } else {
@@ -2487,6 +2543,26 @@ void YRShellInterpreter::outString( const char* P) {
     if( P != NULL) {
         while( *P != '\0') {
             outChar( *P++);
+        }
+    }
+}
+
+void YRShellInterpreter::outRawString( const char* P) {
+    if( P != NULL) {
+        while( *P != '\0') {
+            if( *P == '\r') {
+                outChar( '\\');
+                outChar( 'r');
+            } else if( *P == '\n') {
+                outChar( '\\');
+                outChar( 'n');
+            } else if( *P == '\t') {
+                outChar( '\\');
+                outChar( 't');
+            } else {
+                outChar( *P);
+            }
+            P++;
         }
     }
 }
@@ -2768,6 +2844,21 @@ void YRShellInterpreter::outUint32X( uint32_t v) {
     outString( buf);
     
 }
+void YRShellInterpreter::outUint32Xn( uint32_t v) {
+    char *P, buf[ 11];
+    unsignedToStringX(v, 8, buf);
+    P = &buf[2];
+    while( *P == '0') {
+        P++;
+    }
+    if( *P == '\0') {
+        P--;
+    }
+    *--P = 'x';
+    *--P = '0';
+    outString( P);
+    
+}
 void YRShellInterpreter::outInt8( int8_t v) {
     char buf[ 5];
     intToString(v, 3, buf);
@@ -2782,6 +2873,15 @@ void YRShellInterpreter::outInt32( int32_t v) {
     char buf[ 12];
     intToString(v, 10, buf);
     outString( buf);
+}
+void YRShellInterpreter::outInt32n( int32_t v) {
+    char *P, buf[ 12];
+    intToString(v, 10, buf);
+    P = buf;
+    while( *P == ' ') {
+        P++;
+    }
+    outString( P);
 }
 uint32_t YRShellInterpreter::popParameterStack( ) {
     uint32_t rc = 0;

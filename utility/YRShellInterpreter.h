@@ -183,6 +183,8 @@ enum SI_CC_functions {
     SI_CC_v_dictionaryRelative,
 
     SI_CC_not,
+    SI_CC_dotRawStr,
+    SI_CC_dotN,
 
  #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     SI_CC_dotf,
@@ -343,6 +345,7 @@ public:
     
     void outChar( char c);
     void outString( const char* S);
+    void outRawString( const char* S);
 
     void outUint8( uint8_t v);
     void outUint16( uint16_t v);
@@ -350,6 +353,7 @@ public:
     void outUint8X( uint8_t v);
     void outUint16X( uint16_t v);
     void outUint32X( uint32_t v);
+    
     void outInt8( int8_t v);
     void outInt16( int16_t v);
     void outInt32( int32_t v);
@@ -357,6 +361,9 @@ public:
     void outInt16X( int16_t v);
     void outInt32X( int32_t v);
     
+    void outInt32n( int32_t v);
+    void outUint32Xn( uint32_t v);
+
     inline bool stacksEmpty( void) { return m_topOfStack == '\0' &&  m_compileTopOfStack == '\0'; }
 };
 

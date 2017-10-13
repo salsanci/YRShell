@@ -1,9 +1,9 @@
 ifeq ($(TERM_PROGRAM),Apple_Terminal)
 	CC=g++
-	CXXFLAGS= -I. -std=c++11
+	CXXFLAGS= -I. -std=c++11 -O3
 else
 	CC=g++ -pthread 
-	CXXFLAGS= -I . -I /usr/include -std=c++11
+	CXXFLAGS= -I . -I /usr/include -std=c++11 -O3
 endif
 
 COMMON_DEPS =  ../YRShell.h ../utility/CircularQ.h ../utility/IntervalTimer.h ../utility/Dictionary.h ../utility/YRShellDefines.h ../utility/YRShellInterpreter.h ../utility/HiResTimer.h ../utility/Sliceable.h
