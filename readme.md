@@ -114,9 +114,9 @@ The board manager adds definitions for the STM32L476RG board we will be using.  
      OK  
      Close    
      
-     Notice that the first time we launch the Arduino IDE, it creates an Arduino directory folder for our program source code.
-     OSX/Linux: `~/Arduino`
-     Windows 10: `~/Documents/Arudino`
+     Notice that the first time we launch the Arduino IDE, it creates an Arduino directory folder for our program source code.  
+     OSX/Linux: `~/Arduino`  
+     Windows 10: `~/Documents/Arudino`  
      The auto-created Arduino directory will be important later when we add the YRShell source code.
 
 STEP 3:  
