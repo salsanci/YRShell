@@ -52,6 +52,7 @@ Windows XP is possible but not covered here until requested.
    You should see a directory window open for   
    `/media/<user>/NODE_L476RG`   (linux)  
    containing two files, DETAILS.TXT and MBED.HTM  
+1. Windows 10: the directory is displayed in File Explorer, but does not automatically open in a window.
    
 NOTE: Linux Mint displays the directory, LED1 COM is solid RED  
 NOTE: Windows 10 gives an error, LED1 COM flashes RED  
@@ -112,6 +113,11 @@ The board manager adds definitions for the STM32L476RG board we will be using.  
      `Tools > Board Manager > Select "STM32 Cores" ` from the bottom of the list  
      OK  
      Close    
+     
+     Notice that the first time we launch the Arduino IDE, it creates an Arduino directory folder for our program source code.
+     OSX/Linux: `~/Arduino`
+     Windows 10: `~/Documents/Arudino`
+     The auto-created Arduino directory will be important later when we add the YRShell source code.
 
 STEP 3:  
 Select the Nucleo-64 L476RG:
@@ -123,7 +129,7 @@ Select the Nucleo-64 L476RG:
 - Arduino IDE > Tools > Port:  
 ` /dev/ttyACM0` (on Linux)  
 `/dev/ttyzzz` (on MACOS)  
-`COM1` (on Windows) 
+`COMn` (on Windows) 
 
 If PORT is greyed out, plug in the USB cable  
 AT THIS POINT, CHECK GROUPS FOR DIALOUT (FOR OSX and Linux)  
@@ -157,6 +163,8 @@ to
    `/home/<yourusername>/Arduino/libraries/`  
 The result should look like this:  
    `/home/<yourusername>/Arduino/libraries/YRShell`
+   
+   Notice that the directory folder `Arduino` was created automaticaly buy the Arduino IDE when it started up the first time.
    
 The YRShell directory should contain several files and subdirectories, such as:  
    `/home/<yourusername>/Arduino/libraries/YRShell/examples`  
