@@ -1,19 +1,7 @@
 #ifndef YRShellInterpreter_h
 #define YRShellInterpreter_h
 
-#if defined(__linux__) || defined(__APPLE__)
-    #define PLATFORM_APPLE
-#else
-    #ifdef NOTARDUINO_AC6
-        #define PLATFORM_AC6
-    #else
-        #define PLATFORM_ARDUINO
-    #endif
-#endif
-
-#ifdef PLATFORM_AC6
-#include "processorGlobal.h"
-#endif
+#include "HardwareSpecific.h"
 
 #include "Sliceable.h"
 #include "CircularQ.h"
@@ -186,6 +174,8 @@ enum SI_CC_functions {
     SI_CC_dotRawStr,
     SI_CC_dotN,
 
+    SI_CC_setBaud,
+    
  #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     SI_CC_dotf,
     SI_CC_dote,

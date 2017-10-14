@@ -1,9 +1,7 @@
 #ifndef Dictionary_h
 #define Dictionary_h
 
-#ifdef PLATFORM_ARDUINO
-#include "processorGlobal.h"
-#endif
+#include "HardwareSpecific.h"
 
 
 #include <stdint.h>

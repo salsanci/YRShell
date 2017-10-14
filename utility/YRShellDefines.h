@@ -1,9 +1,7 @@
 #ifndef YRShellDefines_h
 #define YRShellDefines_h
 
-#ifdef PLATFORM_ARDUINO
-#include "processorGlobal.h"
-#endif
+#include "HardwareSpecific.h"
 
 #define YRSHELL_DEBUG
 #define YRSHELL_INTERPRETER_FLOATING_POINT

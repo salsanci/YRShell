@@ -1,5 +1,8 @@
 #ifndef HIRESTIMER_h
 #define HIRESTIMER_h
+
+#include "HardwareSpecific.h"
+
 #include <stdint.h>
 #include <stddef.h>
 class HiResTimer {
@@ -15,15 +18,15 @@ public:
     void reset( void);
     void start( void);
     void stop( void);
-
+ 
     uint32_t getCount( void);
     uint32_t getMin( void);
     uint32_t getMax( void);
     uint32_t getAverage( void);
 
-    static unsigned getSysticks( void);
-    static unsigned getMicros( void);
-    static unsigned getMillis( void);
+    static uint32_t getSysticks( void);
+    static uint32_t getMicros( void);
+    static uint32_t getMillis( void);
 };
 
 #endif

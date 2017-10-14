@@ -1,13 +1,11 @@
 #ifndef IntervalTimer_h
 #define IntervalTimer_h
 
-#ifdef NOTARDUINO_AC6
-#include "processorGlobal.h"
-#endif
+#include "HardwareSpecific.h"
 
 class IntervalTimer {
 private:
-#if defined(__linux__) || defined(__APPLE__)
+#if defined(PLATFORM_LA)
     double m_start, m_interval;
 #else
    unsigned m_start, m_interval;

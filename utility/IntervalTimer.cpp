@@ -1,4 +1,5 @@
 
+#include "HardwareSpecific.h"
 #include "IntervalTimer.h"
 #include "HiResTimer.h"
 
@@ -7,7 +8,7 @@ IntervalTimer::IntervalTimer( unsigned intervalInMilliSeconds) {
     setInterval( intervalInMilliSeconds);
 }
 
-#if defined(__linux__) || defined(__APPLE__)
+#ifdef PLATFORM_LA
 #include <time.h>
 void IntervalTimer::setInterval( unsigned intervalInMilliSeconds) {
     struct timespec t;

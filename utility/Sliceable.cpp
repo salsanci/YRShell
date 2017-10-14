@@ -1,19 +1,12 @@
 #include "Sliceable.h"
 
+static SliceAllTimer sliceAllTimer;
+
 Sliceable* Sliceable::s_First = NULL;
 Sliceable* Sliceable::s_Current = NULL;
 Sliceable* Sliceable::s_Last = NULL;
+SliceAllTimer* Sliceable::s_SliceAllTimer = &sliceAllTimer;
 uint32_t Sliceable::s_slowCounter = SLICE_SLOW_LIMIT;
-
-// Finish THis
-class SliceAll : public Sliceable {
-    SliceAll( void);
-    ~SliceAll( void);
-    void slice( void);
-};
-SliceAll::SliceAll( void) { }
-SliceAll::~SliceAll( void) { }
-void SliceAll::slice( void) { }
 
 Sliceable::Sliceable() {
 	m_Next = NULL;
@@ -23,6 +16,7 @@ Sliceable::Sliceable() {
 		s_Last->m_Next = this;
 		s_Last = this;
     }
+    m_timeSlice = true;
 }
 Sliceable::~Sliceable() {
 }
@@ -31,17 +25,23 @@ void Sliceable::sliceOne() {
 		s_Current = s_First;
 	}
 	if( s_Current != NULL) {
-		s_Current->startTimer();
+		if( s_Current->m_timeSlice) {
+			s_Current->startTimer();
+		}
 		s_Current->slice();
-		s_Current->stopTimer();
+		if( s_Current->m_timeSlice) {
+			s_Current->stopTimer();
+		}
 		s_Current = s_Current->m_Next;
 	}
 }
 void Sliceable::sliceAll() {
+	s_SliceAllTimer->startTimer();
 	sliceOne( );
     for( uint16_t i = 0; i < 0x200 && s_Current != NULL; i++) {
         sliceOne();
     }
+	s_SliceAllTimer->stopTimer();
 }
 void Sliceable::sliceSlow() {
     if( --s_slowCounter == 0) {

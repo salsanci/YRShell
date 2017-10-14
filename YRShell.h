@@ -1,6 +1,9 @@
 #ifndef Shell_h
 #define Shell_h
 
+#include "utility/HardwareSpecific.h"
+#include "utility/BufferedSerial.h"
+
 #include "utility/YRShellInterpreter.h"
 
 /** \brief YRShellBase - interactive

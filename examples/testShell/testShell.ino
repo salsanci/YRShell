@@ -3,7 +3,6 @@
 #include <YRShell.h>
 
 bool ledControl;
-BufferedSerial bs( &Serial );
 
 typedef enum {
     SE_CC_first = YRSHELL_DICTIONARY_EXTENSION_FUNCTION,
@@ -112,11 +111,11 @@ IntervalTimer it;
 
 void setup()
 {
-  Serial.begin(115200);
+  BSerial.setBaud( 115200);
   pinMode(LED_BUILTIN, OUTPUT);
   it.setInterval( 0);
   myShell.init();
-  bs.init( myShell.getInq(), myShell.getOutq());
+  BSerial.init( myShell.getInq(), myShell.getOutq());
 }
 
 void loop()

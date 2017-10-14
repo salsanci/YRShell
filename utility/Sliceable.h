@@ -3,25 +3,24 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "HardwareSpecific.h"
 #include "HiResTimer.h"
 
 #define SLICE_SLOW_LIMIT 100
 
 
 class Sliceable;
+class SliceAllTimer;
 class Sliceable {
 protected:
-    Sliceable* m_Next;
-    HiResTimer m_timer;
-    uint64_t hiResAccum;
-    int32_t  hiResTimer;
-    uint32_t hiResTimerMin;
-    uint32_t hiResTimerMax;
-    uint32_t hiResCount;
+    Sliceable*  m_Next;
+    HiResTimer  m_timer;
+    bool        m_timeSlice;
 
     static Sliceable* s_First;
     static Sliceable* s_Current;
     static Sliceable* s_Last;
+    static SliceAllTimer* s_SliceAllTimer;
     static uint32_t s_slowCounter;
 public:
     static void sliceOne( void);
@@ -41,5 +40,13 @@ public:
     uint32_t getTimerAverage( void);
 
 };
+
+class SliceAllTimer : public Sliceable {
+public:
+    SliceAllTimer( void) { m_timeSlice = false; }
+    virtual ~SliceAllTimer( void) { }
+    virtual const char* sliceName( void) { return "SliceAllTimer"; }
+    virtual void slice( void) {  }
+ };
 
 #endif
