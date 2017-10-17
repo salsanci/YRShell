@@ -98,6 +98,13 @@ public:
 		m_nextQ = NULL;
 		reset();
 	}
+	/** \brief Destructor.
+
+	 Default destructor, no parameters are required.
+	 */
+	virtual ~CircularQ( ) {
+
+	}
 	/** \brief Clears Q.
 
 	 Clears Q.

@@ -2,7 +2,6 @@
 #include <YRShell.h>
 
 bool ledControl;
-BufferedSerial bs( &Serial );
 
 class CommonShell : public virtual YRShellInterpreter {
 public:
@@ -92,7 +91,7 @@ void CommonShell::executeFunction( uint16_t n ) {
                     shellVectorIndex = 0;
                 }
                 currentShell = shellVector[ shellVectorIndex];
-                bs.init( currentShell->getInq(), currentShell->getOutq());
+                BSerial.init( currentShell->getInq(), currentShell->getOutq());
 
                 break;
             default:
@@ -158,7 +157,7 @@ IntervalTimer it;
 
 void setup()
 {
-  Serial.begin(115200);
+  BSerial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   it.setInterval( 0);
   shell1.init();
@@ -169,7 +168,7 @@ void setup()
   shell2.setPrompt("s2>");
   shell3.setPrompt("s3>");
   shell4.setPrompt("s4>");
-  bs.init( currentShell->getInq(), currentShell->getOutq());
+  BSerial.init( currentShell->getInq(), currentShell->getOutq());
 }
 
 void loop()

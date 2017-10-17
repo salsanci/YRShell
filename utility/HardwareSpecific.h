@@ -11,24 +11,21 @@
 #endif
 
 #ifndef PLATFORM_LA
-	#ifdef NOTARDUINO_AC6
-			#define PLATFORM_AC6
-	#else
+	#ifndef PLATFORM_AC6
 			#define PLATFORM_ARDUINO
 	#endif
 
 	#ifdef PLATFORM_AC6
-	#include "processorGlobal.h"
+		#include "processorGlobal.h"
 	#endif
 
 	#ifdef PLATFORM_ARDUINO
-	#include "Arduino.h"
+		#include "Arduino.h"
 	#endif
 #endif
 
-#endif
-
 #include <stdint.h>
+#include <stdbool.h>
 #include <stddef.h>
 
 void HW_setSerialBaud( uint32_t port, uint32_t baud);
@@ -36,3 +33,5 @@ void HW_setSerialBaud( uint32_t port, uint32_t baud);
 uint32_t HW_getSysticks( void);
 uint32_t HW_getMicros( void);
 uint32_t HW_getMillis( void);
+
+#endif

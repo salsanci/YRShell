@@ -1,5 +1,4 @@
 
-#define YRSHELL_DICTIONARY_SIZE 256
 #include <YRShell.h>
 
 bool ledControl;
