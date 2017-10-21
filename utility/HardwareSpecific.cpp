@@ -40,13 +40,7 @@ void HW_setSerialBaud( uint32_t port, uint32_t baud) {
 				}
 
 #endif
-
 }
-
-
-uint32_t HW_getSysticks( void);
-uint32_t HW_getMicros( void);
-uint32_t HW_getMillis( void);
 
 #ifdef PLATFORM_LA
 #include <time.h>
@@ -68,18 +62,38 @@ uint32_t HW_getMillis() {
     double end = (t.tv_sec + ((double) t.tv_nsec) / 1000000000.0) * 1000.0;
     return (unsigned) end; 
 }
+uint32_t HW_getSysTicksPerSecond( ) {
+	return 1000000000;
+}
 #endif
 
 #ifdef PLATFORM_AC6
 
 uint32_t HW_getSysticks() {
-    return HW_getMicros();
-}
-uint32_t HW_getMicros() {
+	// int irqMask = __disable_irq();
 	uint32_t m0 = HAL_GetTick();
 	uint32_t u0 = SysTick->LOAD - SysTick->VAL;
 	uint32_t m1 = HAL_GetTick();
 	uint32_t u1 = SysTick->LOAD - SysTick->VAL;
+	//if( irqMask) {
+	//	__enable_irq( );
+	//}
+
+	if (m1 > m0) {
+		return m1 * SysTick->LOAD + u1;
+	} else {
+		return m0 * SysTick->LOAD + u0;
+	}
+}
+uint32_t HW_getMicros() {
+	//int irqMask = __disable_irq();
+	uint32_t m0 = HAL_GetTick();
+	uint32_t u0 = SysTick->LOAD - SysTick->VAL;
+	uint32_t m1 = HAL_GetTick();
+	uint32_t u1 = SysTick->LOAD - SysTick->VAL;
+	//if( irqMask) {
+	//	__enable_irq( );
+	//}
 
 	if (m1 > m0) {
 		return ( m1 * 1000 + (u1 * 1000) / SysTick->LOAD);
@@ -89,6 +103,9 @@ uint32_t HW_getMicros() {
 }
 uint32_t HW_getMillis() {
     return HAL_GetTick();
+}
+uint32_t HW_getSysTicksPerSecond( ) {
+	return HAL_RCC_GetHCLKFreq();
 }
 #endif
 
@@ -102,4 +119,9 @@ uint32_t HW_getMicros() {
 uint32_t HW_getMillis() {
     return millis(); 
 } 
+uint32_t HW_getSysTicksPerSecond( ) {
+	return 1000000;
+}
 #endif
+
+

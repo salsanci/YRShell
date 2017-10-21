@@ -175,6 +175,7 @@ enum SI_CC_functions {
     SI_CC_dotN,
 
     SI_CC_setBaud,
+    SI_CC_sysTicksPerSecond,
     
  #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     SI_CC_dotf,

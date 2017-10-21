@@ -910,6 +910,7 @@ static const FunctionEntry interpreterFunctions[] = {
     { (uint16_t)YRShellInterpreter::SI_CC_dotN,                                  ".n" },
 
     { (uint16_t)YRShellInterpreter::SI_CC_setBaud,                                "setBaud" },
+    { (uint16_t)YRShellInterpreter::SI_CC_sysTicksPerSecond,                      "sysTicksPerSecond" },
 
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     { (uint16_t)YRShellInterpreter::SI_CC_dotf,                                   ".f" },
@@ -1109,6 +1110,7 @@ const char *SIDebugStrings[] = {
     "SI_CC_dotN",
 
     "SI_CC_setBaud",
+    "SI_CC_sysTicksPerSecond",
 
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     "SI_CC_dotf",
@@ -1875,6 +1877,10 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             	v2 = popParameterStack();
             	HW_setSerialBaud(v1, v2);
             	break;
+            case SI_CC_sysTicksPerSecond:
+            	v1 = HW_getSysTicksPerSecond();
+                pushParameterStack( v1);
+				break;
 
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
         case SI_CC_dotf:

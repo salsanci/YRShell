@@ -25,13 +25,12 @@ static const FunctionEntry shellExtensionFunctions[] = {
 };
 static FunctionDictionary dictionaryExtensionFunction( shellExtensionFunctions, YRSHELL_DICTIONARY_EXTENSION_FUNCTION );
 
-
 CompiledDictionary compiledExtensionDictionary( NULL, 0xFFFF , 0x0000 , YRSHELL_DICTIONARY_EXTENSION_COMPILED);
-
 
 class MyYRShell : public YRShell {
 protected:
     virtual void executeFunction( uint16_t n);
+    virtual const char* shellClass( void) { return "MyYRShell"; }
 
 public:
     MyYRShell();
@@ -85,12 +84,12 @@ void MyYRShell::executeFunction( uint16_t n) {
                 break;
             case SE_CC_ledOn:
                 if( ledControl) {
-                    digitalWrite(LED_BUILTIN, HIGH);
+                    //digitalWrite(LED_BUILTIN, HIGH);
                 }
                 break;
             case SE_CC_ledOff:
                 if( ledControl) {
-                    digitalWrite(LED_BUILTIN, LOW);
+                    //digitalWrite(LED_BUILTIN, LOW);
                 }
                 break;
             default:
@@ -110,7 +109,7 @@ IntervalTimer it;
 
 void setup()
 {
-  BSerial.setBaud( 115200);
+  BSerial.begin( 115200);
   pinMode(LED_BUILTIN, OUTPUT);
   it.setInterval( 0);
   myShell.init();
