@@ -5,9 +5,6 @@
 ShellRunner r;
 
 TEST_CASE( "Basic math tests", "[basicMath]" ) {
-    SECTION( "Initialize") {
-        REQUIRE( r.init() == true);
-    }
     SECTION( "Integer Tests") {
         REQUIRE( r.runCommand("1 2 +", ".") == true);
         REQUIRE( r.getIntResult() == 3);

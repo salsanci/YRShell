@@ -5,10 +5,6 @@
 ShellRunner::ShellRunner( ) {
     m_commandTimeout = 1000;
 }
-bool ShellRunner::init() {
-    m_shell.init();
-    return true;
-}
 bool ShellRunner::runCommand( const char* Setup,  const char *Command) {
     IntervalTimer timeout;
     char *P, *Lim, *Input, *FirstOutput = NULL, *SecondOutput = NULL;
