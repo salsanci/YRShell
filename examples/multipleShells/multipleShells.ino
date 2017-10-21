@@ -128,14 +128,6 @@ void setup()
   BSerial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   it.setInterval( 0);
-  shell1.init();
-  shell2.init();
-  shell3.init();
-  shell4.init();
-  shell1.setPrompt("s1>");
-  shell2.setPrompt("s2>");
-  shell3.setPrompt("s3>");
-  shell4.setPrompt("s4>");
   BSerial.init( currentShell->getInq(), currentShell->getOutq());
 }
 

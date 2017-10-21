@@ -3,17 +3,18 @@
 
 #include "HardwareSpecific.h"
 
-#define YRSHELL_DEBUG
+//#define YRSHELL_DEBUG
 #define YRSHELL_INTERPRETER_FLOATING_POINT
 
 
 #ifndef YRSHELL_VERSION
-#define YRSHELL_VERSION "\rYRShell Version 0.1\r" // make sure this string length is less than YRSHELL_OUTQ_SIZE
+#define YRSHELL_VERSION "\rYRShell Version 0.2\r" // make sure this string length is less than YRShell outq size
 #endif
 
 typedef enum {
 	YRSHELL_INVALID_STATE = 0,
-    YRSHELL_BEGINNING = 1,
+    YRSHELL_NOT_INITIALIZED = 1,
+    YRSHELL_BEGINNING,
     YRSHELL_INRESET,
     YRSHELL_BEGIN_IDLE,
     YRSHELL_IDLE,

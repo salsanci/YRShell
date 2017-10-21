@@ -1,5 +1,7 @@
 
 #include "YRShellInterpreter.h"
+
+uint8_t	YRShellInterpreter::s_shellNumber = 0;
 /*
  
 
@@ -952,6 +954,7 @@ static FunctionDictionary dictionaryInterpreterFunction( interpreterFunctions, Y
 #ifdef YRSHELL_DEBUG
 const char *stateDebugStrings[] = {
     "INVALID",
+	"YRSHELL_NOT_INITIALIZED",
     "YRSHELL_BEGINNING",
     "YRSHELL_INRESET",
     "YRSHELL_BEGIN_IDLE",
@@ -1171,7 +1174,9 @@ YRShellInterpreter::YRShellInterpreter() {
     m_Registers = NULL;
     m_numRegisters = 0;
 	m_compileTopOfStack = 0;
+#ifdef YRSHELL_DEBUG
 	m_debugFlags = 0;
+#endif
 	m_hexMode = false;
 	m_lastState = YRSHELL_INVALID_STATE;
 	m_outputTimeoutInMilliseconds = 1000;
@@ -1180,10 +1185,14 @@ YRShellInterpreter::YRShellInterpreter() {
 	m_PC = YRSHELL_DICTIONARY_INVALID;
 	m_returnTopOfStack = 0;
 	m_saveptr = NULL;
-	m_state = YRSHELL_INVALID_STATE;
+	m_state = YRSHELL_NOT_INITIALIZED;
 	m_token = NULL;
 	m_topOfStack = 0;
 	m_useAuxQueues = false;
+	strcpy( m_autoPrompt, "YR_");
+	unsignedToStringZero(s_shellNumber++, 3, &m_autoPrompt[3]);
+	strcat( m_autoPrompt, ">");
+	setPrompt( m_autoPrompt);
 }
 YRShellInterpreter::~YRShellInterpreter() {
 }
@@ -2260,6 +2269,9 @@ void YRShellInterpreter::slice(void) {
         m_outputTimeout.setInterval(m_outputTimeoutInMilliseconds);
     }
     switch( m_state) {
+    	case YRSHELL_NOT_INITIALIZED:
+    		init();
+    		break;
         case YRSHELL_BEGIN_IDLE:
             outString( m_prompt);
             CC_clearPad();

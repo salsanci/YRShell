@@ -209,10 +209,9 @@ enum SI_CC_functions {
 };
 
 protected:
+    static  uint8_t     s_shellNumber;
     YRShellState                            m_lastState, m_state;
-
     Dictionary                              *m_dictionaryList[ YRSHELL_DICTIONARY_LAST_INDEX];
-
     CircularQBase<char>                     *m_Inq, *m_AuxInq, *m_Outq, *m_AuxOutq;
     
 #ifdef YRSHELL_DEBUG
@@ -222,6 +221,7 @@ protected:
     bool        m_expandCR;
     bool        m_hexMode;
     bool        m_useAuxQueues;
+    char        m_autoPrompt[8];
 
     uint32_t    m_outputTimeoutInMilliseconds;
     IntervalTimer m_outputTimeout;
@@ -259,6 +259,7 @@ protected:
     virtual uint32_t shellSize( void) { return sizeof( *this); }
     virtual const char* shellClass( void) { return "YRShellInterpreter"; }
     virtual const char* sliceName( ) { return shellClass(); }
+    virtual void init( void);
     
     void nextState(YRShellState n);
     void fillPad( char c);
@@ -304,7 +305,6 @@ protected:
 public:
     YRShellInterpreter( );
     virtual ~YRShellInterpreter();
-    void init( void);
     
     static const char* getFileName( const char* P);
     virtual void shellERROR( const char* file, unsigned line);

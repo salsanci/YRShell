@@ -112,7 +112,6 @@ void setup()
   BSerial.begin( 115200);
   pinMode(LED_BUILTIN, OUTPUT);
   it.setInterval( 0);
-  myShell.init();
   BSerial.init( myShell.getInq(), myShell.getOutq());
 }
 
