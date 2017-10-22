@@ -81,7 +81,10 @@ We need the build tools for compilation and and testing.  Your installation may 
 
 #### For Windows: 
 
-We don't seem to need any additional tools installed on Windows 10.  This will be updated is we find we need something for earlier versions of windows, as needed.  
+There are a couple alternatives for compiling YRShell.cpp for the Windows coomand line.  One is Cygwin, another is WSL, the windows Subsystem for Linux (bash for Windows).  
+
+__We need to figure how we want to handle this__
+
 
 ### PC Tools: doxygen
 
@@ -89,7 +92,7 @@ Sal is using doxygen (document generator tool) to generate the documentation for
 
 http://www.stack.nl/~dimitri/doxygen/download.html  
 
-NOTE: you are not required or expected to install or use doxygen, it is included here for completeness.  
+NOTE: you are not required to install or use doxygen, to use YRShell.  If you plan to look at or modify the YRShell,cpp source code, doxygen may be handy. The install instructions the development team uses are included here for completeness.  
 
 ## Setup-Arduino-IDE  
 Start with the instructions https://github.com/stm32duino/wiki/wiki/Getting-Started  
