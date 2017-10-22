@@ -2151,6 +2151,8 @@ void YRShellInterpreter::reset( ) {
         outString( YRSHELL_VERSION);
         outString( " commit: ");
         outString( GIT_COMMIT_HASH);
+        outChar( ' ');
+        outString( GIT_COMMIT_SHORT_HASH);
         outChar( '\r');
     }
 }

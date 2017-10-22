@@ -16,13 +16,17 @@ TEST_DEPS = catch.h testSupport.h $(COMMON_DEPS)
 TEST_OBJ = testall.o testSupport.o $(COMMON_OBJ)
 
 
-all: ../utility/CurrentGit.h testall yrshell doc testall runtest
+all: testall yrshell doc testall runtest
+
 
 genGitHash: genGitHash.c
 	$(GCC) -o $@ $<
 
 ../utility/CurrentGit.h: genGitHash
-	git rev-parse --verify HEAD | ./genGitHash > ../utility/CurrentGit.h
+	git rev-parse --verify HEAD > ./tmpgithash
+	git rev-parse --short HEAD >> ./tmpgithash
+	./genGitHash <./tmpgithash > ../utility/CurrentGit.h
+	rm -f ./tmpgithash
 
 %.o: %.cpp $(TEST_DEPS)
 	$(CC) -c -o $@ $< $(CXXFLAGS)
