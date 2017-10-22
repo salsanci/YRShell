@@ -1,3 +1,0 @@
-#define GIT_COMMIT_HASH "
-a6a6b9ab1ed115d796c98cc7d24700961b0a4780
-"
