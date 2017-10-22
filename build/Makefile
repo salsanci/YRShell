@@ -45,7 +45,7 @@ doxygen.log: Doxyfile $(TEST_DEPS)  doxygen.h
 runtest: testresult
 
 testresult:
-	./testall -s > testresult
+	./testall -d yes > testresult
 
 .PHONY: cleanall
 

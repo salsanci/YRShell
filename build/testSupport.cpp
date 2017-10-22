@@ -5,6 +5,7 @@
 
 ShellRunner::ShellRunner( ) {
     m_commandTimeout = 1000;
+    m_init = false;
 }
 bool ShellRunner::runCommand( const char* Setup,  const char *Command) {
     IntervalTimer timeout;
@@ -26,7 +27,19 @@ bool ShellRunner::runCommand( const char* Setup,  const char *Command) {
         strcat( buf, m_resultEnd);
         strcat( buf, "' .str\r");
         
-        Sliceable::sliceAll();
+        for( int i = 0; i < 16; i++) {
+            Sliceable::sliceAll();
+        }
+        if( !m_init) {
+            m_init = true;
+            while( m_shell.getOutq().valueAvailable()) {
+                putchar( m_shell.getOutq().get());
+                Sliceable::sliceAll();
+            }
+            putchar('\n');
+            putchar('\n');
+        }
+
         
         P = m_resultBuffer;
         Lim = m_resultBuffer + sizeof( m_resultBuffer) - 2;

@@ -10,6 +10,7 @@ protected:
     uint32_t m_commandTimeout;
     const char* m_resultBegin = "<RESULTBEGIN>";
     const char* m_resultEnd = "<RESULTEND>";
+    bool m_init;
 public:
     ShellRunner( );
     bool runCommand( const char* Setup, const char* Command);
