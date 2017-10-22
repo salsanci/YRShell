@@ -1,31 +1,45 @@
 #ifndef HardwareSpecific_h
 #define HardwareSpecific_h
 
+
+
 #ifdef __linux__
 	#define PLATFORM_LA
     #define PLATFORM_LINUX
-	#warning "COMPILEDEBUG 1: __linux__ DEFINED"
+	#ifdef COMPILE_DEBUG
+		#warning "COMPILEDEBUG 1: __linux__ DEFINED"
+	#endif
 #endif
 #ifdef __APPLE__
 	#define PLATFORM_LA
     #define PLATFORM_APPLE
-	#warning "COMPILEDEBUG 2: __APPLE__ DEFINED"
+	#ifdef COMPILE_DEBUG
+		#warning "COMPILEDEBUG 2: __APPLE__ DEFINED"
+	#endif
 #endif
 
 #ifndef PLATFORM_LA
-	#warning "COMPILEDEBUG 3: PLATFORM_LA NOT DEFINED"
+	#ifdef COMPILE_DEBUG
+		#warning "COMPILEDEBUG 3: PLATFORM_LA NOT DEFINED"
+	#endif
 	#ifndef PLATFORM_AC6
-	#warning "COMPILEDEBUG 4: PLATFORM_AC6 NOT DEFINED"
+		#ifdef COMPILE_DEBUG
+			#warning "COMPILEDEBUG 4: PLATFORM_AC6 NOT DEFINED"
+		#endif
 		#define PLATFORM_ARDUINO
 	#endif
 
 	#ifdef PLATFORM_AC6
-		#warning "COMPILEDEBUG 5: PLATFORM_AC6 DEFINED"
+		#ifdef COMPILE_DEBUG
+			#warning "COMPILEDEBUG 5: PLATFORM_AC6 DEFINED"
+		#endif
 		#include "processorGlobal.h"
 	#endif
 
 	#ifdef PLATFORM_ARDUINO
-		#warning "COMPILEDEBUG 6: PLATFORM_ARDUINO DEFINED"
+		#ifdef COMPILE_DEBUG
+			#warning "COMPILEDEBUG 6: PLATFORM_ARDUINO DEFINED"
+		#endif
 		#include "Arduino.h"
 	#endif
 #endif

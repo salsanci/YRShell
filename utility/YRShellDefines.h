@@ -4,6 +4,7 @@
 #include "HardwareSpecific.h"
 
 //#define YRSHELL_DEBUG
+//#define COMPILE_DEBUG
 #define YRSHELL_INTERPRETER_FLOATING_POINT
 
 
