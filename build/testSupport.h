@@ -12,7 +12,6 @@ protected:
     const char* m_resultEnd = "<RESULTEND>";
 public:
     ShellRunner( );
-    bool init();
     bool runCommand( const char* Setup, const char* Command);
     int getIntResult( void);
     unsigned getUnsignedResult( void);

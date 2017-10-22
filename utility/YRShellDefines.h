@@ -8,7 +8,7 @@
 
 
 #ifndef YRSHELL_VERSION
-#define YRSHELL_VERSION "\rYRShell Version 0.2\r" // make sure this string length is less than YRShell outq size
+#define YRSHELL_VERSION "\rYRShell Version 0.2 " // make sure this string length is less than YRShell outq size
 #endif
 
 typedef enum {

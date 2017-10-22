@@ -2,6 +2,7 @@
 #define YRShellInterpreter_h
 
 #include "HardwareSpecific.h"
+#include "CurrentGit.h"
 
 #include "Sliceable.h"
 #include "CircularQ.h"

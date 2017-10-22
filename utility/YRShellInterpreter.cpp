@@ -2149,6 +2149,9 @@ void YRShellInterpreter::reset( ) {
     
         outChar( '\r');
         outString( YRSHELL_VERSION);
+        outString( " commit: ");
+        outString( GIT_COMMIT_HASH);
+        outChar( '\r');
     }
 }
 void YRShellInterpreter::reset( const char* file, unsigned line) {

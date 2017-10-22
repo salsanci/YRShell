@@ -1,6 +1,7 @@
 
 #include "testSupport.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 ShellRunner::ShellRunner( ) {
     m_commandTimeout = 1000;
@@ -24,7 +25,9 @@ bool ShellRunner::runCommand( const char* Setup,  const char *Command) {
         strcat( buf, " s' ");
         strcat( buf, m_resultEnd);
         strcat( buf, "' .str\r");
-    
+        
+        Sliceable::sliceAll();
+        
         P = m_resultBuffer;
         Lim = m_resultBuffer + sizeof( m_resultBuffer) - 2;
         timeout.setInterval(m_commandTimeout);
@@ -38,9 +41,11 @@ bool ShellRunner::runCommand( const char* Setup,  const char *Command) {
                 }
             }
             c++;
-            m_shell.slice();
+            Sliceable::sliceAll();
             while( (FirstOutput == NULL ||  SecondOutput == NULL)  && m_shell.getOutq().valueAvailable()) {
-                *P++ = m_shell.getOutq().get();
+                *P = m_shell.getOutq().get();
+                //putchar( *P);
+                P++;
                 *P = '\0';
             }
             if( P >= Lim) {
@@ -62,7 +67,6 @@ bool ShellRunner::runCommand( const char* Setup,  const char *Command) {
     }
     return m_result != NULL;
 }
-
 
 int ShellRunner::getIntResult( ) {
     return atoi(m_result);
