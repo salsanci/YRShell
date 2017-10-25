@@ -1,17 +1,4 @@
 # YrShell
-
-
-- test --> build
-	-
-- utility --> src
-
-- fix __APPLE_CC__ **
-
- –lpthread for linux **  
-
- - fix Makefile **  
-
- - yrshell  
  
 YrShell : An interactive command line shell for arduino arm based systems
 
