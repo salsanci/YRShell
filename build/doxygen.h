@@ -362,7 +362,7 @@ To set fresh with the project (you have no YRShell directory on your PC and want
 
 Move to the YRShell directory (created by git)
 
-    `cd YRShell`
+    cd YRShell
 
 To see the current branch
 
@@ -374,22 +374,25 @@ To create a new branch (to keep your changes separate from master)
 
 To change to a different branch (one that already exists in the project)
 
-    git checkout doc`
+    git checkout doc
 
 To update your local PC with this week's changes (from the development team on Sunday afternoon)
 
   - Get Sal's changes to MASTER
   
-        git pull master`
+        git pull master
 
   - get Braino's documentation changes to DOC  
   
         git pull doc`
 
   - push changes up to the doc branch
-    - (pulls anybody else's changes to me)         
+    - (pulls anybody else's changes to me) 
+    
         git pull origin doc  
-    - (pushes my changes out for everybody else)	
+	
+    - (pushes my changes out for everybody else)
+    
         git push origin doc    
   
   Sal merges our changes (if he accept them) into MASTER
