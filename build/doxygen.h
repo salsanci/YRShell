@@ -384,12 +384,12 @@ To update your local PC with this week's changes (from the development team on S
 
   - get Braino's documentation changes to DOC  
   
-`git pull doc`
+    `git pull doc`
 
   - push changes up to the doc branch
   
-  `git pull origin doc`  (pulls anybody else's changes to me)
-  `git push origin doc`  (pushes my changes out for everybody else)
+  `git pull origin doc`  (pulls anybody else's changes to me)  
+  `git push origin doc`  (pushes my changes out for everybody else)  
   
   Sal merges our changes (if he accept them) into MASTER
 
