@@ -358,29 +358,29 @@ Notes for commonly used git commands
 
 To set fresh with the project (you have no YRShell directory on your PC and want a fresh one)
 
-git clone https://github.com/salsanci/YRShell.git
+    git clone https://github.com/salsanci/YRShell.git
 
 Move to the YRShell directory (created by git)
 
-`cd YRShell`
+    `cd YRShell`
 
 To see the current branch
 
-`git branch`
+    `git branch`
 
 To create a new branch (to keep your changes separate from master)
 
-`git checkout -b` `[name_of_your_new_branch]`
+    `git checkout -b` `[name_of_your_new_branch]`
 
 To change to a different branch (one that already exists in the project)
 
-`git checkout doc`
+    `git checkout doc`
 
 To update your local PC with this week's changes (from the development team on Sunday afternoon)
 
   - Get Sal's changes to MASTER
   
-`git pull master`
+    `git pull master`
 
   - get Braino's documentation changes to DOC  
   
