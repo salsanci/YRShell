@@ -3,22 +3,29 @@
 
 
 
+#ifdef __unix__
+	#define PLATFORM_LUA
+    #define PLATFORM_UNIX
+	#ifdef COMPILE_DEBUG
+		#warning "COMPILEDEBUG 0: __unix__ DEFINED"
+	#endif
+#endif
 #ifdef __linux__
-	#define PLATFORM_LA
+	#define PLATFORM_LUA
     #define PLATFORM_LINUX
 	#ifdef COMPILE_DEBUG
 		#warning "COMPILEDEBUG 1: __linux__ DEFINED"
 	#endif
 #endif
 #ifdef __APPLE__
-	#define PLATFORM_LA
+	#define PLATFORM_LUA
     #define PLATFORM_APPLE
 	#ifdef COMPILE_DEBUG
 		#warning "COMPILEDEBUG 2: __APPLE__ DEFINED"
 	#endif
 #endif
 
-#ifndef PLATFORM_LA
+#ifndef PLATFORM_LUA
 	#ifdef COMPILE_DEBUG
 		#warning "COMPILEDEBUG 3: PLATFORM_LA NOT DEFINED"
 	#endif
