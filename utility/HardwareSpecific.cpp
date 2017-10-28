@@ -42,7 +42,7 @@ void HW_setSerialBaud( uint32_t port, uint32_t baud) {
 #endif
 }
 
-#ifdef PLATFORM_LA
+#ifdef PLATFORM_LUA
 #include <time.h>
 uint32_t HW_getSysticks() {
     struct timespec t;

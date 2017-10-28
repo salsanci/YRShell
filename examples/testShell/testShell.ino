@@ -84,12 +84,12 @@ void MyYRShell::executeFunction( uint16_t n) {
                 break;
             case SE_CC_ledOn:
                 if( ledControl) {
-                    //digitalWrite(LED_BUILTIN, HIGH);
+                    digitalWrite(LED_BUILTIN, HIGH);
                 }
                 break;
             case SE_CC_ledOff:
                 if( ledControl) {
-                    //digitalWrite(LED_BUILTIN, LOW);
+                    digitalWrite(LED_BUILTIN, LOW);
                 }
                 break;
             default:

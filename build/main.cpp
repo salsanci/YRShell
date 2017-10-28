@@ -86,7 +86,7 @@ public:
     virtual const char* shellClass( void) { return "MyYRShell"; }
 };
 
-class SmallYRShell : public virtual YRShellBase<128, 64, 16, 16, 16, 8, 64, 64, 64, 64>, public virtual CommonShell {
+class SmallYRShell : public virtual YRShellBase<128, 64, 16, 16, 16, 8, 64, 256, 64, 64>, public virtual CommonShell {
 public:
     /** \brief Used by SmallYRShell to map to the native functions.
      
@@ -337,9 +337,6 @@ int main(int argc, const char * argv[]) {
     }
     Dictionary::s_DictionaryError =  &errd;
 
-    shell0.init();
-    shell1.init();
-    shell2.init();
     shell0.setPrompt("bShell>");
     shell1.setPrompt("HELO>");
     shell2.setPrompt("OK>");
