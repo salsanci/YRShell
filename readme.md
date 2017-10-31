@@ -148,22 +148,29 @@ Now we procede to the YrShell module.
 ## Setup-YrShell
 Clone or Download Fshell from GitHub  `https://github.com/salsanci/YRShell`  
 - copy the directory  
-    - Linux/OSX `/home/<yourusername>/YrShell`
-    - Windows 10 `c:/YrShell`
+    - _Linux/OSX_ `/home/<yourusername>/YrShell`  
+    - _Windows 10_ `c:\YrShell`  
 to  
-   `/home/<yourusername>/Arduino/libraries/`  
+    - _Linux/OSX_   `/home/<yourusername>/Arduino/libraries/`  
+    - _Windows 10_  `C:\Users\<yourusername>\Documents\Arduino\libraries`  
+   
 The result should look like this:  
-   `/home/<yourusername>/Arduino/libraries/YRShell`
+    - _Linux/OSX_     `/home/<yourusername>/Arduino/libraries/YRShell`  
+    - _Windsows 10_  `C:\Users\<yourusername>\Documents\Arduino\libraries\YRShell`  
    
    Notice that the directory folder `Arduino` was created automaticaly buy the Arduino IDE when it started up the first time.
    
 The YRShell directory should contain several files and subdirectories, such as:  
+_Linux/OSX_  
    `/home/<yourusername>/Arduino/libraries/YRShell/examples`  
    `/home/<yourusername>/Arduino/libraries/YRShell/utility`  
+_Windows 10_  
+   `C:\Users<yourusername>\Documents\Arduino\libraries\YRShell\examples`  
+   `C:\Users<yourusername>\Documents\Arduino\libraries\YRShell\utility`  
    
 Plug in the USB cable to the Nucleo-L476 board if it is not already.  
 - Start the Arduino IDE  
-  `Sketch > Include Library > YRShell` (way at the bottom)
+  `Sketch > Include Library > YRShell` (way at the bottom)  
 - Navigate to the Fshell arduino sketch:  
   `File > OPen > /home/<yourusername>/Arduino/libraries/YRShell/examples/multipleShells/multipleShells.ino`  
   
@@ -172,10 +179,10 @@ The Arduino IDE should display the Fshell sketch on your screen if it is set upc
 __Notice line 129 - Serial.begin(115200);__  
 
 Verify and upload the sketch to the Nucleo-L476 using the icons at the top of the arduino IDE.  
-  - The LD1 COMM LED on by the USB jack should flash from green to red a couple times. 
-  - The green LED LD2 should flash ON for about a half second and OFF for about a second and a half.
-  - Notice Lines 182 and 185 in YRShell/multipleShells.ino.  You can very the blink pattern by changing these intervals.
-  - Notice that you must upload after each edit for the change to affect the blink pattern.
+  - The LD1 COMM LED on by the USB jack should flash from green to red a couple times.  
+  - The green LED LD2 should flash ON for about a half second and OFF for about a second and a half.  
+  - Notice Lines 182 and 185 in YRShell/multipleShells.ino.  You can very the blink pattern by changing these intervals.  
+  - Notice that you must upload after each edit for the change to affect the blink pattern.   
   - If you can change the blink pattern for example 10 milliseconds on and 1500 millseconds off, you are set up correctly.  
   
 Test the Fshell Command line.  
@@ -191,32 +198,32 @@ in the input field, type in
  `st?`  
 and hit enter.   
 
-**You should see the current stack items displayed.**`/  Use the period **.** followed by the enter key to take items off the stack, and type numbers separated by spaces and terminated with the enter key to put items on the stack.  Notice how you can cause stack underflow messages when you remove more items than are  present.
+**You should see the current stack items displayed.**`/  Use the period **.** followed by the enter key to take items off the stack, and type numbers separated by spaces and terminated with the enter key to put items on the stack.  Notice how you can cause stack underflow messages when you remove more items than are  present.  
 
 Type in  
 `wl`  
 and hit enter  
 
-**You should see a display off all currently defined command words.**  Try the various commands such as addition `+` subtraction `-` multipliplication `*` and divdision `/` to get a feel for how they function.  Try more commands until something blows up.  Hit the reset button to start fresh.  Notice that not all command have a meanings out of context. Avoid executing commands out of context as they often cause undefined behavior.
+**You should see a display off all currently defined command words.**  Try the various commands such as addition `+` subtraction `-` multipliplication `*` and divdision `/` to get a feel for how they function.  Try more commands until something blows up.  Hit the reset button to start fresh.  Notice that not all command have a meanings out of context. Avoid executing commands out of context as they often cause undefined behavior.  
 
 YRShell is now set up and ready for action.  
 
 
 # End of user documentation for initial setup    
 
-# Full YRShell source code documentation is generated using DOXYGEN
+# Full YRShell source code documentation is generated using DOXYGEN  
 
 The documentation beyond inital setup will be generated using `make doxygen` in the build directory. The generated doxygen documentation will be found in the created directory `~/build/html/index.html`  
 
-To Generate the documentation switch to the build directory `cd ~/YRShell/build`  
+To Generate the documentation switch to the build directory `cd ~/YRShell/build`    
 run the MAKE utility for doxygen: `make doxygen`  
 Doxygen will create a directory `html`  
-Switch to the html directory:
+Switch to the html directory:  
 
 `cd ~/YRShell/build/html`  
 
-find the file `index.html`
+find the file `index.html`  
 
-Open index.html in your favorite browser to find the generated documentation for the YRShell source code.
+Open index.html in your favorite browser to find the generated documentation for the YRShell source code.  
 
 #END
