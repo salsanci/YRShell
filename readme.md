@@ -179,7 +179,10 @@ The Arduino IDE should display the Fshell sketch on your screen if it is set upc
 
 __Notice line 129 - Serial.begin(115200);__  
 
-Verify and upload the sketch to the Nucleo-L476 using the icons at the top of the arduino IDE.  
+## Verify and upload the sketch to the Nucleo-L476 using the icons at the top of the arduino IDE.  
+
+Ensure the multipleshells.ino sketch is displayed in the Arduino IDE window
+Click the ARROW button (upload) to compile and upload the multipleshells.ino sketch to the Nucleo-L476RG  
   - The LD1 COMM LED on by the USB jack should flash from green to red a couple times.  
   - The green LED LD2 should flash ON for about a half second and OFF for about a second and a half.  
   - Notice Lines 182 and 185 in YRShell/multipleShells.ino.  You can very the blink pattern by changing these intervals.  
