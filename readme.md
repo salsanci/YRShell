@@ -55,7 +55,7 @@ There are two parts to the PC software.  These are the general PC build tools, a
 
 ## Setup PC tools  
 
-The build tools are the (gnu) build-essential (compiler) build tools and the doxygen documentation tools.  
+The build tools are the (gnu) build-essential (compiler) build tools and the doxygen documentation tools.  Notice that we do NOT need to install STLink.  STLink has hardware JTAG, but this is not part of the YRShell implementation at this time.
 
 ### PC Tools: build essential  
 
@@ -139,6 +139,8 @@ Verify the Arduino IDE is correctly configured for the STM32-L476RG.  Use the fo
  
 At this point, the general Arduino IDE is setup for the STM32Nucleo-L476RG. The IDE has been verified as working by successful compilaction and load of an example program.  
 
+After you have compiled and installed the BLINK program example to demonstrated that the Arduino IDE and the STM32Nucleo-L476RG board are functioning, you no longer need the BLINK progran example.  You can close this window.  
+
 ***
 Now we procede to the YrShell module.  
 ***
@@ -169,10 +171,9 @@ _Windows 10_
    `C:\Users<yourusername>\Documents\Arduino\libraries\YRShell\utility`  
    
 Plug in the USB cable to the Nucleo-L476 board if it is not already.  
-- Start the Arduino IDE  
-  `Sketch > Include Library > YRShell` (way at the bottom)  
+- Start the Arduino IDE (click on the Arduino icon)  
 - Navigate to the Fshell arduino sketch:  
-  `File > OPen > /home/<yourusername>/Arduino/libraries/YRShell/examples/multipleShells/multipleShells.ino`  
+  `File > Examples > YRShell  > multipleShells.ino`  
   
 The Arduino IDE should display the Fshell sketch on your screen if it is set upcorrectly.  
 
