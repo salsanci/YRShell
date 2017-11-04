@@ -20,6 +20,11 @@ void BufferedSerial::slice( void) {
 		}
 	}
 	if( m_previousQ != NULL) {
+#ifdef ARDUINO_SAM_DUE
+		if( m_previousQ->used() > 0) {
+			m_hs->write( m_previousQ->get());
+		}
+#else
 		s1 = m_previousQ->getLinearReadBufferSize();
 		s2 = m_hs->availableForWrite();
 		s1 = s1 <= s2 ? s1 : s2;
@@ -27,6 +32,7 @@ void BufferedSerial::slice( void) {
 			m_hs->write( m_previousQ->getLinearReadBuffer(), s1);
 			m_previousQ->drop( s1);
 		}
+#endif
 	}
 }
 void BufferedSerial::begin( uint32_t baud) {

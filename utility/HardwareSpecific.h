@@ -1,6 +1,7 @@
 #ifndef HardwareSpecific_h
 #define HardwareSpecific_h
 
+// #define COMPILE_DEBUG
 
 
 #ifdef __unix__
@@ -46,6 +47,16 @@
 	#ifdef PLATFORM_ARDUINO
 		#ifdef COMPILE_DEBUG
 			#warning "COMPILEDEBUG 6: PLATFORM_ARDUINO DEFINED"
+		#endif
+		#ifdef ARDUINO_SAM_DUE
+			#define ENABLE_SERIAL1
+			#define ENABLE_SERIAL2
+			#define ENABLE_SERIAL3
+		#endif
+		#ifdef ARDUINO_AVR_MEGA2560
+			#define ENABLE_SERIAL1
+			#define ENABLE_SERIAL2
+			#define ENABLE_SERIAL3
 		#endif
 		#include "Arduino.h"
 	#endif

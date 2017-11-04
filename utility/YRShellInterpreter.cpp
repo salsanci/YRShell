@@ -953,7 +953,7 @@ static FunctionDictionary dictionaryInterpreterFunction( interpreterFunctions, Y
 
 #ifdef YRSHELL_DEBUG
 const char *stateDebugStrings[] = {
-    "INVALID",
+    "YRSHELL_INVALID_STATE",
 	"YRSHELL_NOT_INITIALIZED",
     "YRSHELL_BEGINNING",
     "YRSHELL_INRESET",
@@ -966,7 +966,10 @@ const char *stateDebugStrings[] = {
     "YRSHELL_COMPILING",
     "YRSHELL_EXECUTING",
     "YRSHELL_WAIT_FOR_OUTPUT_SPACE",
-    "YRSHELL_WAIT_DELAY"
+    "YRSHELL_WAIT_DELAY",
+    "YRSHELL_OUTPUT",
+    "YRSHELL_OUTPUT_STR",
+    "YRSHELL_LAST_INVALID_STATE"
 };
 const char *SIDebugStrings[] = {
     "SI_CC_first",
@@ -1150,8 +1153,6 @@ const char *SIDebugStrings[] = {
 
 CompiledDictionary emptyDictionary;
 
-//TODO control structure message masks undefined word
-
 void YRShellInterpreter::init( ) {
     reset();
     
@@ -1178,7 +1179,6 @@ YRShellInterpreter::YRShellInterpreter() {
 	m_debugFlags = 0;
 #endif
 	m_hexMode = false;
-	m_lastState = YRSHELL_INVALID_STATE;
 	m_outputTimeoutInMilliseconds = 1000;
 	m_padCount = 0;
     m_padSize = 0;
@@ -1189,14 +1189,28 @@ YRShellInterpreter::YRShellInterpreter() {
 	m_token = NULL;
 	m_topOfStack = 0;
 	m_useAuxQueues = false;
-	strcpy( m_autoPrompt, "YR_");
-	unsignedToStringZero(s_shellNumber++, 3, &m_autoPrompt[3]);
+#ifdef  INPUT_BUFFER_EDITING
+    m_LastBuffer = NULL;
+    if( m_lastBufferSize != 0) {
+        memset(m_LastBuffer, 0, m_lastBufferSize);
+        m_lastBufferFree = 0;
+        m_lastBufferIndex = 0;
+    }
+#endif
+	strcpy( m_autoPrompt, "\rYR_");
+	unsignedToStringZero(s_shellNumber++, 2, &m_autoPrompt[3]);
 	strcat( m_autoPrompt, ">");
 	setPrompt( m_autoPrompt);
+    m_outputStrPtr  = NULL;
+    m_outputUint = 0;
+    m_outputStr0 = NULL;
+    m_outputStr1 = NULL;
+    m_outputStr2 = NULL;
+    m_outputStr3 = NULL;
+    m_stateTopOfStack = 0;
 }
 YRShellInterpreter::~YRShellInterpreter() {
 }
-
 bool YRShellInterpreter::isCompileToken() {
     return m_token != NULL && (!strcmp( m_token, "s'") || !strcmp( m_token, "[") || !strcmp( m_token, "][") || !strcmp( m_token, "]") || !strcmp( m_token, "{") || !strcmp( m_token, "}") );
 }
@@ -1229,10 +1243,10 @@ const char* YRShellInterpreter::getFileName( const char* P) {
 }
 
 void YRShellInterpreter::shellERROR( const char* file, unsigned line) {
-    reset( getFileName(file), line);
+    reset( file, line);
 }
 void YRShellInterpreter::shellERROR( const char* file, unsigned line, const char* message) {
-    reset( getFileName(file), line, message);
+    reset( file, line, message);
 }
 void YRShellInterpreter::CC_nextEntry( ) {
     uint32_t v1 = popParameterStack();
@@ -1305,7 +1319,8 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             outChar( '\n');
             break;
         case SI_CC_reset:
-            reset( __FILE__, __LINE__, "COMMAND RESET\r\n");
+            m_DictionaryCurrent->reset();
+            reset( __FILE__, __LINE__, "COMMAND RESET");
             break;
         case SI_CC_uint16:
             v1 = fetchCurrentValueToken();
@@ -1358,8 +1373,8 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             outChar( ' ');
             break;
         case SI_CC_dotStr:
-            P = getAddressFromToken( popParameterStack());
-            outString( P );
+            m_outputStrPtr = getAddressFromToken( popParameterStack());
+            pushState(YRSHELL_OUTPUT_STR);
             break;
         case SI_CC_hex:
             m_hexMode = true;
@@ -1618,7 +1633,7 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             
         case SI_CC_delay:
             m_delayTimer.setInterval(popParameterStack());
-            nextState(YRSHELL_WAIT_DELAY);
+            pushState(YRSHELL_WAIT_DELAY);
             break;
         case SI_CC_nextEntry:
             CC_nextEntry( );
@@ -1629,8 +1644,9 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             if( v1 != YRSHELL_DICTIONARY_INVALID && v2 < YRSHELL_DICTIONARY_LAST_INDEX && m_dictionaryList[ v2] != NULL) {
                 v1 = m_dictionaryList[ v2]->getNameAddressToken(v1);
                 P = getAddressFromToken( v1);
-                outString( P);
                 pushParameterStack((uint32_t) strlen( P));
+                m_outputStrPtr = P;
+                pushState( YRSHELL_OUTPUT_STR);
             } else {
                 pushParameterStack(0);
             }
@@ -1683,7 +1699,8 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             pushParameterStack( shellSize());
             break;
         case SI_CC_printShellClass:
-            outString( shellClass());
+            m_outputStrPtr = shellClass();
+            pushState( YRSHELL_OUTPUT_STR);
             break;
 
         case SI_CC_dictionarySize:
@@ -1781,7 +1798,8 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
         	v1 = popParameterStack();
         	S = Sliceable::getSlicePointer( v1);
         	if( S != NULL) {
-        		outString( S->sliceName() );
+                m_outputStrPtr = S->sliceName();
+                pushState( YRSHELL_OUTPUT_STR);
          	}
             break;
             
@@ -2121,7 +2139,6 @@ void YRShellInterpreter::interpretReset( ) {
 }
 void YRShellInterpreter::reset( ) {
     if( m_state != YRSHELL_INRESET) {
-
         m_Inq->reset();
         m_AuxInq->reset();
         m_Outq->reset();
@@ -2140,36 +2157,29 @@ void YRShellInterpreter::reset( ) {
         m_topOfStack = 0;
         m_returnTopOfStack = 0;
         m_compileTopOfStack = 0;
+        m_stateTopOfStack = 0;
         m_hexMode = false;
-
         m_useAuxQueues = false;
     
         m_PC = 0;
-        m_outputTimeoutInMilliseconds = 1000;
+        //m_outputTimeoutInMilliseconds = 1000;
     
-        outChar( '\r');
-        outString( YRSHELL_VERSION);
-        outString( " commit: ");
-        outString( GIT_COMMIT_HASH);
-        outChar( ' ');
-        outString( GIT_COMMIT_SHORT_HASH);
-        outChar( '\r');
+        m_outputStr0 = "\r" YRSHELL_VERSION " Commit: " GIT_COMMIT_HASH " " GIT_COMMIT_SHORT_HASH "\rCompile Time: " __DATE__ " " __TIME__ " Main File: ";
+        m_outputStr1 = mainFileName();
     }
 }
 void YRShellInterpreter::reset( const char* file, unsigned line) {
     reset();
-    outString( file);
-    outUint32(line);
-    outChar( '\r');
-   
+    m_outputStr2 = getFileName( file);
+    m_outputUint = line;
+    m_outputUintValid = true;
 }
 void YRShellInterpreter::reset( const char* file, unsigned line, const char* message) {
     reset();
-    outString( file);
-    outUint32(line);
-    outString( " ");
-    outString( message);
-    outChar( '\r');
+    m_outputStr2 = message;
+    m_outputStr3 = getFileName( file);
+    m_outputUint = line;
+    m_outputUintValid = true;
 }
 void YRShellInterpreter::nextState(YRShellState n) {
 #ifdef YRSHELL_DEBUG
@@ -2181,11 +2191,98 @@ void YRShellInterpreter::nextState(YRShellState n) {
         outString( "]]");
     }
 #endif
-    m_lastState = m_state;
     m_state = n;
+    if( m_state <= YRSHELL_INVALID_STATE || m_state >= YRSHELL_LAST_INVALID_STATE) {
+        shellERROR( __FILE__, __LINE__);
+    }
+}
+void YRShellInterpreter::pushState( YRShellState n) {
+    if( m_stateTopOfStack >= (sizeof(m_stateStack)/sizeof(m_stateStack[0])) ) {
+        shellERROR( __FILE__, __LINE__);
+    }
+    m_stateStack[ m_stateTopOfStack++] = m_state;
+    nextState( n);
+}
+void YRShellInterpreter::popState() {
+    if( m_stateTopOfStack == 0 ) {
+        shellERROR( __FILE__, __LINE__);
+    }
+    m_state = m_stateStack[ --m_stateTopOfStack];
+    if( m_state <= YRSHELL_INVALID_STATE || m_state >= YRSHELL_LAST_INVALID_STATE) {
+        shellERROR( __FILE__, __LINE__);
+    }
+}
+void YRShellInterpreter::fillPadInternal( char c) {
+    uint16_t i, j;
+    if( c == '\r' || c == '\n') {
+        for( i = 0; i < m_padCount; i++ ) {
+            if( m_Pad[ i] != ' ' && m_Pad[ i] != '\t') {
+                break;
+            }
+        }
+        if( m_Pad[ i] == '/' && m_Pad[ i + 1] == '/') {
+            m_padCount = 0;
+            m_Pad[ 0] = '\0';
+        }
+#ifdef INPUT_BUFFER_EDITING
+        if( m_lastBufferSize != 0) {
+            m_lastBufferIndex = m_lastBufferFree;
+            for( i = 0; i < m_padCount + 1; i++) {
+                m_LastBuffer[ m_lastBufferFree++ ] = m_Pad[ i];
+                if( m_lastBufferFree >= m_lastBufferSize) {
+                    m_lastBufferFree = 0;
+                }
+            }
+            j = m_lastBufferFree;
+            for( i = 0; i < m_lastBufferSize + 1 && m_LastBuffer[ j] != '\0'; i++) {
+                m_LastBuffer[  j++] = '\0';
+                if( j >= m_lastBufferSize) {
+                    j = 0;
+                }
+            }
+        }
+        nextState( YRSHELL_BEGIN_PARSING);
+    } else if( c == '\x08' ) {
+        if( m_padCount > 0) {
+            m_Pad[ --m_padCount] = '\0';
+            if( m_commandEcho) {
+                outChar( ' ');
+                outChar( '\x08');
+            }
+        }
+    } else if( c == '\x05') {
+        if( m_lastBufferSize != 0) {
+            for( m_padCount = 0, i = 0, j = m_lastBufferIndex; i < (m_padSize - 1)  &&  m_LastBuffer[j] != '\0'; m_padCount++, i++) {
+                m_Pad[ m_padCount] = m_LastBuffer[ j];
+                j = (j < m_lastBufferSize - 1) ? j + 1 : 0;
+            }
+            m_Pad[ m_padCount] = '\0';
+            m_lastBufferIndex = (m_lastBufferIndex == 0) ? m_lastBufferSize - 1 : m_lastBufferIndex - 1;
+            for( i = 0; i < m_lastBufferSize &&  m_LastBuffer[ m_lastBufferIndex] == '\0'; i++ ) {
+                m_lastBufferIndex = (m_lastBufferIndex == 0) ? m_lastBufferSize - 1 : m_lastBufferIndex - 1;
+            }
+            for( i = 0; i < m_lastBufferSize &&  m_LastBuffer[ m_lastBufferIndex] != '\0'; i++ ) {
+                m_lastBufferIndex = (m_lastBufferIndex == 0) ? m_lastBufferSize - 1 : m_lastBufferIndex - 1;
+            }
+            m_lastBufferIndex = ((m_lastBufferIndex + 1) >= m_lastBufferSize) ? 0 : m_lastBufferIndex + 1;
+            m_padCount = strlen( m_Pad);
+            outString( m_prompt);
+            m_outputStrPtr = m_Pad;
+            pushState( YRSHELL_OUTPUT_STR);
+        }
+    } else {
+        m_Pad[ m_padCount++] = c;
+        m_Pad[ m_padCount] = '\0';
+    }
+#else
+    nextState( YRSHELL_BEGIN_PARSING);
+    } else {
+        m_Pad[ m_padCount++] = c;
+        m_Pad[ m_padCount] = '\0';
+    }
+#endif
 }
 void YRShellInterpreter::fillPad( char c) {
-    uint16_t i;
 #ifdef YRSHELL_DEBUG
     if( m_debugFlags & YRSHELL_DEBUG_INPUT) {
         outString("[YRShellInterpreter::fillPad ");
@@ -2196,24 +2293,10 @@ void YRShellInterpreter::fillPad( char c) {
     if( m_commandEcho) {
         outChar( c);
     }
-    if( m_padCount > (m_padSize - 2)) {
+    if( m_padCount > (m_padSize - 4)) {
         reset( __FILE__, __LINE__, "INPUT BUFFER OVERFLOW");
     } else {
-        if( c == '\r' || c == '\n') {
-            for( i = 0; i < m_padCount; i++ ) {
-                if( m_Pad[ i] != ' ' && m_Pad[ i] != '\t') {
-                    break;
-                }
-            }
-            if( m_Pad[ i] == '/' && m_Pad[ i + 1] == '/') {
-                m_padCount = 0;
-                m_Pad[ 0] = '\0';
-            }
-            nextState( YRSHELL_BEGIN_PARSING);
-        } else {
-            m_Pad[ m_padCount++] = c;
-            m_Pad[ m_padCount] = '\0';
-        }
+        fillPadInternal( c);
     }
 }
 #ifdef YRSHELL_DEBUG
@@ -2266,11 +2349,18 @@ void YRShellInterpreter::beginParsing(void) {
         }
     }
 }
+void YRShellInterpreter::setOutputTimeout( uint32_t t) {
+    m_outputTimeoutInMilliseconds = t;
+}
 
+uint16_t YRShellInterpreter::outputSpace( ) {
+    return m_useAuxQueues ? m_AuxOutq->free() : m_Outq->free();
+}
 void YRShellInterpreter::slice(void) {
     char c;
-    if( ( (m_Outq->free() < (m_Outq->size()/2)) || (m_AuxOutq->free() < (m_AuxOutq->size()/2)) ) && m_state != YRSHELL_WAIT_FOR_OUTPUT_SPACE) {
-        nextState( YRSHELL_WAIT_FOR_OUTPUT_SPACE);
+
+    if( ( (m_Outq->free() < (m_Outq->size()/2)) || (m_AuxOutq->free() < (m_AuxOutq->size()/2)) ) && m_state != YRSHELL_WAIT_FOR_OUTPUT_SPACE && m_state != YRSHELL_OUTPUT&& m_state != YRSHELL_OUTPUT_STR) {
+        pushState( YRSHELL_WAIT_FOR_OUTPUT_SPACE);
         m_outputTimeout.setInterval(m_outputTimeoutInMilliseconds);
     }
     switch( m_state) {
@@ -2326,7 +2416,6 @@ void YRShellInterpreter::slice(void) {
             debugToken();
 #endif
             if( m_token == NULL) {
-                //TODO
                 if( m_compileTopOfStack) {
                     m_DictionaryCurrent->rollBack();
                     shellERROR(__FILE__, __LINE__, "INCOMPLETE CONTROL STRUCTURE");
@@ -2341,22 +2430,77 @@ void YRShellInterpreter::slice(void) {
             break;
         case YRSHELL_WAIT_FOR_OUTPUT_SPACE:
             if( m_Outq->used() < (m_Outq->size()/2) && m_AuxOutq->used() < (m_AuxOutq->size()/2) ) {
-                nextState( m_lastState);
+                popState( );
+                //nextState( m_lastState);
             } else if( m_outputTimeout.hasIntervalElapsed()) {
-                shellERROR( __FILE__, __LINE__, "OUTPUT WAIT FOR SPACE TIMEOUT");
+                if( m_outputTimeoutInMilliseconds != 0) {
+                    shellERROR( __FILE__, __LINE__, "OUTPUT WAIT FOR SPACE TIMEOUT");
+                } else {
+                    m_Outq->drop(  m_Outq->size()/2 - m_Outq->free() );
+                    m_AuxOutq->drop( m_Outq->size()/2 - m_AuxOutq->free());
+                }
             }
             break;
         case YRSHELL_WAIT_DELAY:
             if( m_delayTimer.hasIntervalElapsed()) {
-                nextState( m_lastState);
+                popState( );
+            }
+            break;
+        case YRSHELL_OUTPUT_STR:
+            if( outputSpace() < 6) {
+                if( m_outputTimeoutInMilliseconds == 0) {
+                    m_Outq->drop(  m_Outq->size()/2 - m_Outq->free() );
+                    m_AuxOutq->drop( m_Outq->size()/2 - m_AuxOutq->free());
+                }
+            } else {
+                while( m_outputStrPtr != NULL && outputSpace() >= 4 ) {
+                    outChar( *m_outputStrPtr++);
+                    if( *m_outputStrPtr == '\0') {
+                        m_outputStrPtr = NULL;
+                    }
+                }
+                if( m_outputStrPtr == NULL) {
+                    popState( );
+                }
+            }
+            break;
+
+            
+        case YRSHELL_OUTPUT:
+            if(m_outputStr0 != NULL) {
+                m_outputStrPtr = m_outputStr0;
+                m_outputStr0 = NULL;
+                pushState( YRSHELL_OUTPUT_STR);
+            } else if(m_outputStr1 != NULL) {
+                m_outputStrPtr = m_outputStr1;
+                m_outputStr1 = NULL;
+                pushState( YRSHELL_OUTPUT_STR);
+           } else if( m_outputStr2 != NULL) {
+                outChar( '\r');
+                m_outputStrPtr = m_outputStr2;
+                m_outputStr2 = NULL;
+                pushState( YRSHELL_OUTPUT_STR);
+            } else if( m_outputStr3 != NULL) {
+                outChar( '\r');
+                m_outputStrPtr = m_outputStr3;
+                m_outputStr3 = NULL;
+                pushState( YRSHELL_OUTPUT_STR);
+            } else if( m_outputUintValid ) {
+                m_outputUintValid = false;
+                outInt32( m_outputUint);
+            } else {
+                outChar( '\r');
+                popState( );
             }
             break;
         default:
+            reset( __FILE__, __LINE__);
             break;
             
     }
     if( m_state == YRSHELL_INRESET) {
         nextState( YRSHELL_BEGIN_IDLE);
+        pushState( YRSHELL_OUTPUT);
     }
 }
 bool YRShellInterpreter::processLiteralToken( ){
@@ -2409,11 +2553,11 @@ bool YRShellInterpreter::processToken( ){
         } else {
             if( rc == YRSHELL_DICTIONARY_INVALID) {
                 if( !processLiteralToken()) {
-                    outString( "\rUNDEFINED [");
-                    outString( m_token);
-                    outString( "]\r");
+                    outString( "\rUNDEFINED: ");
+                    m_outputStrPtr = m_token;
                     interpretReset();
                     nextState( YRSHELL_BEGIN_IDLE);
+                    pushState( YRSHELL_OUTPUT_STR);
                     m_returnTopOfStack = 0;
                     m_compileTopOfStack = 0;
                     ret = false;
@@ -2557,7 +2701,7 @@ CircularQBase<char>& YRShellInterpreter::getAuxOutq() {
     return *m_AuxOutq;
 }
 
-void YRShellInterpreter::outChar( const char c) {
+void YRShellInterpreter::outCharRaw( const char c) {
     if( m_useAuxQueues) {
         if( !m_AuxOutq->put( c) && m_state != YRSHELL_INRESET) {
             shellERROR( __FILE__, __LINE__, "OUTPUT BUFFER OVERFLOW");
@@ -2567,11 +2711,13 @@ void YRShellInterpreter::outChar( const char c) {
             shellERROR( __FILE__, __LINE__, "OUTPUT BUFFER OVERFLOW");
         }
     }
+}
+void YRShellInterpreter::outChar( const char c) {
+    outCharRaw( c);
     if( m_expandCR && c == '\x0D') {
-        outChar( '\n');
+        outCharRaw( '\n');
     }
 }
-
 void YRShellInterpreter::outString( const char* P) {
     if( P != NULL) {
         while( *P != '\0') {
@@ -2579,7 +2725,6 @@ void YRShellInterpreter::outString( const char* P) {
         }
     }
 }
-
 void YRShellInterpreter::outRawString( const char* P) {
     if( P != NULL) {
         while( *P != '\0') {

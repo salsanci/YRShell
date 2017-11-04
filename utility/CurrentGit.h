@@ -1,5 +1,5 @@
 #ifndef CurrrentGit_h
 #define CurrrentGit_h
-#define GIT_COMMIT_HASH "402509b000f660e1a7f622daf63f6b998fe6a9dd"
-#define GIT_COMMIT_SHORT_HASH "[402509b]"
+#define GIT_COMMIT_HASH "c9cd6c75559ddb3ae60de70394c3309c339d0dc4"
+#define GIT_COMMIT_SHORT_HASH "[c9cd6c7]"
 #endif

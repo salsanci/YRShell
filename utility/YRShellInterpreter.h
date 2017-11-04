@@ -13,7 +13,6 @@
 #include "math.h"
 #endif
 
-
 /** \brief YRShellInterpreter - interactive
  
  Details on what YRShellInterpreter is
@@ -210,8 +209,10 @@ enum SI_CC_functions {
 };
 
 protected:
-    static  uint8_t     s_shellNumber;
-    YRShellState                            m_lastState, m_state;
+    static  uint8_t                         s_shellNumber;
+    YRShellState                            m_stateStack[ 8], m_state;
+    uint8_t                                 m_stateTopOfStack;
+
     Dictionary                              *m_dictionaryList[ YRSHELL_DICTIONARY_LAST_INDEX];
     CircularQBase<char>                     *m_Inq, *m_AuxInq, *m_Outq, *m_AuxOutq;
     
@@ -223,7 +224,12 @@ protected:
     bool        m_hexMode;
     bool        m_useAuxQueues;
     char        m_autoPrompt[8];
-
+#ifdef  INPUT_BUFFER_EDITING
+    char        *m_LastBuffer;
+    uint16_t    m_lastBufferSize;
+    uint16_t    m_lastBufferFree;
+    uint16_t    m_lastBufferIndex;
+#endif
     uint32_t    m_outputTimeoutInMilliseconds;
     IntervalTimer m_outputTimeout;
     IntervalTimer m_delayTimer;
@@ -241,10 +247,19 @@ protected:
     uint8_t     m_topOfStack;
     uint8_t     m_returnTopOfStack;
     uint8_t     m_compileTopOfStack;
+
     
     char *m_token, *m_saveptr;
     uint32_t m_PC;
-    const char* m_prompt = ">";
+    const char* m_prompt;
+    
+    const char* m_outputStrPtr;
+    const char* m_outputStr0;
+    const char* m_outputStr1;
+    const char* m_outputStr2;
+    const char* m_outputStr3;
+    unsigned m_outputUint;
+    bool m_outputUintValid;
     
     CurrentVariableDictionary* m_DictionaryCurrent;
     
@@ -260,10 +275,15 @@ protected:
     virtual uint32_t shellSize( void) { return sizeof( *this); }
     virtual const char* shellClass( void) { return "YRShellInterpreter"; }
     virtual const char* sliceName( ) { return shellClass(); }
+    virtual const char* mainFileName( ) { return shellClass(); }
     virtual void init( void);
     
-    void nextState(YRShellState n);
+    uint16_t outputSpace( void);
+    void nextState( YRShellState n);
+    void popState( void);
+    void pushState( YRShellState n);
     void fillPad( char c);
+    void fillPadInternal( char c);
     void interpretReset( void);
     void reset( void);
     void reset( const char* file, unsigned line);
@@ -307,10 +327,19 @@ public:
     YRShellInterpreter( );
     virtual ~YRShellInterpreter();
     
-    static const char* getFileName( const char* P);
     virtual void shellERROR( const char* file, unsigned line);
     virtual void shellERROR( const char* file, unsigned line, const char* message);
     
+    static const char* getFileName( const char* P);
+    /** \brief The time in milliseconds to wait for the output queues to have space.
+     
+     The time in milliseconds to wait for the output queues to have space.
+     The interpreter will not proceed on a slice unless both the output queue and the aux output queuse are at least half empty.
+     In the case of a timeout, the queues are cleared and an error is generated.
+     A zero value disables this and simply discards the output without generating an error so the interpreter can proceed.
+     
+     */
+    void setOutputTimeout( uint32_t t);
     void setPrompt( const char* prompt );
     
     void slice( void);
@@ -335,6 +364,7 @@ public:
     void outEngFloat( float num);
 #endif
     
+    void outCharRaw( char c);
     void outChar( char c);
     void outString( const char* S);
     void outRawString( const char* S);

@@ -5,6 +5,8 @@
 //  Copyright © 2017 Sal Sanci. All rights reserved.
 //
 
+//TODO fix this
+#define MAIN_FILE "build/main.cpp"
 
 #include <iostream>
 #include <string>
@@ -79,14 +81,15 @@ enum SE_CC_functions {
 };
 protected:
     virtual void executeFunction( uint16_t n);
- 
+    virtual const char* shellClass( void) { return "MyYRShell"; }
+    virtual const char* mainFileName( void) { return "build/main.cpp"; }
+
 public:
     MyYRShell() { }
     void init(void);
-    virtual const char* shellClass( void) { return "MyYRShell"; }
 };
 
-class SmallYRShell : public virtual YRShellBase<128, 64, 16, 16, 16, 8, 64, 256, 64, 64>, public virtual CommonShell {
+class SmallYRShell : public virtual YRShellBase<128, 64, 16, 16, 16, 8, 64, 64, 64, 64, 0>, public virtual CommonShell {
 public:
     /** \brief Used by SmallYRShell to map to the native functions.
      
@@ -100,14 +103,15 @@ public:
     };
 protected:
     virtual void executeFunction( uint16_t n);
-    
+    virtual const char* shellClass( void) { return "SmallYRShell"; }
+    virtual const char* mainFileName( void) { return "build/main.cpp"; }
+
 public:
     SmallYRShell() { }
     void init(void);
-    virtual const char* shellClass( void) { return "SmallYRShell"; }
 };
 
-class BigYRShell : public virtual YRShellBase<8192, 256, 16, 16, 16, 8, 16384, 16384, 4096, 4096>, public virtual CommonShell {
+class BigYRShell : public virtual YRShellBase<8192, 256, 16, 16, 16, 8, 16384, 16384, 4096, 4096, 8192>, public virtual CommonShell {
 public:
     /** \brief Used by SmallYRShell to map to the native functions.
      
@@ -124,11 +128,12 @@ public:
     };
 protected:
     virtual void executeFunction( uint16_t n);
-    
+    virtual const char* shellClass( void) { return "BigYRShell"; }
+    virtual const char* mainFileName( void) { return "build/main.cpp"; }
+
 public:
     BigYRShell() { }
     void init(void);
-    virtual const char* shellClass( void) { return "BigYRShell"; }
 };
 
 BigYRShell shell0;
@@ -328,7 +333,8 @@ int main(int argc, const char * argv[]) {
     pthread_t kThread;
     uint16_t lastLen= 0;
 
-    std::cout.setf( std::ios_base::unitbuf );
+    //system( "stty raw");
+    //std::cout.setf( std::ios_base::unitbuf );
 
     if(pthread_create(&kThread, NULL, kscan, (void*) NULL)) {
         
@@ -337,12 +343,12 @@ int main(int argc, const char * argv[]) {
     }
     Dictionary::s_DictionaryError =  &errd;
 
-    shell0.setPrompt("bShell>");
-    shell1.setPrompt("HELO>");
-    shell2.setPrompt("OK>");
+    shell0.setOutputTimeout(1500);
+    shell1.setOutputTimeout( 0);
+    shell2.setOutputTimeout( 0);
     iTimer.setInterval(1);
     out1.init( currentYRShell->getOutq());
-    out2.init(currentYRShell->getAuxOutq());
+    out2.init( currentYRShell->getAuxOutq());
 
     std::cout.setf( std::ios_base::unitbuf );
     while( 1) {
