@@ -73,5 +73,6 @@ clean:
 	rm -f *.o
 	rm -f ../*.o
 	rm -f ../utility/*.o
+	rm -f ./genGitHash
 
 
