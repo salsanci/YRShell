@@ -31,6 +31,7 @@ class MyYRShell : public YRShell {
 protected:
     virtual void executeFunction( uint16_t n);
     virtual const char* shellClass( void) { return "MyYRShell"; }
+    virtual const char* mainFileName( ) { return "examples/testShell/testShell.ino"; }
 
 public:
     MyYRShell();

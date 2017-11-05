@@ -85,7 +85,21 @@ public:
  
  
  */
-class YRSmallShell : public virtual YRShellBase<2048, 128, 16, 16, 16, 8, 32, 32, 16, 16, 0>{
+class YRMidShell : public virtual YRShellBase<256, 128, 16, 16, 16, 8, 64, 128, 64, 64, 256>{
+protected:
+public:
+    YRMidShell( ) { }
+    virtual ~YRMidShell( ) { }
+    virtual uint32_t shellSize( void) { return sizeof( *this); }
+    virtual const char* shellClass( void) { return "YRMidShell"; }
+};
+/** \brief  interactive
+ 
+ Details on what YRSmallShell is
+ 
+ 
+ */
+class YRSmallShell : public virtual YRShellBase<64, 64, 16, 16, 16, 8, 32, 32, 32, 32, 0>{
 protected:
 public:
     YRSmallShell( ) { }

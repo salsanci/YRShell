@@ -2,10 +2,10 @@
 #include <YRShell.h>
 
 
-class MyShell : public YRShell {
+class MyShell : public YRSmallShell {
 protected:
 	virtual const char* shellClass( void) { return "MyShell"; }
-    virtual const char* mainFileName( ) { return "examples/YRShell/YRShell.ino"; }
+    virtual const char* mainFileName( ) { return "examples/YRSmallShell/YRSnmallShell.ino"; }
 public:
 	MyShell() {}
 	virtual ~MyShell() {}

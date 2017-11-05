@@ -18,6 +18,7 @@ public:
     CommonShell( void) {  }
     virtual ~CommonShell( void) { }
     void init(void);
+    virtual const char* mainFileName( ) { return "examples/multipleShells/multipleShells.ino"; }
 };
 
 
@@ -42,16 +43,16 @@ public:
     virtual const char* shellClass( void) { return "MyYRShell"; }
 };
 
-class SmallYRShell : public virtual YRShellBase<128, 64, 16, 16, 16, 8, 64, 90, 64, 64>, public virtual CommonShell {
+class LittleYRShell : public virtual YRShellBase<64, 64, 16, 16, 16, 8, 64, 64, 64, 64, 0>, public virtual CommonShell {
 public:
-    SmallYRShell() { }
-    virtual const char* shellClass( void) { return "SmallYRShell"; }
+    LittleYRShell() { }
+    virtual const char* shellClass( void) { return "LittleYRShell"; }
 };
 
 MyYRShell shell1;
-SmallYRShell shell2;
+LittleYRShell shell2;
 MyYRShell shell3;
-SmallYRShell shell4;
+LittleYRShell shell4;
 
 YRShellInterpreter *shellVector[] = {&shell1, &shell2, &shell3, &shell4};
 uint8_t shellVectorIndex = 0;

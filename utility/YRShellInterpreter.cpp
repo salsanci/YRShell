@@ -1644,9 +1644,13 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             if( v1 != YRSHELL_DICTIONARY_INVALID && v2 < YRSHELL_DICTIONARY_LAST_INDEX && m_dictionaryList[ v2] != NULL) {
                 v1 = m_dictionaryList[ v2]->getNameAddressToken(v1);
                 P = getAddressFromToken( v1);
-                pushParameterStack((uint32_t) strlen( P));
-                m_outputStrPtr = P;
-                pushState( YRSHELL_OUTPUT_STR);
+                if( P == NULL || strlen(P) == 0) {
+                    pushParameterStack( 0);
+                } else {
+                    pushParameterStack((uint32_t) strlen( P));
+                    m_outputStrPtr = P;
+                    pushState( YRSHELL_OUTPUT_STR);
+                }
             } else {
                 pushParameterStack(0);
             }
