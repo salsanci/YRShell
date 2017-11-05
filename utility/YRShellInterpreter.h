@@ -176,7 +176,10 @@ enum SI_CC_functions {
 
     SI_CC_setBaud,
     SI_CC_sysTicksPerSecond,
-    
+
+    SI_CC_lastBufferSize,
+    SI_CC_printMainFileName,
+
  #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     SI_CC_dotf,
     SI_CC_dote,

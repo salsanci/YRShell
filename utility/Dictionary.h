@@ -177,7 +177,7 @@ protected:
     uint16_t findInternalEntry( const char* name, uint16_t link);
 public:
     CompiledDictionary( void);
-    CompiledDictionary( uint16_t* dict, uint16_t lastWord, uint16_t size, uint16_t mask);
+    CompiledDictionary( const uint16_t* dict, uint16_t lastWord, uint16_t size, uint16_t mask);
     uint16_t getSize( void) { return m_size; }
     
     /** \brief Returns an index pointing to the first dictionary entry.

@@ -93,8 +93,8 @@ CompiledDictionary::CompiledDictionary( ) {
     m_size = 0;
     m_mask = 0;
 }
-CompiledDictionary::CompiledDictionary( uint16_t* dict, uint16_t lastWord, uint16_t size, uint16_t mask) {
-    m_dictionary = dict;
+CompiledDictionary::CompiledDictionary( const uint16_t* dict, uint16_t lastWord, uint16_t size, uint16_t mask) {
+    m_dictionary = (uint16_t*) dict;
     m_lastWord = lastWord;
     m_size = size;
     m_mask = mask;
