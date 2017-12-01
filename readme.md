@@ -9,6 +9,7 @@ This is a very powerful and potentially dangerous tool.  On a good day, one of t
 YrShell is simillar to, but not the same as, FORTH. That is, the YrShell command line works the same as a FORTH command line.  Under the hood its all different, but we don't care, because we never need to look at that part. (The source code and testing interfaces are provided in case you do want to go there, but then you must be crazy and you're on your own. If this does not discourage you, then maybe you can help with development and testing).
 Back to FORTH, find the Leo Brode tutorial HERE:  http://www.forth.org/tutorials.html  
  
+ Please SIGN-IN to GITHUB to see the project wiki pages for YRShell.  The wiki is not always visible until you sign in.  
 
 # Setup-Hardware
 YrShell is designed and tested on ST-Microelectronics STM32Nucleo-L476RG micocontroller board. This hardware should be more or ess compatible with ANY Arduino board, but we will not be sure until user confirm or deny specific boards. For the purpose of this document we will only discuss one hardware board, the STM32Nucleo-L476RG.  
