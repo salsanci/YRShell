@@ -6,6 +6,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <atomic>
 
 /** \brief CircularQBase - abstract base class for a FIFO Queue meant to be used by one reader and one writer
  
@@ -138,6 +139,7 @@ public:
 			s1 = s1 <= s2 ? s1 : s2;
 			if( s1 > 0) {
 				memcpy(m_nextQ->getLinearWriteBuffer(), getLinearReadBuffer(), s1);
+                atomic_thread_fence( std::memory_order_release);
 				drop( s1);
 				m_nextQ->append( s1);
 			}
@@ -148,6 +150,7 @@ public:
 			s1 = s1 <= s2 ? s1 : s2;
 			if( s1 > 0) {
 				memcpy(getLinearWriteBuffer(), m_previousQ->getLinearReadBuffer(), s1);
+                atomic_thread_fence( std::memory_order_release);
 				m_previousQ->drop( s1);
 				append( s1);
 			}
@@ -299,6 +302,7 @@ public:
 		if (m_head != m_tail) {
 			rc = m_buf[m_tail];
 			newTail = m_tail + 1;
+            atomic_thread_fence( std::memory_order_release);
 			if (newTail >= SIZE) {
 				m_tail = 0;
 			} else {
@@ -320,6 +324,7 @@ public:
 		}
 		if (newHead != m_tail) {
 			m_buf[m_head] = v;
+            atomic_thread_fence( std::memory_order_release);
 			m_head = newHead;
 			rc = true;
 		}
