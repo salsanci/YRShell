@@ -1078,6 +1078,7 @@ static const FunctionEntry interpreterFunctions[] = {
     { (uint16_t)YRShellInterpreter::SI_CC_lastBufferSize,                         "lastBufferSize" },
     { (uint16_t)YRShellInterpreter::SI_CC_printMainFileName,                      "printMainFileName" },
 
+    { (uint16_t)YRShellInterpreter::SI_CC_setPromptEnable,                        "setPromptEnable" },
     
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     { (uint16_t)YRShellInterpreter::SI_CC_dotf,                                   ".f" },
@@ -1376,6 +1377,7 @@ YRShellInterpreter::YRShellInterpreter() {
     m_outputStr2 = NULL;
     m_outputStr3 = NULL;
     m_stateTopOfStack = 0;
+    m_promptEnable = true;
 }
 YRShellInterpreter::~YRShellInterpreter() {
 }
@@ -1449,6 +1451,11 @@ void YRShellInterpreter::CC_nextEntry( ) {
     pushParameterStack( res);
 }
 
+void YRShellInterpreter:: prompt( ) {
+	if( m_promptEnable) {
+		outString( m_prompt);
+	}
+}
 void YRShellInterpreter::executeFunction( uint16_t n) {
     bool b;
     int32_t i;
@@ -1477,7 +1484,7 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             outChar( '\r');
             break;
         case SI_CC_prompt:
-            outString(m_prompt);
+            prompt();
             break;
         case SI_CC_lf:
             outChar( '\n');
@@ -2081,14 +2088,18 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
                 pushParameterStack( v1);
 				break;
 
-        case SI_CC_lastBufferSize:
-            pushParameterStack( m_lastBufferSize);
-            break;
-        case SI_CC_printMainFileName:
-            m_outputStrPtr = mainFileName();
-            pushState( YRSHELL_OUTPUT_STR);
-            break;
+	        case SI_CC_lastBufferSize:
+	            pushParameterStack( m_lastBufferSize);
+	            break;
+	        case SI_CC_printMainFileName:
+	            m_outputStrPtr = mainFileName();
+	            pushState( YRSHELL_OUTPUT_STR);
+	            break;
             
+	        case SI_CC_setPromptEnable:
+	            m_promptEnable = popParameterStack( );
+	            break;      
+
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
         case SI_CC_dotf:
             outFloat(popFloat());
@@ -2446,7 +2457,7 @@ void YRShellInterpreter::fillPadInternal( char c) {
             }
             m_lastBufferIndex = ((m_lastBufferIndex + 1) >= m_lastBufferSize) ? 0 : m_lastBufferIndex + 1;
             m_padCount = strlen( m_Pad);
-            outString( m_prompt);
+            prompt();
             m_outputStrPtr = m_Pad;
             pushState( YRSHELL_OUTPUT_STR);
         }
@@ -2548,7 +2559,7 @@ void YRShellInterpreter::slice(void) {
     		init();
     		break;
         case YRSHELL_BEGIN_IDLE:
-            outString( m_prompt);
+            prompt( );
             CC_clearPad();
             m_padCount = 0;
             nextState( YRSHELL_IDLE);

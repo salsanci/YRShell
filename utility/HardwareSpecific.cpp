@@ -44,6 +44,7 @@ void HW_setSerialBaud( uint32_t port, uint32_t baud) {
 
 #ifdef PLATFORM_LUA
 #include <time.h>
+// TODO CHECK RESOLUTION IS APPROPRIATE 2017-11-28 SAL
 uint32_t HW_getSysticks() {
     struct timespec t;
     clock_gettime(CLOCK_REALTIME, &t);
