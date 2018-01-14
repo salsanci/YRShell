@@ -182,6 +182,11 @@ enum SI_CC_functions {
 
     SI_CC_setPromptEnable,
 
+    SI_CC_strBang,
+    SI_CC_charBang,
+    SI_CC_charAt,
+    SI_CC_textIO,
+
  #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     SI_CC_dotf,
     SI_CC_dote,
@@ -228,6 +233,7 @@ protected:
     bool        m_expandCR;
     bool        m_hexMode;
     bool        m_useAuxQueues;
+    bool        m_useTextOutput;
     char        m_autoPrompt[8];
     bool        m_promptEnable;
 
@@ -244,6 +250,9 @@ protected:
     char        *m_Pad;
     uint16_t    m_padCount;
     uint16_t    m_padSize;
+
+    char        *m_TextBuffer;
+    uint16_t    m_textBufferSize;
 
     uint32_t*   m_Registers;
     uint16_t    m_numRegisters;

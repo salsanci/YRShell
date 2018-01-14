@@ -105,6 +105,11 @@ void setup()
   it.setInterval( 0);
   BSerial.init( shell.getInq(), shell.getOutq());
   lcd.begin(16, 2);
+  lcd.setCursor(0, 0);
+  lcd.print( "WELCOME         ");
+  lcd.setCursor(0, 1);
+  lcd.print( "           READY");
+ 
 }
 
 void loop()
@@ -126,7 +131,6 @@ void loop()
 
 /*
 
-: esc? key? [ 0x1B == ] 
 
 : lcr4  75 > [  4 ][ 5 ]
 : lcr3  dup 250 > [ drop 3 ][ lcr4 ]
@@ -136,6 +140,14 @@ void loop()
 // rb ( -- ) read lcd buttons
 : rb 0 { lcr dup 0!= [ . cr ][ drop ] esc? } drop
 
+: db3 16 spaces
+: db1 0 0 c! textIO s'  value:' .str lcdReadButtons .w db3  mainIO 0 0 lcdWrite
+: db2 s' button:' 0 str! textIO lcr .w db3 mainIO 0 1 lcdWrite 
+// db ( -- ) read lcd buttons
+: db { db1 db2 esc? }
 
+// demo ( -- )
+: _demo 0 { }
+: demo 0 { 0 0 c! textIO dup .b mainIO 0 0 lcdWrite _demo 3000 delay 0x10 + dup 0x100 & }
 
 */

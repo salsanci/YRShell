@@ -12,7 +12,7 @@
  
  
  */
-template< unsigned DICTIONARY_SIZE, unsigned PAD_SIZE, unsigned NUM_REGISTERS,
+template< unsigned DICTIONARY_SIZE, unsigned PAD_SIZE, unsigned TEXT_BUFER_SIZE, unsigned NUM_REGISTERS,
     unsigned PARAMETER_STACK_SIZE, unsigned RETURN_STACK_SIZE, unsigned COMPILE_STACK_SIZE,
     unsigned INQ_SIZE, unsigned OUTQ_SIZE, unsigned AUX_INQ_SIZE, unsigned AUX_OUTQ_SIZE,
     unsigned LAST_BUFFER_SIZE >
@@ -26,6 +26,7 @@ protected:
     CircularQ<char, AUX_OUTQ_SIZE>  m_auxOutq;
     
     char        m_pad[ PAD_SIZE];
+    char        m_textBuffer[ TEXT_BUFER_SIZE];
 #ifdef INPUT_BUFFER_EDITING
     char        m_lastBufferArray[ LAST_BUFFER_SIZE];
 #endif
@@ -42,7 +43,9 @@ public:
         m_Outq = &m_outq;
         m_AuxOutq = &m_auxOutq;
         m_Pad = m_pad;
+        m_TextBuffer = m_textBuffer;
         m_padSize = sizeof( m_pad);
+        m_textBufferSize = sizeof( m_textBuffer);
         m_Registers = m_registers;
         m_numRegisters = sizeof(m_registers)/sizeof(m_registers[0]);
         m_ParameterStack = m_parameterStack;
@@ -70,7 +73,7 @@ public:
  
  
  */
-class YRShell : public virtual YRShellBase<2048, 128, 16, 16, 16, 8, 128, 256, 128, 256, 256>{
+class YRShell : public virtual YRShellBase<2048, 128, 128, 16, 16, 16, 8, 128, 256, 128, 256, 256>{
 protected:
 public:
     YRShell( ) { }
@@ -85,7 +88,7 @@ public:
  
  
  */
-class YRMidShell : public virtual YRShellBase<256, 128, 16, 16, 16, 8, 64, 128, 64, 64, 256>{
+class YRMidShell : public virtual YRShellBase<256, 128, 128, 16, 16, 16, 8, 64, 128, 64, 64, 256>{
 protected:
 public:
     YRMidShell( ) { }
@@ -99,7 +102,7 @@ public:
  
  
  */
-class YRSmallShell : public virtual YRShellBase<64, 64, 16, 16, 16, 8, 32, 32, 32, 32, 0>{
+class YRSmallShell : public virtual YRShellBase<64, 64, 64, 16, 16, 16, 8, 32, 32, 32, 32, 0>{
 protected:
 public:
     YRSmallShell( ) { }

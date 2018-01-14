@@ -89,7 +89,7 @@ public:
     void init(void);
 };
 
-class SmallYRShell : public virtual YRShellBase<128, 64, 16, 16, 16, 8, 64, 64, 64, 64, 0>, public virtual CommonShell {
+class SmallYRShell : public virtual YRShellBase<128, 64, 64, 16, 16, 16, 8, 64, 64, 64, 64, 0>, public virtual CommonShell {
 public:
     /** \brief Used by SmallYRShell to map to the native functions.
      
@@ -111,7 +111,7 @@ public:
     void init(void);
 };
 
-class BigYRShell : public virtual YRShellBase<8192, 256, 16, 16, 16, 8, 16384, 16384, 4096, 4096, 8192>, public virtual CommonShell {
+class BigYRShell : public virtual YRShellBase<8192, 256, 256, 16, 16, 16, 8, 16384, 16384, 4096, 4096, 8192>, public virtual CommonShell {
 public:
     /** \brief Used by SmallYRShell to map to the native functions.
      
