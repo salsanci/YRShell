@@ -131,6 +131,7 @@ void loop()
 
 /*
 
+: lcdClear s'                 ' dup 0 lcdWrite 1 lcdWrite
 
 : lcr4  75 > [  4 ][ 5 ]
 : lcr3  dup 250 > [ drop 3 ][ lcr4 ]
@@ -147,7 +148,8 @@ void loop()
 : db { db1 db2 esc? }
 
 // demo ( -- )
-: _demo 0 { }
-: demo 0 { 0 0 c! textIO dup .b mainIO 0 0 lcdWrite _demo 3000 delay 0x10 + dup 0x100 & }
+: _demo0 2dup c! 1 + swap 1 + swap
+: _demo1 dup 0 { _demo0  dup 0x10 == } 2drop 0 16 c! 0 1 lcdWrite
+: demo hex lcdClear 0 { 0 0 c! textIO dup .b mainIO 0 0 lcdWrite _demo1 3000 delay 0x10 + dup 0x100 & } drop
 
 */

@@ -43,7 +43,7 @@ public:
     virtual const char* shellClass( void) { return "MyYRShell"; }
 };
 
-class LittleYRShell : public virtual YRShellBase<64, 64, 16, 16, 16, 8, 64, 64, 64, 64, 0>, public virtual CommonShell {
+class LittleYRShell : public virtual YRShellBase<64, 64, 16, 16, 16, 16, 8, 64, 64, 64, 64, 0>, public virtual CommonShell {
 public:
     LittleYRShell() { }
     virtual const char* shellClass( void) { return "LittleYRShell"; }
