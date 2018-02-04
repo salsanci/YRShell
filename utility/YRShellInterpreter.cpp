@@ -1785,6 +1785,10 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             pushParameterStack( HiResTimer::getMicros());
             break;
 
+        case SI_CC_millis:
+            pushParameterStack( HiResTimer::getMillis());
+            break;
+
         case SI_CC_bang:
         	v1 = popParameterStack();
         	v2 = popParameterStack();

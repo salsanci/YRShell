@@ -43,11 +43,11 @@ public:
 	virtual const bool spaceAvailable(uint16_t n = 1) = 0;
 	virtual TYPE get(void) = 0;
 	virtual bool put(TYPE v) = 0;
-	virtual char* getBuffer(void) = 0;
-	virtual char* getLinearReadBuffer(void) = 0;
+	virtual TYPE* getBuffer(void) = 0;
+	virtual TYPE* getLinearReadBuffer(void) = 0;
 	virtual uint16_t getLinearReadBufferSize(void) = 0;
 	virtual void drop(uint16_t n) = 0;
-	virtual char* getLinearWriteBuffer(void) = 0;
+	virtual TYPE* getLinearWriteBuffer(void) = 0;
 	virtual uint16_t getLinearWriteBufferSize(void) = 0;
 	virtual void append(uint16_t n) = 0;
 	virtual void setHead(uint16_t h) = 0;
@@ -97,6 +97,7 @@ public:
 	 */
 	CircularQ() {
 		m_nextQ = NULL;
+		Sliceable::m_sliceEnabled = true;
 		reset();
 	}
 	/** \brief Destructor.
@@ -119,6 +120,7 @@ public:
 	 */
 	void setNextQ( CircularQBase<TYPE>& q) {
 		m_nextQ = &q;
+		Sliceable::m_sliceEnabled = true;
 	}
 	/** \brief Sets the queue which receives the output of this Q.
 
@@ -126,6 +128,7 @@ public:
 	 */
 	void setPreviousQ( CircularQBase<TYPE>& q) {
 		m_previousQ = &q;
+		Sliceable::m_sliceEnabled = true;
 	}
 	/** \brief Pulls input from the queue Q, pushes output to the next queue.
 

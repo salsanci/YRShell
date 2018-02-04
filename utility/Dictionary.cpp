@@ -1,8 +1,12 @@
 #include "YRShellInterpreter.h"
 #include "Dictionary.h"
 
+DictionaryError::DictionaryError( ) {
+}
+DictionaryError::~DictionaryError( ) {
+}
+
 void DictionaryError::shellERROR( const char* name, unsigned line) {
-    
 }
 
 DictionaryError* Dictionary::s_DictionaryError = NULL;
@@ -13,6 +17,10 @@ Dictionary::Dictionary( ) {
 Dictionary::~Dictionary( ) {
     shellERROR(__FILE__, __LINE__);
 }
+void Dictionary::setDictionaryError( DictionaryError* e){
+	s_DictionaryError = e;
+}
+
 uint16_t Dictionary::getFirstEntry( ) {
     shellERROR(__FILE__, __LINE__);
     return YRSHELL_DICTIONARY_INVALID;

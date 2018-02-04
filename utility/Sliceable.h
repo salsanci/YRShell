@@ -16,13 +16,19 @@ protected:
     Sliceable*  m_Next;
     HiResTimer  m_timer;
     bool        m_timeSlice;
+    bool        m_sliceEnabled;
 
     static Sliceable* s_First;
     static Sliceable* s_Current;
     static Sliceable* s_Last;
+    static Sliceable* s_Priority;
     static SliceAllTimer* s_SliceAllTimer;
     static uint32_t s_slowCounter;
+
 public:
+    void setPriority( void);
+    void resetPriority( void);
+    static void slicePriority( void);
     static void sliceOne( void);
     static void sliceAll( void);
     static void sliceSlow( void);

@@ -5,6 +5,7 @@ static SliceAllTimer sliceAllTimer;
 Sliceable* Sliceable::s_First = NULL;
 Sliceable* Sliceable::s_Current = NULL;
 Sliceable* Sliceable::s_Last = NULL;
+Sliceable* Sliceable::s_Priority = NULL;
 SliceAllTimer* Sliceable::s_SliceAllTimer = &sliceAllTimer;
 uint32_t Sliceable::s_slowCounter = SLICE_SLOW_LIMIT;
 
@@ -17,22 +18,42 @@ Sliceable::Sliceable() {
 		s_Last = this;
     }
     m_timeSlice = true;
+    m_sliceEnabled = true;
 }
 Sliceable::~Sliceable() {
+}
+void Sliceable::setPriority( ) {
+	s_Priority = this;
+}
+void Sliceable::resetPriority( ) {
+	s_Priority = NULL;
 }
 void Sliceable::sliceOne() {
 	if( s_Current == NULL) {
 		s_Current = s_First;
 	}
 	if( s_Current != NULL) {
-		if( s_Current->m_timeSlice) {
-			s_Current->startTimer();
-		}
-		s_Current->slice();
-		if( s_Current->m_timeSlice) {
-			s_Current->stopTimer();
+		if( s_Current->m_sliceEnabled) {
+			if( s_Current->m_timeSlice) {
+				s_Current->startTimer();
+			}
+			s_Current->slice();
+			if( s_Current->m_timeSlice) {
+				s_Current->stopTimer();
+			}
 		}
 		s_Current = s_Current->m_Next;
+	}
+}
+void Sliceable::slicePriority() {
+	if( s_Priority != NULL && s_Priority->m_sliceEnabled) {
+		if( s_Priority->m_timeSlice) {
+			s_Priority->startTimer();
+		}
+		s_Priority->slice();
+		if( s_Priority->m_timeSlice) {
+			s_Priority->stopTimer();
+		}
 	}
 }
 void Sliceable::sliceAll() {
@@ -40,6 +61,7 @@ void Sliceable::sliceAll() {
 	sliceOne( );
     for( uint16_t i = 0; i < 0x200 && s_Current != NULL; i++) {
         sliceOne();
+        slicePriority();
     }
 	s_SliceAllTimer->stopTimer();
 }

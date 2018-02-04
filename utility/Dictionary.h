@@ -13,7 +13,10 @@ class YRShellInterpreter;
 
 class DictionaryError {
 public:
+	DictionaryError( void);
+	virtual ~DictionaryError( void);
     virtual void shellERROR( const char* name, unsigned line);
+
 };
 
 /** \brief Base class for all the dictionaries used by the interpreter
@@ -27,6 +30,7 @@ protected:
 public:
     static  DictionaryError*    s_DictionaryError; /**< The global error reporting object for dictionaires. */
     
+    static void setDictionaryError( DictionaryError* e);
     /** \brief Constructor.
 
     Default constructor, no parameters are required.
