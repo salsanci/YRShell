@@ -1,7 +1,7 @@
 #include "HardwareSpecific.h"
 
 #ifdef PLATFORM_AC6
-#include "STMlib2/STMSerial.h"
+#include "STMSerialLib/STMSerial.h"
 #endif
 
 #ifdef PLATFORM_ARDUINO

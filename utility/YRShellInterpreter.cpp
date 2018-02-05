@@ -36,6 +36,12 @@ uint8_t	YRShellInterpreter::s_shellNumber = 0;
  : _wl2 rot dup [ c> drop cr ][ c> spaces ] 0== rot rot dup dictInvalid ==
  : _wl3 .entryName 40 swap - >c
  : wl 0 0 dictInvalid { nextEntry over .bx dup .wx 2dup entryToken .wx 2dup _wl3 _wl2 } 2drop drop cr
+ : _wls1 over .bx dup .wx  2dup entryToken .wx 2dup .entryName drop cr
+ : wls 0 dictInvalid { nextEntry  isEntryMatch [ _wls1 ] dup dictInvalid == } 2drop drop
+ 
+ : _w over .bx dup .wx  2dup entryToken .wx 2dup .entryName drop cr
+ : w 0 dictInvalid { nextEntry  _w dup dictInvalid == } 2drop
+ : x 0 dictInvalid { nextEntry  _w dup dictInvalid == } 2drop drop
  
  : _inf0 s'      DICTIONARY_SIZE: ' .str dictionarySize . cr
  : _inf1 s'             PAD_SIZE: ' .str padSize . cr
@@ -922,6 +928,11 @@ static const FunctionEntry interpreterFunctions[] = {
     { (uint16_t)YRShellInterpreter::SI_CC_charAt,                                 "c@" },
     { (uint16_t)YRShellInterpreter::SI_CC_textIO,                                 "textIO" },
 
+    { (uint16_t)YRShellInterpreter::SI_CC_nextDelay,                              "nextDelay" },
+    
+    { (uint16_t)YRShellInterpreter::SI_CC_isEntryMatch,                           "isEntryMatch" },
+
+
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     { (uint16_t)YRShellInterpreter::SI_CC_dotf,                                   ".f" },
     { (uint16_t)YRShellInterpreter::SI_CC_dote,                                   ".e" },
@@ -1136,6 +1147,10 @@ const char *SIDebugStrings[] = {
     "SI_CC_charAt",
     "SI_CC_textIO",
 
+    "SI_CC_nextDelay",
+    
+    "SI_CC_isEntryMatch",
+
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     "SI_CC_dotf",
     "SI_CC_dote",
@@ -1311,7 +1326,7 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
     int32_t i;
     uint32_t v1, v2, v3;
     float f1, f2;
-    const char *P;
+    const char *P, *M;
     Sliceable *S;
 
 #ifdef YRSHELL_DEBUG
@@ -1660,7 +1675,11 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             m_delayTimer.setInterval(popParameterStack());
             pushState(YRSHELL_WAIT_DELAY);
             break;
-        case SI_CC_nextEntry:
+		case SI_CC_nextDelay:
+			m_delayTimer.isNextInterval();
+            pushState(YRSHELL_WAIT_DELAY);
+			break;
+       	case SI_CC_nextEntry:
             CC_nextEntry( );
             break;
         case SI_CC_dotEntryName:
@@ -1680,6 +1699,37 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
                 pushParameterStack(0);
             }
             break;
+        case SI_CC_isEntryMatch:
+            v1 = popParameterStack();
+            v2 = popParameterStack();
+            v3 = popParameterStack();
+            pushParameterStack(v3);
+            pushParameterStack(v2);
+            pushParameterStack(v1);
+            if( v1 != YRSHELL_DICTIONARY_INVALID && v2 < YRSHELL_DICTIONARY_LAST_INDEX && m_dictionaryList[ v2] != NULL) {
+                v1 = m_dictionaryList[ v2]->getNameAddressToken(v1);
+                P = getAddressFromToken( v1);
+                M = getAddressFromToken( v3);
+                v1 = (uint32_t) strlen( P);
+                v2 = (uint32_t) strlen( M);
+                if( P == NULL || v1 == 0 || M == NULL || v2 == 0 || v1 < v2) {
+                    pushParameterStack( 0);
+                } else {
+                    v3 = v1 - v2;
+                    v1 = 0;
+                    for( i = 0; i <= v3; i++) {
+                        if( !strncmp(P+i, M, v2) ) {
+                            v1 = -1;
+                            break;
+                        }
+                    }
+                    pushParameterStack(v1);
+                }
+            } else {
+                pushParameterStack( 0);
+            }
+            break;
+            
         case SI_CC_entryToken:
             v1 = popParameterStack();
             v2 = popParameterStack();
@@ -1699,6 +1749,7 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
                 pushParameterStack( 0);
             }
             break;
+            
         case SI_CC_auxKeyQ:
             if( m_AuxInq->valueAvailable()) {
                 pushParameterStack( m_AuxInq->get());
@@ -1959,7 +2010,7 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
         case SI_CC_strBang:
             v1 = popParameterStack();
             v2 = popParameterStack();
-            v1 =  v1 > (m_textBufferSize - 1) ? m_textBufferSize - 1 : v1;
+            v1 =  v1 > ((uint32_t) (m_textBufferSize - 1)) ? m_textBufferSize - 1 : v1;
             v3 = m_textBufferSize - v1;
             if( m_textBufferSize > 0 && v3 > 1) {
                 strncpy( &m_TextBuffer[ v1], getAddressFromToken(v2), v3);
@@ -2787,7 +2838,7 @@ CircularQBase<char>& YRShellInterpreter::getAuxOutq() {
 void YRShellInterpreter::outCharRaw( const char c) {
     if( m_useTextOutput) {
         uint32_t s = (uint32_t) strlen( m_TextBuffer);
-        if( s < (m_textBufferSize - 1) ) {
+        if( s < ((uint32_t) (m_textBufferSize - 1)) ) {
             m_TextBuffer[ s++] = c;
             m_TextBuffer[ s] = '\0';
         } else {

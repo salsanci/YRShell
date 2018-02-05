@@ -187,6 +187,11 @@ enum SI_CC_functions {
     SI_CC_charAt,
     SI_CC_textIO,
 
+    SI_CC_nextDelay,
+    
+    SI_CC_isEntryMatch,
+
+
  #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     SI_CC_dotf,
     SI_CC_dote,
@@ -365,14 +370,14 @@ public:
     CircularQBase<char>& getOutq(void);
     CircularQBase<char>& getAuxOutq(void);
     
-    char charToHex( char c);
-    void intToString(int32_t n, uint8_t numDigits, char *s);
-    void unsignedToStringZero(uint32_t num, uint8_t numDigits, char *s);
-    void unsignedToString(uint32_t num, uint8_t numDigits, char *s);
-    void unsignedToStringX(uint32_t num, uint8_t numDigits, char *s);
-    const char* stringToUnsignedInternal( const char* P, uint32_t* V);
-    bool stringToUnsigned( const char* P, uint32_t* V);
-    bool stringToUnsignedX( const char* P, uint32_t* V);
+    static char charToHex( char c);
+    static void intToString(int32_t n, uint8_t numDigits, char *s);
+    static void unsignedToStringZero(uint32_t num, uint8_t numDigits, char *s);
+    static void unsignedToString(uint32_t num, uint8_t numDigits, char *s);
+    static void unsignedToStringX(uint32_t num, uint8_t numDigits, char *s);
+    static const char* stringToUnsignedInternal( const char* P, uint32_t* V);
+    static bool stringToUnsigned( const char* P, uint32_t* V);
+    static bool stringToUnsignedX( const char* P, uint32_t* V);
 #ifdef YRSHELL_INTERPRETER_FLOATING_POINT
     bool stringToFloat( const char* P, uint32_t* V);
     void floatToString( float num, char *s);

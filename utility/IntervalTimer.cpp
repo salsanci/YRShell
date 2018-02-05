@@ -7,8 +7,15 @@
 IntervalTimer::IntervalTimer( unsigned intervalInMilliSeconds) {
     setInterval( intervalInMilliSeconds);
 }
+bool IntervalTimer::isNextInterval(void) {
+    bool rc = hasIntervalElapsed();
+    if( rc) {
+        m_start += m_interval;
+    }
+    return rc;
+}
 
-#ifdef PLATFORM_LA
+#ifdef PLATFORM_LUA
 #include <time.h>
 void IntervalTimer::setInterval( unsigned intervalInMilliSeconds) {
     struct timespec t;
