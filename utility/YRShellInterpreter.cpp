@@ -14,7 +14,7 @@ uint8_t	YRShellInterpreter::s_shellNumber = 0;
  : _cxc dup 0x20 < over 0x7E > | [ drop 0x2e ] emit
  : _cxb dup 0xFF & _cxc 8 >> _cxc 1 +
  : _cxa dup getCurrentDictionary _cxb
- : _cx0 _cxa _cxa _cxa _cxa _cxa _cxa _cxa _cxa drop
+ : _cx0 _cxa _cxa _cxa _cxa _cxa _cxa _cxa _cxa _cxa _cxa _cxa _cxa _cxa _cxa _cxa _cxa drop
  : _cd1 _cd0 s' compiledDictionaryData[] = {\r' .str
  : _cx1 _cd0 s' compiledExtensionDictionaryData[] = {\r' .str
  : _cd2 dup 0x10 - 0xF & 0== [ s' // ' .str dup 0x10 - dup .wx space _cx0 cr ]
@@ -27,7 +27,7 @@ uint8_t	YRShellInterpreter::s_shellNumber = 0;
  : _cx6 s' compiledExtensionDictionary( compiledExtensionDictionaryData, ' .str
  : _cd7 getCurrentDictionaryLastWord .wx s' , ' .str getCurrentDictionaryEnd .wx
  : _cd8 _cd1 _cd4 _cd5 _cd6 _cd7  s' , YRSHELL_DICTIONARY_INTERPRETER_COMPILED);\r' .str
- : _cx8 _cx1 _cd4 _cd5 _cx6 _cd7 s' , YRSHELL_DICTIONARY_EXTENSION_COMPILED);\r' .str
+ : _cx8 _cx1 _cd4 _cx5 _cx6 _cd7 s' , YRSHELL_DICTIONARY_EXTENSION_COMPILED);\r' .str
  : compileInterpreterDictionary _cd8
  : compileExtensionDictionary _cx8
  
@@ -70,10 +70,8 @@ uint8_t	YRShellInterpreter::s_shellNumber = 0;
  : resetStats 0 { dup clearStats [ 1 + 0 ][ -1 ] } drop
 
  : _dr0  dup numRegisters < [  dup @ . 1 + ]
- : _dr1 dup . s' : ' .str  dup @ . _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 cr
+ : _dr1 dup . s' : ' .str  _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 _dr0 cr
  : regs 0 { _dr1 dup numRegisters >= } drop
- 
- 
  
  
  //TODO fix dc iFUNCTION
@@ -1717,7 +1715,7 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
                 } else {
                     v3 = v1 - v2;
                     v1 = 0;
-                    for( i = 0; i <= v3; i++) {
+                    for( i = 0; i <= (int) v3; i++) {
                         if( !strncmp(P+i, M, v2) ) {
                             v1 = -1;
                             break;
@@ -2584,7 +2582,9 @@ void YRShellInterpreter::slice(void) {
                 }
             } else {
                 while( m_outputStrPtr != NULL && outputSpace() >= 4 ) {
-                    outChar( *m_outputStrPtr++);
+                	if( *m_outputStrPtr) {
+                		outChar( *m_outputStrPtr++);
+                	}
                     if( *m_outputStrPtr == '\0') {
                         m_outputStrPtr = NULL;
                     }
