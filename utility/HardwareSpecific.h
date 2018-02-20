@@ -3,7 +3,6 @@
 
 // #define COMPILE_DEBUG
 
-
 #ifdef __unix__
 	#define PLATFORM_LUA
     #define PLATFORM_UNIX
@@ -66,7 +65,12 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#define SERIAL_FLOW_CONTROL_NONE 0
+#define SERIAL_FLOW_CONTROL_XON_XOFF 1
+#define SERIAL_FLOW_CONTROL_RTS_CTS 2
+
 void HW_setSerialBaud( uint32_t port, uint32_t baud);
+void HW_setSerialFlowControl( uint32_t port, uint32_t control);
 
 uint32_t HW_getSysticks( void);
 uint32_t HW_getMicros( void);

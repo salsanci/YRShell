@@ -41,6 +41,39 @@ void HW_setSerialBaud( uint32_t port, uint32_t baud) {
 
 #endif
 }
+void HW_setSerialFlowControl( uint32_t port, uint32_t control) {
+	#ifdef PLATFORM_AC6
+            	STMSerial::setUartFlowControl( port, control);
+#endif
+#ifdef PLATFORM_ARDUINO
+				switch( port) {
+#ifdef ENABLE_SERIAL
+					case 0:
+//						BSerial.setBaud( baud);
+					break;
+#endif
+#ifdef ENABLE_SERIAL1
+					case 1:
+//						BSerial1.setBaud( baud);
+					break;
+#endif
+#ifdef ENABLE_SERIAL2
+					case 2:
+//						BSerial2.setBaud( baud);
+					break;
+#endif
+#ifdef ENABLE_SERIAL3
+					case 3:
+//						BSerial3.setBaud( baud);
+					break;
+#endif
+
+					default:
+					break;
+				}
+
+#endif
+}
 
 #ifdef PLATFORM_LUA
 #include <time.h>

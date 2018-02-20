@@ -53,6 +53,8 @@ public:
 	virtual void setHead(uint16_t h) = 0;
 	virtual void setNextQ( CircularQBase<TYPE>& q) = 0;
 	virtual void setPreviousQ( CircularQBase<TYPE>& q) = 0;
+	virtual void setNextQ( CircularQBase<TYPE>* q) = 0;
+	virtual void setPreviousQ( CircularQBase<TYPE>* q) = 0;
 	virtual void slice( void) = 0;
 };
 
@@ -122,12 +124,20 @@ public:
 		m_nextQ = &q;
 		Sliceable::m_sliceEnabled = true;
 	}
+	void setNextQ( CircularQBase<TYPE>* q) {
+		m_nextQ = q;
+		Sliceable::m_sliceEnabled = true;
+	}
 	/** \brief Sets the queue which receives the output of this Q.
 
 	 Sets the queue which receives the output of this Q.
 	 */
 	void setPreviousQ( CircularQBase<TYPE>& q) {
 		m_previousQ = &q;
+		Sliceable::m_sliceEnabled = true;
+	}
+	void setPreviousQ( CircularQBase<TYPE>* q) {
+		m_previousQ = q;
 		Sliceable::m_sliceEnabled = true;
 	}
 	/** \brief Pulls input from the queue Q, pushes output to the next queue.
