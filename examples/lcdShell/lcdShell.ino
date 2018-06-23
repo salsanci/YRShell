@@ -152,12 +152,23 @@ void loop()
 : _demo1 dup 0 { _demo0  dup 0x10 == } 2drop 0 16 c! 0 1 lcdWrite
 : demo hex lcdClear 0 { 0 0 c! textIO dup .b mainIO 0 0 lcdWrite _demo1 3000 delay 0x10 + dup 0x100 & } drop
 
-
-: lcdClear s'                 ' dup 0 lcdWrite 1 lcdWrite
 : _t0 micros 0 0 c! textIO . mainIO 0 0 lcdWrite
 : _t1 millis 0 0 c! textIO . mainIO 0 1 lcdWrite
 : t lcdClear millis { _t0 _t1 { 1 delay millis over - 1000 > } 1000 +  esc? }
 
+: .nc .n 0x3A emit 
+: _utd dup 86400000 / .nc
+: _uth 86400000 % dup 3600000 / .nc
+: _utm 3600000 % dup 60000 / .nc
+: _uts  60000 % dup 1000 / .n
+: uptime millis _utd _uth _utm _uts 0x2e emit 1000 % .n 
+
+: _ut 0 0 c! textIO uptime mainIO 0 0 lcdWrite
+: tt lcdClear millis { _ut { 1 delay millis over - 1000 > } 1000 +  esc? }
+
+
+: b? lcr  [ 50 delay lcr ][ 0 ]
+: ttt lcdClear millis { _ut { 1 delay millis over - 100 > } 100 + b? [ { b? } { b? 0== } { b? } { b? 0== } ] esc? }
 
 
 */
