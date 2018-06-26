@@ -57,7 +57,7 @@ public:
 #ifdef INPUT_BUFFER_EDITING
         m_lastBufferSize = LAST_BUFFER_SIZE;
         m_LastBuffer = m_lastBufferArray;
-#else
+//#else
         m_lastBufferSize = 0;
 #endif
     }

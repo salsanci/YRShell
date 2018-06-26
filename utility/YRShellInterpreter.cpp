@@ -2027,7 +2027,11 @@ void YRShellInterpreter::executeFunction( uint16_t n) {
             break;
 
         case SI_CC_lastBufferSize:
+#ifdef INPUT_BUFFER_EDITING
             pushParameterStack( m_lastBufferSize);
+#else
+            pushParameterStack( 0);
+#endif
             break;
         case SI_CC_printMainFileName:
             m_outputStrPtr = mainFileName();
@@ -2517,7 +2521,6 @@ uint16_t YRShellInterpreter::outputSpace( ) {
 }
 void YRShellInterpreter::slice(void) {
     char c;
-
     if( ( (m_Outq->free() < (m_Outq->size()/2)) || (m_AuxOutq->free() < (m_AuxOutq->size()/2)) ) && m_state != YRSHELL_WAIT_FOR_OUTPUT_SPACE && m_state != YRSHELL_OUTPUT&& m_state != YRSHELL_OUTPUT_STR) {
         pushState( YRSHELL_WAIT_FOR_OUTPUT_SPACE);
         m_outputTimeout.setInterval(m_outputTimeoutInMilliseconds);
