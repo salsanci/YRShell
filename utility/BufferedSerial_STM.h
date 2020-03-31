@@ -8,13 +8,14 @@
 #include "CircularQ.h"
 #include "main.h"
 #include <YRShell.h>
+#include <utility/InterruptSliceable.h>
 
 /** \brief BufferedSerial - provides interface to STM serial HAL using queues
 
  Provides interface to STM serial HAL using queues.
 
  */
-class BufferedSerial : public Sliceable {
+class BufferedSerial : public Sliceable, public InterruptSliceable {
 protected:
 	UART_HandleTypeDef *m_phandler; /**< Pointer to the UART handler object */
 	CircularQ<char, SERIAL_RX_BUFFER_SIZE> m_nextQ; /**< Pointer to the queue which will receive data from the Serial object */
@@ -45,7 +46,7 @@ public:
 	usually in an interrupt context.
 
 	*/
-     void sliceFast(void);
+     void sliceInterrupt(void);
      /** \brief begin - Initialize and start the Serial object
 
 	Initialize and start the Serial object

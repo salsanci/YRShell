@@ -36,7 +36,7 @@ void BufferedSerial::slice( void) {
 	m_previousQ.slice();
 }
 // Call from interrupt context
-void BufferedSerial::sliceFast(void) {
+void BufferedSerial::sliceInterrupt(void) {
 	if( m_phandler->hdmarx) {
 		processRX();
 	}
