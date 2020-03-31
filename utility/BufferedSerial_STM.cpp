@@ -20,10 +20,8 @@ uint8_t BufferedSerial::initUart() {
 			return (uint8_t)handlerStatus;
 		}
 	} else {
-		handlerStatus = HAL_UART_Receive_IT( m_phandler, (unsigned char*)m_nextQ.getLinearWriteBuffer(), 1);
-		if( HAL_OK != handlerStatus) {
-			return (uint8_t)handlerStatus;
-		}
+		// Only DMA is currently supported
+		return 0x01;
 	}
 	return 0x00;
 }
@@ -37,19 +35,18 @@ void BufferedSerial::slice( void) {
 }
 // Call from interrupt context
 void BufferedSerial::sliceInterrupt(void) {
-	if( m_phandler->hdmarx) {
-		processRX();
-	}
+	processRX();
 	processTX();
 }
 uint8_t BufferedSerial::begin(uint32_t baud) {
-	uint8_t result = 0x00;
+	if(m_phandler == NULL) return 0x01;
 	if(m_initialized) {
-		result = setBaud(baud);
-	} else {
-		m_phandler->Init.BaudRate = baud;
-		HAL_UART_Init(m_phandler);
-		result = initUart();
+		return setBaud(baud);
+	}
+	m_phandler->Init.BaudRate = baud;
+	HAL_UART_Init(m_phandler);
+	uint8_t result = initUart();
+	if(result == 0x00) {
 		m_initialized = true;
 	}
 	return result;
@@ -68,18 +65,10 @@ uint8_t BufferedSerial::setBaud(uint32_t baud) {
 void BufferedSerial::processRX(void) {
 	if(m_phandler == NULL) return;
 	uint16_t used;
-	uint16_t prevUsed;
-	uint16_t availableQ;
-	uint16_t bytesInDMA;
-	availableQ = m_nextQ.size();
-	prevUsed = m_nextQ.used();
-
-	if(m_phandler->hdmarx) {
-		bytesInDMA = __HAL_DMA_GET_COUNTER( m_phandler->hdmarx);
-		m_nextQ.setHead(availableQ - bytesInDMA);
-	} else {
-		return;
-	}
+	uint16_t prevUsed    = m_nextQ.used();
+	uint16_t availableQ  = m_nextQ.size();
+	uint16_t bytesInDMA  = __HAL_DMA_GET_COUNTER( m_phandler->hdmarx);
+	m_nextQ.setHead(availableQ - bytesInDMA);
 	used = m_nextQ.used();
 	// Catch overflow condition
 	if(used < prevUsed) {
