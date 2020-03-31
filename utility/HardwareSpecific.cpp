@@ -10,18 +10,7 @@
 
 void HW_setSerialBaud( uint32_t port, uint32_t baud) {
 #ifdef PLATFORM_AC6
-	switch(port) {
-	case 0:
-		#ifdef ENABLE_SERIAL1
-		BSerial1.setBaud(baud);
-		#endif
-		break;
-	case 1:
-		#ifdef ENABLE_SERIAL2
-		BSerial2.setBaud(baud);
-		#endif
-		break;
-	};
+	// Not supported on AC6 platform
 #endif
 #ifdef PLATFORM_ARDUINO
 				switch( port) {
