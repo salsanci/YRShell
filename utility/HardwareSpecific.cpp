@@ -1,7 +1,7 @@
 #include "HardwareSpecific.h"
 
 #ifdef PLATFORM_AC6
-#include "STMSerial.h"
+#include "BufferedSerial_STM.h"
 #endif
 
 #ifdef PLATFORM_ARDUINO
@@ -9,8 +9,19 @@
 #endif
 
 void HW_setSerialBaud( uint32_t port, uint32_t baud) {
-	#ifdef PLATFORM_AC6
-            	STMSerial::setUartBaudRate( port, baud);
+#ifdef PLATFORM_AC6
+	switch(port) {
+	case 0:
+		#ifdef ENABLE_SERIAL1
+		BSerial1.setBaud(baud);
+		#endif
+		break;
+	case 1:
+		#ifdef ENABLE_SERIAL2
+		BSerial2.setBaud(baud);
+		#endif
+		break;
+	};
 #endif
 #ifdef PLATFORM_ARDUINO
 				switch( port) {
@@ -42,8 +53,8 @@ void HW_setSerialBaud( uint32_t port, uint32_t baud) {
 #endif
 }
 void HW_setSerialFlowControl( uint32_t port, uint32_t control) {
-	#ifdef PLATFORM_AC6
-            	STMSerial::setUartFlowControl( port, control);
+#ifdef PLATFORM_AC6
+//      	STMSerial::setUartFlowControl( port, control);
 #endif
 #ifdef PLATFORM_ARDUINO
 				switch( port) {
