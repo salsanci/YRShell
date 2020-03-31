@@ -3,27 +3,29 @@
 #ifdef PLATFORM_AC6
 BufferedSerial::BufferedSerial( UART_HandleTypeDef* handler) :
 	m_phandler(handler),
-	m_begun(false),
-	m_currentTXCount(0)
+	m_nextQ(),
+	m_previousQ(),
+	m_initialized(false),
+	m_bytesTx(0)
 {
 
 }
-void BufferedSerial::initUart( UART_HandleTypeDef* huart) {
-	HAL_StatusTypeDef hrc;
-	m_phandler = huart;
+uint8_t BufferedSerial::initUart() {
+	if(m_phandler == NULL) return 0x01;
+	HAL_StatusTypeDef handlerStatus;
 
 	if( m_phandler->hdmarx) {
-		hrc = HAL_UART_Receive_DMA( m_phandler, (unsigned char*)m_nextQ.getBuffer(), m_nextQ.size());
-		if( HAL_OK != hrc) {
-			fatalERROR( __FILE__, __LINE__);
+		handlerStatus = HAL_UART_Receive_DMA( m_phandler, (unsigned char*)m_nextQ.getBuffer(), m_nextQ.size());
+		if( HAL_OK != handlerStatus) {
+			return (uint8_t)handlerStatus;
 		}
 	} else {
-		hrc = HAL_UART_Receive_IT( m_phandler, (unsigned char*)m_nextQ.getLinearWriteBuffer(), 1);
-		if( HAL_OK != hrc) {
-			fatalERROR( __FILE__, __LINE__);
+		handlerStatus = HAL_UART_Receive_IT( m_phandler, (unsigned char*)m_nextQ.getLinearWriteBuffer(), 1);
+		if( HAL_OK != handlerStatus) {
+			return (uint8_t)handlerStatus;
 		}
 	}
-
+	return 0x00;
 }
 void BufferedSerial::init(  CircularQBase<char>& nq, CircularQBase<char>& pq) {
 	m_nextQ.setNextQ( nq);
@@ -40,64 +42,64 @@ void BufferedSerial::sliceFast(void) {
 	}
 	processTX();
 }
-void BufferedSerial::begin(uint32_t baud) {
-	if(m_begun) {
-		setBaud(baud);
+uint8_t BufferedSerial::begin(uint32_t baud) {
+	uint8_t result = 0x00;
+	if(m_initialized) {
+		result = setBaud(baud);
 	} else {
-		m_begun = true;
 		m_phandler->Init.BaudRate = baud;
 		HAL_UART_Init(m_phandler);
-		initUart(m_phandler);
+		result = initUart();
+		m_initialized = true;
 	}
+	return result;
 }
 void BufferedSerial::end( void) {
-	if( m_begun) {
-		HAL_UART_DeInit( m_phandler);
-		m_begun = false;
+	if( m_initialized) {
+		HAL_UART_DeInit(m_phandler);
+		m_initialized = false;
 	}
 }
-void BufferedSerial::setBaud( uint32_t baud) {
+uint8_t BufferedSerial::setBaud(uint32_t baud) {
 	end();
-	begin(baud);
+	return begin(baud);
 }
 
-void BufferedSerial::processRX( void) {
-	uint16_t used, oldUsed, bs, dmac;
-	bs = m_nextQ.size();
-	oldUsed = m_nextQ.used();
+void BufferedSerial::processRX(void) {
+	if(m_phandler == NULL) return;
+	uint16_t used;
+	uint16_t prevUsed;
+	uint16_t availableQ;
+	uint16_t bytesInDMA;
+	availableQ = m_nextQ.size();
+	prevUsed = m_nextQ.used();
 
-	if( m_phandler->hdmarx) {
-		dmac = 	__HAL_DMA_GET_COUNTER( m_phandler->hdmarx);
-		m_nextQ.setHead( bs - dmac);
+	if(m_phandler->hdmarx) {
+		bytesInDMA = __HAL_DMA_GET_COUNTER( m_phandler->hdmarx);
+		m_nextQ.setHead(availableQ - bytesInDMA);
 	} else {
-		fatalERROR(__FILE__, __LINE__ );
+		return;
 	}
 	used = m_nextQ.used();
-	if( used < oldUsed) {
-		//m_inputQOverrun = true;
+	// Catch overflow condition
+	if(used < prevUsed) {
 		m_nextQ.reset();
 	}
 }
 void BufferedSerial::processTX( void) {
-	if( m_phandler->gState == HAL_UART_STATE_READY)
-	{
-		HAL_StatusTypeDef hrc;
-		if( m_currentTXCount) {
-			m_previousQ.drop(m_currentTXCount);
-			m_currentTXCount = 0;
-		}
-		m_currentTXCount = m_previousQ.getLinearReadBufferSize( );
-		if(m_currentTXCount > 0) {
-			m_currentTXCount = m_currentTXCount > BS_ST_TX_CHUNK_SIZE ? BS_ST_TX_CHUNK_SIZE : m_currentTXCount;
-			if( m_phandler->hdmatx) {
-				if( HAL_OK != (hrc = HAL_UART_Transmit_DMA( m_phandler, (unsigned char*)m_previousQ.getLinearReadBuffer(), m_currentTXCount)) ) {
-					fatalERROR(__FILE__, __LINE__ );
-				}
-			} else {
-				if( HAL_OK != (hrc = HAL_UART_Transmit_IT( m_phandler, (unsigned char*)m_previousQ.getLinearReadBuffer(), m_currentTXCount)) ) {
-					fatalERROR(__FILE__, __LINE__ );
-				}
-			}
+	if(m_phandler == NULL) return;
+	if(m_phandler->gState != HAL_UART_STATE_READY) return;
+
+	if(m_bytesTx > 0) {
+		m_previousQ.drop(m_bytesTx);
+		m_bytesTx = 0;
+	}
+	m_bytesTx = m_previousQ.getLinearReadBufferSize();
+	if(m_bytesTx > 0) {
+		m_bytesTx = m_bytesTx > SERIAL_TX_CHUNK_SIZE ? SERIAL_TX_CHUNK_SIZE : m_bytesTx;
+		if( m_phandler->hdmatx) {
+			// TODO: Add error handling?
+			HAL_UART_Transmit_DMA( m_phandler, (unsigned char*)m_previousQ.getLinearReadBuffer(), m_bytesTx);
 		}
 	}
 }
