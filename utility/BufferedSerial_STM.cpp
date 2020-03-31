@@ -15,12 +15,12 @@ void BufferedSerial::initUart( UART_HandleTypeDef* huart) {
 	if( m_phandler->hdmarx) {
 		hrc = HAL_UART_Receive_DMA( m_phandler, (unsigned char*)m_nextQ.getBuffer(), m_nextQ.size());
 		if( HAL_OK != hrc) {
-			data_fatalERROR( __FILE__, __LINE__ , hrc);
+			fatalERROR( __FILE__, __LINE__);
 		}
 	} else {
 		hrc = HAL_UART_Receive_IT( m_phandler, (unsigned char*)m_nextQ.getLinearWriteBuffer(), 1);
 		if( HAL_OK != hrc) {
-			data_fatalERROR( __FILE__, __LINE__ , hrc);
+			fatalERROR( __FILE__, __LINE__);
 		}
 	}
 
@@ -91,11 +91,11 @@ void BufferedSerial::processTX( void) {
 			m_currentTXCount = m_currentTXCount > BS_ST_TX_CHUNK_SIZE ? BS_ST_TX_CHUNK_SIZE : m_currentTXCount;
 			if( m_phandler->hdmatx) {
 				if( HAL_OK != (hrc = HAL_UART_Transmit_DMA( m_phandler, (unsigned char*)m_previousQ.getLinearReadBuffer(), m_currentTXCount)) ) {
-					data_fatalERROR(__FILE__, __LINE__ , hrc);
+					fatalERROR(__FILE__, __LINE__ );
 				}
 			} else {
 				if( HAL_OK != (hrc = HAL_UART_Transmit_IT( m_phandler, (unsigned char*)m_previousQ.getLinearReadBuffer(), m_currentTXCount)) ) {
-					data_fatalERROR(__FILE__, __LINE__ , hrc);
+					fatalERROR(__FILE__, __LINE__ );
 				}
 			}
 		}
@@ -103,28 +103,22 @@ void BufferedSerial::processTX( void) {
 }
 
 #ifdef ENABLE_SERIAL1
-extern UART_HandleTypeDef huart1;
-BufferedSerial BSerial1(&huart1);
+BufferedSerial BSerial1(usartHandler(1));
 #endif
 #ifdef ENABLE_SERIAL2
-extern UART_HandleTypeDef huart2;
-BufferedSerial BSerial2(&huart2);
+BufferedSerial BSerial2(usartHandler(2));
 #endif
 #ifdef ENABLE_SERIAL3
-extern UART_HandleTypeDef huart3;
-BufferedSerial BSerial3(&huart3);
+BufferedSerial BSerial3(usartHandler(3));
 #endif
 #ifdef ENABLE_SERIAL4
-extern UART_HandleTypeDef huart4;
-BufferedSerial BSerial4(&huart4);
+BufferedSerial BSerial4(usartHandler(4));
 #endif
 #ifdef ENABLE_SERIAL5
-extern UART_HandleTypeDef huart5;
-BufferedSerial BSerial5(&huart5);
+BufferedSerial BSerial5(usartHandler(5));
 #endif
 #ifdef ENABLE_SERIAL6
-extern UART_HandleTypeDef huart6;
-BufferedSerial BSerial6(&huart6);
+BufferedSerial BSerial6(usartHandler(6));
 #endif
 
 
