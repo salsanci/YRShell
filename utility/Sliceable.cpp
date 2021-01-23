@@ -71,6 +71,8 @@ void Sliceable::sliceSlow() {
         sliceOne();
     }
 }
+void Sliceable::slice( ) {
+}
 const char* Sliceable::sliceName( ) {
 	return "Sliceable";
 }

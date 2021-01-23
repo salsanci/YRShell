@@ -1,4 +1,5 @@
 
+#include "DebugLog.h"
 #include "YRShellInterpreter.h"
 
 uint8_t	YRShellInterpreter::s_shellNumber = 0;
@@ -1251,7 +1252,11 @@ YRShellInterpreter::YRShellInterpreter() {
 	m_saveptr = NULL;
 	m_state = YRSHELL_NOT_INITIALIZED;
 	m_token = NULL;
+    m_log = NULL;
 	m_topOfStack = 0;
+    m_requestUseAuxQueues = false;
+    m_requestUseMainQueues = false;
+    m_lastUseAuxQueues = false;
 	m_useAuxQueues = false;
     m_useTextOutput = false;
 #ifdef  INPUT_BUFFER_EDITING
@@ -2322,6 +2327,7 @@ void YRShellInterpreter::reset( ) {
         m_compileTopOfStack = 0;
         m_stateTopOfStack = 0;
         m_hexMode = false;
+        m_lastUseAuxQueues = false;
         m_useAuxQueues = false;
     
         m_PC = 0;
@@ -2519,8 +2525,18 @@ void YRShellInterpreter::setOutputTimeout( uint32_t t) {
 uint16_t YRShellInterpreter::outputSpace( ) {
     return  m_useTextOutput ? m_textBufferSize - strlen(m_TextBuffer): (m_useAuxQueues ? m_AuxOutq->free() : m_Outq->free());
 }
+bool YRShellInterpreter::isIdle( ) {
+    return m_state == YRSHELL_IDLE;
+}
+ 
 void YRShellInterpreter::slice(void) {
     char c;
+    if( m_lastUseAuxQueues != m_useAuxQueues) {
+        if( m_log != NULL) {
+            m_log->print( __FILE__, __LINE__, 0x80000000, m_lastUseAuxQueues, m_useAuxQueues, "YRShellInterpreter_slice: m_lastUseAuxQueues, m_useAuxQueues"  );
+        }
+        m_lastUseAuxQueues = m_useAuxQueues;
+    }
     if( ( (m_Outq->free() < (m_Outq->size()/2)) || (m_AuxOutq->free() < (m_AuxOutq->size()/2)) ) && m_state != YRSHELL_WAIT_FOR_OUTPUT_SPACE && m_state != YRSHELL_OUTPUT&& m_state != YRSHELL_OUTPUT_STR) {
         pushState( YRSHELL_WAIT_FOR_OUTPUT_SPACE);
         m_outputTimeout.setInterval(m_outputTimeoutInMilliseconds);
@@ -2536,6 +2552,14 @@ void YRShellInterpreter::slice(void) {
             nextState( YRSHELL_IDLE);
             break;
         case YRSHELL_IDLE:
+            if( m_requestUseMainQueues) {
+                m_requestUseMainQueues = false;
+                m_useAuxQueues = false;
+            }
+            if( m_requestUseAuxQueues) {
+                m_requestUseAuxQueues = false;
+                m_useAuxQueues = true;
+            }
             if( m_useAuxQueues) {
                 if( m_AuxInq->valueAvailable()) {
                     nextState( YRSHELL_FILLING_AUXPAD);

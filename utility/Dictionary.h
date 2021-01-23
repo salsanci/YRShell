@@ -80,12 +80,12 @@ public:
 
     Will be handled by subclasses as applicable.
     */
-    virtual uint16_t find( const char* name) =0;
+    virtual uint16_t find( const char* name);
     /** \brief Should not be called.
      
      Will be handled by subclasses as applicable.
      */
-    virtual uint16_t findEntry( const char* name) =0;
+    virtual uint16_t findEntry( const char* name) {return 0;}
     /** \brief Error routine for dictionaries
      
      Error routine for dictionaries.

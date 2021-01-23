@@ -35,7 +35,7 @@ public:
     static Sliceable* getSlicePointer( uint16_t n);
     Sliceable( void);
     virtual ~Sliceable( void);
-    virtual void slice( void) = 0;
+    virtual void slice( void);
     virtual const char* sliceName( void);
     void resetTimer( void);
     void startTimer( void);
@@ -44,6 +44,8 @@ public:
     uint32_t getTimerMin( void);
     uint32_t getTimerMax( void);
     uint32_t getTimerAverage( void);
+    void sliceEnable( void) { m_sliceEnabled = true; }
+    void sliceDisable( void) { m_sliceEnabled = false; }
 
 };
 

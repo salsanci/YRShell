@@ -4,7 +4,7 @@
 #include "HardwareSpecific.h"
 
 
-#define INPUT_BUFFER_EDITING
+// #define INPUT_BUFFER_EDITING
 #define YRSHELL_INTERPRETER_FLOATING_POINT
 
 

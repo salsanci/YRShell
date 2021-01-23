@@ -35,27 +35,27 @@ public:
 	virtual ~CircularQBase() {
 	}
 
-	virtual void reset(void) = 0;
-	virtual const uint16_t size(void) = 0;
-	virtual const uint16_t used(void) = 0;
-	virtual const uint16_t free(void) = 0;
-	virtual const bool valueAvailable(uint16_t n = 1) = 0;
-	virtual const bool spaceAvailable(uint16_t n = 1) = 0;
-	virtual TYPE get(void) = 0;
-	virtual bool put(TYPE v) = 0;
-	virtual TYPE* getBuffer(void) = 0;
-	virtual TYPE* getLinearReadBuffer(void) = 0;
-	virtual uint16_t getLinearReadBufferSize(void) = 0;
-	virtual void drop(uint16_t n) = 0;
-	virtual TYPE* getLinearWriteBuffer(void) = 0;
-	virtual uint16_t getLinearWriteBufferSize(void) = 0;
-	virtual void append(uint16_t n) = 0;
-	virtual void setHead(uint16_t h) = 0;
-	virtual void setNextQ( CircularQBase<TYPE>& q) = 0;
-	virtual void setPreviousQ( CircularQBase<TYPE>& q) = 0;
-	virtual void setNextQ( CircularQBase<TYPE>* q) = 0;
-	virtual void setPreviousQ( CircularQBase<TYPE>* q) = 0;
-	virtual void slice( void) = 0;
+	virtual void reset(void) {};
+	virtual const uint16_t size(void) {return 0;};
+	virtual const uint16_t used(void) {return 0;};
+	virtual const uint16_t free(void) {return 0;};
+	virtual const bool valueAvailable(uint16_t n = 1) {return false;};
+	virtual const bool spaceAvailable(uint16_t n = 1) {return false;};
+	virtual TYPE get(void) {return TYPE(0);};
+	virtual bool put(TYPE v) {return false;};
+	virtual TYPE* getBuffer(void) {return 0;};
+	virtual TYPE* getLinearReadBuffer(void) {return 0;};
+	virtual uint16_t getLinearReadBufferSize(void) {return 0;};
+	virtual void drop(uint16_t n) {};
+	virtual TYPE* getLinearWriteBuffer(void) {return 0;};
+	virtual uint16_t getLinearWriteBufferSize(void) {return 0;};
+	virtual void append(uint16_t n) {};
+	virtual void setHead(uint16_t h) {};
+	virtual void setNextQ( CircularQBase<TYPE>& q) {};
+	virtual void setPreviousQ( CircularQBase<TYPE>& q) {};
+	virtual void setNextQ( CircularQBase<TYPE>* q) {};
+	virtual void setPreviousQ( CircularQBase<TYPE>* q) {};
+	virtual void slice( void) {};
 };
 
 /** \brief CircularQ - a FIFO Queue meant to be used by one reader and one writer
@@ -122,11 +122,15 @@ public:
 	 */
 	void setNextQ( CircularQBase<TYPE>& q) {
 		m_nextQ = &q;
-		Sliceable::m_sliceEnabled = true;
+		if( m_nextQ != NULL) {
+			Sliceable::m_sliceEnabled = true;
+		}
 	}
 	void setNextQ( CircularQBase<TYPE>* q) {
 		m_nextQ = q;
-		Sliceable::m_sliceEnabled = true;
+		if( m_nextQ != NULL) {
+			Sliceable::m_sliceEnabled = true;
+		}
 	}
 	/** \brief Sets the queue which receives the output of this Q.
 
@@ -134,11 +138,15 @@ public:
 	 */
 	void setPreviousQ( CircularQBase<TYPE>& q) {
 		m_previousQ = &q;
-		Sliceable::m_sliceEnabled = true;
+		if( m_previousQ != NULL) {
+			Sliceable::m_sliceEnabled = true;
+		}
 	}
 	void setPreviousQ( CircularQBase<TYPE>* q) {
 		m_previousQ = q;
-		Sliceable::m_sliceEnabled = true;
+		if( m_previousQ != NULL) {
+			Sliceable::m_sliceEnabled = true;
+		}
 	}
 	/** \brief Pulls input from the queue Q, pushes output to the next queue.
 
@@ -303,14 +311,14 @@ public:
 	 Returns true if an item (or if a n is specified, n items) can be written to the queue.
 	 */
 	const bool spaceAvailable(uint16_t n = 1) {
-		return free() >= 1;
+		return free() >= n;
 	}
 	/** \brief Get a value from the queue.
 
 	 Returns the next item in the queue. valueAvailable() should always be called first.
 	 */
 	TYPE get(void) {
-		TYPE rc = 0;
+		TYPE rc = TYPE(0);
 		uint16_t newTail;
 		if (m_head != m_tail) {
 			rc = m_buf[m_tail];

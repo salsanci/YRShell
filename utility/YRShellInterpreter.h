@@ -13,6 +13,8 @@
 #include "math.h"
 #endif
 
+class DebugLog;
+
 /** \brief YRShellInterpreter - interactive
  
  Details on what YRShellInterpreter is
@@ -230,6 +232,8 @@ protected:
 
     Dictionary                              *m_dictionaryList[ YRSHELL_DICTIONARY_LAST_INDEX];
     CircularQBase<char>                     *m_Inq, *m_AuxInq, *m_Outq, *m_AuxOutq;
+
+    DebugLog                                *m_log;
     
 #ifdef YRSHELL_DEBUG
     unsigned    m_debugFlags;
@@ -237,6 +241,9 @@ protected:
     bool        m_commandEcho;
     bool        m_expandCR;
     bool        m_hexMode;
+    bool        m_requestUseAuxQueues;
+    bool        m_requestUseMainQueues;
+    bool        m_lastUseAuxQueues;
     bool        m_useAuxQueues;
     bool        m_useTextOutput;
     char        m_autoPrompt[8];
@@ -364,7 +371,7 @@ public:
     void setOutputTimeout( uint32_t t);
     void setPrompt( const char* prompt );
     
-    void slice( void);
+    virtual void slice( void);
     CircularQBase<char>& getInq( void);
     CircularQBase<char>& getAuxInq( void);
     CircularQBase<char>& getOutq(void);
@@ -409,8 +416,15 @@ public:
     void outUint32Xn( uint32_t v);
 
     inline bool stacksEmpty( void) { return m_topOfStack == '\0' &&  m_compileTopOfStack == '\0'; }
+    inline void requestUseAuxQueues( void) { m_requestUseAuxQueues = true; }
+    inline void requestUseMainQueues( void) { m_requestUseMainQueues = true; }
+    inline bool isAuxQueueInUse( void) { return m_useAuxQueues; }
+    bool isIdle( void);
+    void setCommandEcho( bool s) { m_commandEcho = s; }
+    bool getCommandEcho( void) { return m_commandEcho; }
+    void setPromptEnable( bool s) { m_promptEnable = s; }
+    bool getPromptEnable( void) { return m_promptEnable; }
 };
-
 
 #endif
 
