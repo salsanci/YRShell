@@ -1,0 +1,66 @@
+0 setPromptEnable
+: .{ 0x7B emit
+: .} 0x7D emit
+: .[ 0x5B emit
+: .] 0x5D emit
+: ." 0x22 emit
+: ., 0x2C emit
+: .: 0x3A emit
+: .,cr ., cr
+: dm? hexMode? decimal
+: hm! [ hex ][ decimal ]
+: .qname ." .str ."
+: .jname .qname .: space
+: ain .{ s' ain' .jname dm? getAnalogPin . hm! .} cr
+: ledOn -1  1 setLedOnOffMs
+: ledOff 1  -1 setLedOnOffMs
+: setLedBlink dup setLedOnOffMs
+: .gp dup s' "GPIO' .str dup 10 >= [ 0x31 emit 10 - ] 0x30 + emit ." .: space getDigitalPin . ., crlf
+: a0 s' A0' .jname getAnalogPin . ., crlf
+: gpio 0 .gp 1 .gp 2 .gp 3 .gp 4 .gp 5 .gp 9 .gp 10 .gp 12 .gp 13 .gp 14 .gp 15 .gp 16 .gp s' millis' .jname millis . crlf
+: jsonPins dm? .{ crlf a0 gpio .} crlf hm!
+
+: jip_1 dup 0xff & .ub ., space 8 >>
+: jip .[ jip_1 jip_1 jip_1 .ub .]
+: jmac_1 dup c@ .ub ., 1 +
+: jmac .[ jmac_1 jmac_1 jmac_1 jmac_1 jmac_1 c@ .ub .]
+
+: .password 0 c@ [ 0x2A 0 c!  0x2A 1 c!  0x2A 2 c!  0 3 c!  ] .qname
+: hs0 s' hostName' .jname getHostName .qname .,cr
+: hs1 s' hostPassword' .jname getHostPassword  .password .,cr
+: hs2 s' hostIp' .jname getHostIp drop strToInt jip  .,cr
+: hs3 s' hostGateway' .jname getHostGateway drop strToInt jip  .,cr
+: hs4 s' hostMask' .jname getHostMask drop strToInt jip  .,cr
+: hs5 s' hostMac' .jname getHostMac jmac .,cr
+: hs6  s' isHostActive' .jname isHostActive . cr
+
+: jsonHost s' host' .jname .{ cr hs0 hs1 hs2 hs3 hs4 hs5 hs6 .} .,cr
+
+: jnetName s' name' .jname dup getNetworkName .qname
+: jnetPwd s' password' .jname dup getNetworkPassword .password
+
+: nt0 s' connectedNetwork' .jname getConnectedNetwork . .,cr
+: nt1 s' networkIp' .jname getNetworkIp drop strToInt jip .,cr
+: nt2 s' networkMac' .jname getNetworkMac jmac .,cr
+
+: jnet 0 { .{ jnetName ., space jnetPwd .} 1 + 2dup > [ .,cr 0 ][  2drop -1 ] } 
+
+: jnets nt0 nt1 nt2 s' networks' .jname .[  cr getNumberOfNetworks dup 0== [ drop ][ jnet ] .] cr
+
+: jsonNet .{ cr jsonHost jnets .} cr
+
+: dfb dup 0xd == over 0xa == | swap 0== |  [ cr ]
+: dfe dup 0x1F > over 0x7F < & [ dup emit ][ space dup .b ]
+: dumpFile loadFile dm? hex { auxKey? [ dfe dfb 0 ][ drop -1 ] } hm!
+
+1 setPromptEnable
+0 setTelnetLogEnable
+
+: ledOn 0xFFFFFFF 1 setLedOnOffMs
+: ledOff 1 0xFFFFFFF setLedOnOffMs
+: ledBlink dup setLedOnOffMs
+
+0x200000 setLogMask
+
+mainIO
+

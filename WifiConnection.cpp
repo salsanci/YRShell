@@ -8,9 +8,21 @@ StringArray::StringArray(DebugLog* log) {
 }
 void StringArray::reset( ) {
   memset( m_s.m_index, 0xFFFF, sizeof( m_s.m_index));
-  m_s.m_lastOffset = 0;
+  m_s.m_lastOffset = 1;
   m_s.m_lastIndex = 0;
+  m_s.m_buf[0] = 0;
 }
+void StringArray::resetString(uint8_t index, const char* s) {
+  const char* d = get(index);
+  if( strlen(d) == strlen(s)) {
+    strcpy( (char*) d, s);
+  } else {
+    if( m_log) {
+      m_log->print( __FILE__, __LINE__, 1, index, s, "StringArray_resetString_Failed: index, string" );
+    }
+  }
+}
+
 void StringArray::dump() {
   if( m_log) {
     m_log->print( __FILE__, __LINE__, 1, m_s.m_lastIndex, m_s.m_lastOffset, "StringArray_dump: lastIndex, lastOffset" );
@@ -29,14 +41,18 @@ void StringArray::append( const char* s) {
   }
 }
 void StringArray::set( uint8_t index, const char* s) {
-  size_t sz = strlen( s) + 1;
-  if( index < ( sizeof( m_s.m_index) / sizeof(m_s.m_index[0])) && sz < (sizeof(m_s.m_buf) - m_s.m_lastOffset) ) {
-    m_s.m_index[ index] = m_s.m_lastOffset;
-    strcpy( &m_s.m_buf[ m_s.m_lastOffset], s );
-    m_s.m_lastOffset += sz;
+  if( *s == '\0') {
+    m_s.m_index[ index] = 0;
   } else {
-    if( m_log) {
-      m_log->print( __FILE__, __LINE__, 1, index, "StringArray_set_failed: index" );
+    size_t sz = strlen( s) + 1;
+    if( index < ( sizeof( m_s.m_index) / sizeof(m_s.m_index[0])) && sz < (sizeof(m_s.m_buf) - m_s.m_lastOffset) ) {
+      m_s.m_index[ index] = m_s.m_lastOffset;
+      strcpy( &m_s.m_buf[ m_s.m_lastOffset], s );
+      m_s.m_lastOffset += sz;
+    } else {
+      if( m_log) {
+        m_log->print( __FILE__, __LINE__, 1, index, "StringArray_set_failed: index" );
+      }
     }
   }
 }
@@ -97,12 +113,20 @@ void StringArray::save(const char* fname ) {
 
 NetworkParameters::NetworkParameters( DebugLog* log) : StringArray( log) {
   reset();
-  m_numberOfHostParameters = 5;
+  m_numberOfFixedParameters = 6;
   append( "");
   append( "");
-  append( "");
-  append( "");
-  append( "");
+  append( "0x00000000");
+  append( "0x00000000");
+  append( "0x00000000");
+  append( "0x00000000");
+}
+
+void NetworkParameters::resetUint32(uint8_t index, uint32_t v ) {
+  const char* d = get( index);
+  char buf[ 11];
+  YRShellInterpreter::unsignedToStringX( v, 8, buf);
+  resetString( index, buf);
 }
 
 void NetworkParameters::setHost(const char* networkName, const char* networkPassword,  const char* ip,  const char* gateway,  const char* mask ) {
@@ -112,6 +136,9 @@ void NetworkParameters::setHost(const char* networkName, const char* networkPass
   set( 3, gateway);
   set( 4, mask);
 }
+void NetworkParameters::setNetworkIp( uint32_t ip) {
+  resetUint32( 5, ip);
+}
 
 void NetworkParameters::addNetwork(const char* networkName, const char* networkPassword ) {
   append( networkName);
@@ -120,7 +147,7 @@ void NetworkParameters::addNetwork(const char* networkName, const char* networkP
 
 const char* NetworkParameters::getNetworkName( uint8_t index) {
   const char* rc = "";
-  uint8_t idx = index * 2 + m_numberOfHostParameters;
+  uint8_t idx = index * 2 + m_numberOfFixedParameters;
   if( idx < m_s.m_lastIndex) {
     rc = get( idx);
   }
@@ -128,7 +155,7 @@ const char* NetworkParameters::getNetworkName( uint8_t index) {
 }
 const char* NetworkParameters::getNetworkPassword( uint8_t index) {
   const char* rc = "";
-  uint8_t idx = index * 2 + m_numberOfHostParameters + 1;
+  uint8_t idx = index * 2 + m_numberOfFixedParameters + 1;
   if( idx < m_s.m_lastIndex) {
     rc = get( idx);
   }
@@ -146,6 +173,7 @@ WifiConnection::WifiConnection( LedBlink* led, DebugLog* log, uint32_t connectTi
   m_state = 0;
   m_enable = false;
   m_maxRssi = -1024;
+  m_hostActive = false;
 }
 
 void WifiConnection::changeState( uint8_t state) {
@@ -153,6 +181,14 @@ void WifiConnection::changeState( uint8_t state) {
     m_log->print( __FILE__, __LINE__, 1, m_state, state, "WifiConnection::changeState: m_state, state" );
   }
   m_state = state;
+}
+
+int WifiConnection::getConnectedNetworkIndex( void) {
+  return isNetworkConnected() ? m_currentAp : -1;
+}
+
+bool WifiConnection::isNetworkConnected( void) {
+  return WiFi.status() == WL_CONNECTED;
 }
 
 void WifiConnection::slice( ) {
@@ -188,7 +224,7 @@ void WifiConnection::slice( ) {
       m_log->print( __FILE__, __LINE__, 1, m_currentAp, "WifiConnection::slice_connecting: currentAp" );
       m_log->print( __FILE__, __LINE__, 1, p, q, "WifiConnection::slice_connecting: p, q" );
       if( *p == '\0' || *q == '\0') {
-        changeState( 4);
+        changeState( 3);
       } else {
         WiFi.begin( (char*)p,  q);
         changeState( 3);
@@ -200,6 +236,7 @@ void WifiConnection::slice( ) {
 
     case 3:
       if( WiFi.status() == WL_CONNECTED) {
+        networkParameters.setNetworkIp((uint32_t) WiFi.localIP());
         changeState( 5);
       } else if( m_timer.hasIntervalElapsed()) {
         changeState( 4);
@@ -305,11 +342,13 @@ void WifiConnection::slice( ) {
       } else {
         hostConfig( );
         if( WiFi.softAP( p, q) ) {
+            m_hostActive = true;
           if( m_log) {
             m_log->print( __FILE__, __LINE__, 1, p, q, "WifiConnection_slice_host_up: networkName, networkPassword" );
             m_log->print( __FILE__, __LINE__, 1, WiFi.softAPIP().toString().c_str(), WiFi.softAPmacAddress().c_str(), "WifiConnection_slice_host_up: softApIp, softApMac" );
           }
         } else {
+          m_hostActive = false;
           if( m_log) {
             m_log->print( __FILE__, __LINE__, 1, p, q, "WifiConnection::slice_host_not_up: p, q" );
           }

@@ -20,6 +20,7 @@ class StringArray {
 protected:
   StringArrayStruct m_s;
   DebugLog* m_log;
+  void resetString(uint8_t index, const char* s);
 public:
   StringArray( DebugLog* log = NULL);
   ~StringArray() { }
@@ -35,7 +36,8 @@ public:
 
 class NetworkParameters : public StringArray {
 protected:
-  uint8_t m_numberOfHostParameters;
+  uint8_t m_numberOfFixedParameters;
+  void resetUint32(uint8_t index, uint32_t v );
 
 public:
   NetworkParameters( DebugLog* log = NULL);
@@ -48,21 +50,25 @@ public:
   const char* getHostIp( void) { return get(2); }
   const char* getHostGateway( void) { return get(3); }
   const char* getHostMask( void) { return get(4); }
+  const char* getNetworkIp( void) { return get(5); }
   const char* getNetworkName( uint8_t index);
   const char* getNetworkPassword( uint8_t index);
-  uint8_t getNumberOfNetworks( void) { return (m_s.m_lastIndex - m_numberOfHostParameters)/2; }
+  uint8_t getNumberOfNetworks( void) { return (m_s.m_lastIndex - m_numberOfFixedParameters)/2; }
   void save( void) { StringArray::save( fileName()); }
   void load( void) { StringArray::load( fileName()); }
   void getHostMac( char* buf) { WiFi.softAPmacAddress( (uint8_t*) buf); }
+  void getNetworkMac( char* buf) { WiFi.macAddress( (uint8_t*) buf); }
 
   void setHostName( const char* networkName) { set( 0, networkName); }
   void setHostPassword( const char* networkPassword ) { set( 1, networkPassword); }
   void setHostIp( const char* ip ) { set( 2, ip); }
   void setHostGateway( const char* gateway) { set( 3, gateway); }
   void setHostMask( const char* mask) { set( 4, mask); }
+  void setNetworkIp( uint32_t ip);
+  void setNetworkMac( const char* mac);
 
-  void setNetworkName( uint8_t index, const char* networkName) { set( index * 2 + m_numberOfHostParameters, networkName); }
-  void setNetworkPassword( uint8_t index, const char* networkPassword) { set( index * 2 + m_numberOfHostParameters + 1, networkPassword); }
+  void setNetworkName( uint8_t index, const char* networkName) { set( index * 2 + m_numberOfFixedParameters, networkName); }
+  void setNetworkPassword( uint8_t index, const char* networkPassword) { set( index * 2 + m_numberOfFixedParameters + 1, networkPassword); }
 
 };
 
@@ -78,6 +84,7 @@ protected:
   LedBlink* m_led;
   bool m_enable;
   IntervalTimer m_timer;
+  bool m_hostActive;
   void changeState( uint8_t state);
   void hostConfig( void);
 
@@ -86,9 +93,12 @@ public:
   virtual ~WifiConnection() { }
   virtual const char* sliceName( void) { return "WifiConnection"; }
   virtual void slice( void);
+  int getConnectedNetworkIndex( void);
+  bool isNetworkConnected( void);
 
   NetworkParameters networkParameters;
 
+  bool isHostActive( void) { return m_hostActive; }
   void enable( void) { m_enable = true; }
   void disable( void) { m_enable = false; }
 };

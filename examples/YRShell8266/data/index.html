@@ -1,0 +1,135 @@
+
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>ESP0
+        </title>
+        <link rel="stylesheet" href="css/index.css">
+        <script src="js/logs.js"></script>
+        <script src="js/global.js"></script>
+        <script src="js/nav.js"></script>
+        <script src="js/esp.js"></script>
+        <script src="js/netConfig.js"></script>
+        <script src="js/pinConfig.js"></script>
+        <script src="js/pinStatus.js"></script>
+        <script src="js/debug.js"></script>
+        <script src="js/index.js"></script>
+        <!-- <meta http-equiv="refresh" content="1"/> -->
+    </head>
+    <body  onload="bodyonload()">
+        <table class="__idClass__navTable">
+            <thead>
+                <tr>
+                    <th class="__idClass__navHeaderCell"></th>
+                    <th class="__idClass__navHeaderCell"></th>
+                    <th class="__idClass__navHeaderCell"></th>
+                    <th class="__idClass__navHeaderCell"></th>
+                    <th class="__idClass__navHeaderCell"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="__idClass__navBodyCell"><button class="__idClass__navButton" id="__idButton_netConfig" onclick="nav_divSelect( '__idButton_netConfig')" >Net Config</button></td>
+                    <td class="__idClass__navBodyCell"><button class="__idClass__navButton" id="__idButton_pinConfig"  onclick="nav_divSelect('__idButton_pinConfig')" >Pin Config</button></td>
+                    <td class="__idClass__navBodyCell"><button class="__idClass__navButton" id="__idButton_pinStatus"  onclick="nav_divSelect( '__idButton_pinStatus')" >Pin Status</button></td>
+                    <td class="__idClass__navBodyCell"><button class="__idClass__navButton" id="__idButton_debug"  onclick="nav_divSelect('__idButton_debug')" >Debug</button></td>
+                    <td class="__idClass__navBodyCell"><button class="__idClass__navButton" id="__idButton_logs"  onclick="nav_divSelect('__idButton_logs')" >Logs</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div id="__iddiv__netConfig"  style="display: none">
+            <h1>Net Config</h1>
+            <p id="__id__netConfigTable"></p>
+            <p></p>
+            <p></p>
+            <button class="__idClass__netConfigButton"  onclick="netConfig_submit()" >Submit</button>
+        </div>
+        <div id="__iddiv__pinConfig"  style="display: none">
+            <h1>Pin Config</h1>
+            <button onclick="pinConfig_reset()">Reset</button>
+            <button onclick="pinConfig_setInitial()">Set To Initial</button>
+            <p id="__id__pinConfigTable"></p>
+        </div>
+        <div id="__iddiv__pinStatus"  style="display: none">
+            <h1>Pin Status</h1>
+            <div>
+                <table class="__idClass__pinStatusRateTable">
+                    <tr>
+                        <td id="__id__pinStatusRateLabel" class="__idClass__pinStatusRateLabel">Refresh rate</td>
+                        <td class="__idClass__pinStatusRateBar">
+                            <input class="__idClass__pinStatusRate" id="__id__pinsStatusUpdateRate" onchange='pinStatus_updatePinUpdateRate(this.value)' type="range" min="0" max="6" step="0.1" value="1"> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="__idClass__pinStatusRateLabel">Achieved rate</td>
+                        <td class="__idClass__pinStatusRateBar">
+                            <progress class="__idClass__pinStatusRate" id="__id__pinStatusProgressUpdate" max="6" value="1" class="__idClass_pin"></progress>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div id="__id__pinStatusTable"></div>
+        </div>
+        <div id="__iddiv__debug"  style="display: none">
+            <h1>Debug</h1>
+            <table class="__idClass__debugTable">
+                <thead>
+                    <tr>
+                        <th class="__idClass__debugCell"></th>
+                        <th class="__idClass__debugCell"></th>
+                        <th class="__idClass__debugCell"></th>
+                        <th class="__idClass__debugCell"></th>
+                        <th class="__idClass__debugCell"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="__idClass__debugCell"><button class="__idClass__debugButton"  onclick="debug_sendConsole()" >Send Console</button></td>
+                        <td class="__idClass__debugCell"><button class="__idClass__debugButton"  onclick="debug_markOutput()" >Mark Output</button></td>
+                        <td class="__idClass__debugCell"><button class="__idClass__debugButton"  onclick="debug_clearOutput()" >Clear Output</button></td>
+                        <td class="__idClass__debugCell"><button class="__idClass__debugButton"  onclick="debug_getJson()" >Get Json</button></td>
+                        <td class="__idClass__debugCell"><button class="__idClass__debugButton"  onclick="" >Test</button></td>
+                    </tr>
+                    <tr></tr>
+                    <tr></tr>
+                    <tr>
+                        <td class="__idClass__debugCell" colspan="4"><input type="text" class="__idClass__debugInput" id="__id__debugBaseText" maxlength="128"></td>
+                        <td class="__idClass__debugCell"><button class="__idClass__debugButton"  onclick='debug_setBase(document.getElementById( "__id__debugBaseText").value)'>Set Base</button></td>
+                    </tr>
+                    <tr></tr>
+                    <tr></tr>
+                    <tr>
+                        <td class="__idClass__debugCell"></td>
+                        <td class="__idClass__debugCell"></td>
+                        <td class="__idClass__debugCell"></td>
+                        <td class="__idClass__debugCell"></td>
+                        <td class="__idClass__debugCell"><button class="__idClass__debugButton"  onclick='debug_clearInput(document.getElementById( "__id__debugInputText"))'>ClearInput</button></td>
+                    </tr>
+                    <tr>
+                        <td class="__idClass__debugCell" colspan="4"><input type="text" class="__idClass__debugInput" id="__id__debugInputText" maxlength="128"></td>
+                        <td class="__idClass__debugCell"><button class="__idClass__debugButton"  onclick='debug_sendConsole(document.getElementById( "__id__debugInputText").value)'>Send Console</button></td>
+                    </tr>
+                    <tr>
+                        <td class="__idClass__debugCell"></td>
+                        <td class="__idClass__debugCell"></td>
+                        <td class="__idClass__debugCell"></td>
+                        <td class="__idClass__debugCell"></td>
+                        <td class="__idClass__debugCell"><button class="__idClass__debugButton"  onclick='debug_getJson(document.getElementById( "__id__debugInputText").value)'>Get Json</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div>
+                <h2>Result</h2>
+                <p id="__id__jsonResult"></p>
+                <div id="__id__debugResult"></div>
+            </div>
+        </div>
+        <div id="__iddiv__logs"  style="display: none">
+            <h1>Logs</h1>
+            <button class="__idClass__logsButton"  onclick="logs_reset()" >Reset</button>
+            <pre id="__id__logsContent">
+            </pre>
+        </div>
+    </body>
+</html>

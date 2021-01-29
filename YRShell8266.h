@@ -57,13 +57,20 @@ typedef enum {
     SE_CC_setTelnetLogEnable,
 
     SE_CC_getHostName,
+    SE_CC_getHostPassword,
     SE_CC_getHostIp,
     SE_CC_getHostGateway,
     SE_CC_getHostMask,
     SE_CC_getHostMac,
+    SE_CC_isHostActive,
 
     SE_CC_getNumberOfNetworks,
+    SE_CC_getConnectedNetwork,
+    SE_CC_getNetworkIp,
+    SE_CC_getNetworkMac,
+
     SE_CC_getNetworkName,
+    SE_CC_getNetworkPassword,
 
     SE_CC_setHostName,        
     SE_CC_setHostPassword,        
@@ -71,7 +78,9 @@ typedef enum {
     SE_CC_setHostGateway,     
     SE_CC_setHostMask,        
     SE_CC_setNetworkName,     
-    SE_CC_setNetworkPassword, 
+    SE_CC_setNetworkPassword,
+
+    SE_CC_saveNetworkParameters, 
 
     SE_CC_loadFile,
 

@@ -69,13 +69,19 @@ static const FunctionEntry yr8266ShellExtensionFunctions[] = {
     { SE_CC_setTelnetLogEnable,   "setTelnetLogEnable"},
 
     { SE_CC_getHostName,          "getHostName" },
+    { SE_CC_getHostPassword,      "getHostPassword" },
     { SE_CC_getHostIp,            "getHostIp" },
     { SE_CC_getHostGateway,       "getHostGateway" },
     { SE_CC_getHostMask,          "getHostMask" },
     { SE_CC_getHostMac,           "getHostMac" },
+    { SE_CC_isHostActive,         "isHostActive" },
 
     { SE_CC_getNumberOfNetworks,  "getNumberOfNetworks" },
+    { SE_CC_getConnectedNetwork,  "getConnectedNetwork" },
+    { SE_CC_getNetworkIp,         "getNetworkIp" },
+    { SE_CC_getNetworkMac,        "getNetworkMac" },
     { SE_CC_getNetworkName,       "getNetworkName" },
+    { SE_CC_getNetworkPassword,   "getNetworkPassword" },
 
     { SE_CC_setHostName,          "setHostName" },
     { SE_CC_setHostPassword,      "setHostPassword" },
@@ -84,6 +90,8 @@ static const FunctionEntry yr8266ShellExtensionFunctions[] = {
     { SE_CC_setHostMask,          "setHostMask" },
     { SE_CC_setNetworkName,       "setNetworkName" },
     { SE_CC_setNetworkPassword,   "setNetworkPassword" },
+
+    { SE_CC_saveNetworkParameters,"saveNetworkParameters" },
 
     { SE_CC_loadFile,              "loadFile" },
 
@@ -333,6 +341,13 @@ void YRShell8266::executeFunction( uint16_t n) {
               }
               pushParameterStack( 0);
             break;
+          case SE_CC_getHostPassword:
+              m_textBuffer[ 0] = '\0';
+              if( m_wifiConnection) {
+                strcpy( m_textBuffer, m_wifiConnection->networkParameters.getHostPassword());
+              }
+              pushParameterStack( 0);
+            break;
           case SE_CC_getHostIp:
               m_textBuffer[ 0] = '\0';
               if( m_wifiConnection) {
@@ -362,6 +377,15 @@ void YRShell8266::executeFunction( uint16_t n) {
               pushParameterStack( 0);
               break;
 
+          case SE_CC_isHostActive:
+              if( m_wifiConnection) {
+                pushParameterStack( m_wifiConnection->isHostActive());
+              } else {
+                pushParameterStack( 0);
+              }
+              break;
+              break;
+
           case SE_CC_getNumberOfNetworks:
               if( m_wifiConnection) {
                 pushParameterStack( m_wifiConnection->networkParameters.getNumberOfNetworks());
@@ -369,12 +393,40 @@ void YRShell8266::executeFunction( uint16_t n) {
                 pushParameterStack( 0);
               }
               break;
-
+          case SE_CC_getConnectedNetwork:
+              if( m_wifiConnection) {
+                pushParameterStack( m_wifiConnection->getConnectedNetworkIndex());
+              } else {
+                pushParameterStack( -1);
+              }
+              break;
+          case SE_CC_getNetworkIp:
+              m_textBuffer[ 0] = '\0';
+              if( m_wifiConnection) {
+                strcpy( m_textBuffer, m_wifiConnection->networkParameters.getNetworkIp( ));
+              }
+              pushParameterStack( 0);
+              break;
+          case SE_CC_getNetworkMac:
+              m_textBuffer[ 0] = '\0';
+              if( m_wifiConnection) {
+                m_wifiConnection->networkParameters.getNetworkMac( m_textBuffer );
+              }
+              pushParameterStack( 0);
+              break;
           case SE_CC_getNetworkName:
               t1 = popParameterStack();
               m_textBuffer[ 0] = '\0';
               if( m_wifiConnection) {
                 strcpy( m_textBuffer, m_wifiConnection->networkParameters.getNetworkName( t1));
+              }
+              pushParameterStack( 0);
+              break;
+          case SE_CC_getNetworkPassword:
+              t1 = popParameterStack();
+              m_textBuffer[ 0] = '\0';
+              if( m_wifiConnection) {
+                strcpy( m_textBuffer, m_wifiConnection->networkParameters.getNetworkPassword( t1));
               }
               pushParameterStack( 0);
               break;
@@ -419,9 +471,15 @@ void YRShell8266::executeFunction( uint16_t n) {
               t1 = popParameterStack();
               t2 = popParameterStack();
               if( m_wifiConnection) {
-                  m_wifiConnection->networkParameters.setNetworkName( t1, getAddressFromToken( t2));
+                  m_wifiConnection->networkParameters.setNetworkPassword( t1, getAddressFromToken( t2));
               }
               break;
+          case SE_CC_saveNetworkParameters: 
+              if( m_wifiConnection) {
+                  m_wifiConnection->networkParameters.save();
+              }
+              break;
+
           case SE_CC_loadFile:
               loadFile( getAddressFromToken(popParameterStack()), false );
               break;
