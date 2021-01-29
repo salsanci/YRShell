@@ -1,5 +1,5 @@
 
-var esp_baseUrl = "http://esp0/"
+var esp_baseUrl = ""
 
 function esp_asciiToHex( s) {
 	var arr = []

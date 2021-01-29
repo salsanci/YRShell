@@ -38,5 +38,5 @@ function logs_leave() {
 setTimeout( function() {
     nav_navMap.get("__idButton_logs").focusFunc = logs_init
     nav_navMap.get("__idButton_logs").unfocusFunc = logs_leave
-    }, 10)
+    }, 500)
 logs_msg( "logs load")
