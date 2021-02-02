@@ -1,4 +1,7 @@
 #include "YRShell8266.h"
+#include <SPI.h>
+
+#include <TelnetServer.h>
 
 #define INITIAL_LOAD_FILE "/start.macro"
 
@@ -66,7 +69,6 @@ static const FunctionEntry yr8266ShellExtensionFunctions[] = {
     { SE_CC_execDone,             "execDone"},
     { SE_CC_hexModeQ,             "hexMode?"},
     { SE_CC_wifiConnected,        "wifiConnected"},
-    { SE_CC_setTelnetLogEnable,   "setTelnetLogEnable"},
 
     { SE_CC_getHostName,          "getHostName" },
     { SE_CC_getHostPassword,      "getHostPassword" },
@@ -105,6 +107,17 @@ static const FunctionEntry yr8266ShellExtensionFunctions[] = {
 
     { SE_CC_dotUb,                ".ub" },
     { SE_CC_strToInt,             "strToInt"},
+    { SE_CC_textBufferSize,       "textBufferSize" },
+
+    { SE_CC_spiStart,             "spiStart" },
+    { SE_CC_spiTransfer,          "spiTransfer" },
+    { SE_CC_spiEnd,               "spiEnd" },
+
+    { SE_CC_spiTest,              "spiTest" },
+
+    { SE_CC_connectQ,             "connectQ" },
+
+    { SE_CC_cqDump,               "cqDump" },
   
     { 0, NULL}
 };
@@ -114,25 +127,14 @@ static FunctionDictionary dictionaryExtensionFunction( yr8266ShellExtensionFunct
 
 CompiledDictionary compiledExtensionDictionary( NULL, 0xFFFF , 0x0000 , YRSHELL_DICTIONARY_EXTENSION_COMPILED);
 
-void saveString( const char* fname, const char* s);
-
-YRShell8266::YRShell8266() {
-  m_httpServer = NULL;
-  m_telnetServer = NULL;
-  m_fileOpen = false;
-  m_initialFileLoaded = false;
-  m_initialized = false;
-  m_auxBufIndex = 0;
-}
-
 YRShell8266::~YRShell8266() {
   if( m_httpServer != NULL) {
     delete m_httpServer;
     m_httpServer = NULL;
   }
-  if( m_telnetServer != NULL) {
-    delete m_telnetServer;
-    m_telnetServer = NULL;
+  if( m_telnetConsoleServer != NULL) {
+    delete m_telnetConsoleServer;
+    m_telnetConsoleServer = NULL;
   }
   if( m_telnetLogServer != NULL) {
     delete m_telnetLogServer;
@@ -140,7 +142,7 @@ YRShell8266::~YRShell8266() {
   }
 }
 
-void YRShell8266::init( unsigned httpPort, unsigned telnetPort, WifiConnection* wifiConnection, LedBlink* led, DebugLog* log, unsigned telnetLogPort) {
+void YRShell8266::init( unsigned httpPort, WifiConnection* wifiConnection, LedBlink* led, DebugLog* log) {
   YRShellBase::init();
   m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_COMPILED_INDEX] = &compiledExtensionDictionary;
   m_dictionaryList[ YRSHELL_DICTIONARY_EXTENSION_FUNCTION_INDEX] = &dictionaryExtensionFunction;
@@ -150,14 +152,6 @@ void YRShell8266::init( unsigned httpPort, unsigned telnetPort, WifiConnection* 
   if( httpPort != 0) {
     m_httpServer = new HServer( this);
     m_httpServer->init( httpPort, m_log, m_led);
-  }
-  if( telnetPort != 0) {
-    m_telnetServer = new TelnetServer;
-    m_telnetServer->init( telnetPort, this, log);
-  }
-  if( telnetLogPort != 0) {
-    m_telnetLogServer = new TelnetLogServer;
-    m_telnetLogServer->init( telnetLogPort);
   }
   m_exec = false;
   m_initialized = true;
@@ -268,7 +262,9 @@ void YRShell8266::slice() {
 } 
 
 void YRShell8266::executeFunction( uint16_t n) {
-  uint32_t t1, t2;
+  uint32_t t1, t2, t3;
+  CircularQBase<char> *q1, *q2;
+  
   if( n <= SE_CC_first || n >= SE_CC_last) {
       YRShellBase::executeFunction(n);
   } else {
@@ -329,9 +325,6 @@ void YRShell8266::executeFunction( uint16_t n) {
               break;
           case SE_CC_wifiConnected:
               pushParameterStack(  WiFi.status() == WL_CONNECTED);
-              break;
-          case SE_CC_setTelnetLogEnable:
-              m_telnetLogEnable = popParameterStack();
               break;
 
           case SE_CC_getHostName:
@@ -524,6 +517,10 @@ void YRShell8266::executeFunction( uint16_t n) {
               outUint8( popParameterStack());
               break;
 
+          case SE_CC_textBufferSize:
+              pushParameterStack( m_textBufferSize);
+          break;
+
           case SE_CC_strToInt:
               if( m_textBuffer[0] == '0' && m_textBuffer[ 1] == 'x') {
                 stringToUnsignedX( m_textBuffer, &t1 );
@@ -533,27 +530,55 @@ void YRShell8266::executeFunction( uint16_t n) {
               pushParameterStack( t1);
               break;
 
+          case SE_CC_spiStart:
+              t1 = popParameterStack(); // spiMode
+              t2 = popParameterStack(); // LSBFIRST
+              t3 = popParameterStack(); // CLOCK
+              SPI.begin();
+              SPI.beginTransaction( SPISettings(t3, t2 ? LSBFIRST : MSBFIRST, t1));
+              break;
+
+          case SE_CC_spiTransfer:
+              memset( m_textBuffer, 0xC5, m_textBufferSize);
+              t1 = popParameterStack(); // nBytes
+              SPI.transfer( m_textBuffer, t1);
+              break;
+
+          case SE_CC_spiEnd:
+              SPI.endTransaction();
+              SPI.end();
+              break;
+
+          case SE_CC_spiTest:
+              digitalWrite( 15, 0);
+              m_textBuffer[ 0] = 0xc5;
+              m_textBuffer[ 1] = 0xc5;
+              SPI.transfer( m_textBuffer, 2);
+              digitalWrite( 15, 1);
+              m_textBuffer[ 0] = 0xc5;
+              m_textBuffer[ 1] = 0xc5;
+              SPI.transfer( m_textBuffer, 2);
+              break;
+
+          case SE_CC_connectQ:
+              t1 = popParameterStack();
+              t2 = popParameterStack();
+              t3 = CharQ::connect(getAddressFromToken( t2), getAddressFromToken( t1));
+              pushParameterStack( t3);
+              break;
+
+          case SE_CC_cqDump:
+              m_log->print( __FILE__, __LINE__, -1, "ENTER" );
+              CQitem::dump();
+              m_log->print( __FILE__, __LINE__, -1, "EXIT" );
+              break;
+
           default:
               shellERROR(__FILE__, __LINE__);
               break;
       }
   }
 }
-
-void YRShell8266::telnetLogPut( char c) {
-  if( m_telnetLogServer && m_telnetLogEnable) {
-    m_telnetLogServer->put( c); 
-  }
-}
-
-bool YRShell8266::telnetLogSpaceAvaliable( uint16_t n) {
-  bool rc = true;
-  if( m_telnetLogServer && m_telnetLogEnable) {
-    rc = m_telnetLogServer->spaceAvailable( n); 
-  }
-  return rc;
-}
-
 void YRShell8266::outUInt8( int8_t v) {
     char buf[ 5];
     unsignedToString(v, 3, buf);

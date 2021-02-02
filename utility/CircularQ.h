@@ -55,6 +55,8 @@ public:
 	virtual void setPreviousQ( CircularQBase<TYPE>& q) {};
 	virtual void setNextQ( CircularQBase<TYPE>* q) {};
 	virtual void setPreviousQ( CircularQBase<TYPE>* q) {};
+	virtual CircularQBase<TYPE>* getNextQ( void) { return NULL;}
+	virtual CircularQBase<TYPE>* getPreviousQ( void) { return NULL;}
 	virtual void slice( void) {};
 };
 
@@ -148,6 +150,21 @@ public:
 			Sliceable::m_sliceEnabled = true;
 		}
 	}
+	/** \brief Returns a pointer to the Q receiving the output of this Q.
+
+	 Returns a pointer to the Q receiving the output of this Q.
+	 */
+	CircularQBase<TYPE>* getNextQ( void) {
+		return m_nextQ;
+	}
+	/** \brief Returns a pointer to the Q supplying input to this Q.
+
+	 Returns a pointer to the Q supplying input to this Q.
+	 */
+	CircularQBase<TYPE>* getPreviousQ( void) {
+		return m_previousQ;
+	}
+
 	/** \brief Pulls input from the queue Q, pushes output to the next queue.
 
 	 Pulls input from the queue Q, pushes output to the next queue.

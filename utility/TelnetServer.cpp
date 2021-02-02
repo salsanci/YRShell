@@ -1,9 +1,19 @@
 #include "TelnetServer.h"
 
-void TelnetLogServer::init( unsigned port) {
+void TelnetConsoleServer::init( unsigned port, DebugLog* log) {
     m_fromTelnetQ = &m_fq;
     m_toTelnetQ = &m_tq;
     m_server = new WiFiServer( port);
+    m_log = log;
+    m_server->begin();
+    m_client = new WiFiClient();
+    m_timer.setInterval( 10);
+}
+void TelnetLogServer::init( unsigned port, DebugLog* log) {
+    m_fromTelnetQ = &m_fq;
+    m_toTelnetQ = &m_tq;
+    m_server = new WiFiServer( port);
+    m_log = log;
     m_server->begin();
     m_client = new WiFiClient();
     m_timer.setInterval( 10);
@@ -37,9 +47,7 @@ TelnetServer::~TelnetServer() {
   m_client = NULL;
 }
 
-void TelnetServer::init( unsigned port, YRShell8266* shell, DebugLog* log) {
-    m_fromTelnetQ = &shell->getInq();
-    m_toTelnetQ = &shell->getOutq();
+void TelnetServer::init( unsigned port, DebugLog* log) {
     m_server = new WiFiServer( port);
     m_log = log;
     m_server->begin();
@@ -106,7 +114,11 @@ void TelnetServer::slice() {
             if( m_toTelnetQ) {
               const char* p = m_toTelnetQ->getLinearReadBuffer();
               size_t len = m_toTelnetQ->getLinearReadBufferSize();
-              if( len > 0 && m_client->availableForWrite() >= len) {
+              size_t aw = m_client->availableForWrite();
+              if( len > 0 && aw > 0) {
+                if( len > aw) {
+                  len = aw;
+                }
                 size_t bw = m_client->write((uint8_t*) p , len );    
                 if( bw > 0) {
                   m_toTelnetQ->drop( bw);

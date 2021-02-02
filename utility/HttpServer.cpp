@@ -1,6 +1,5 @@
 #include "HttpServer.h"
 
-
 HttpServer::HttpServer( void) {
   m_server = NULL;
   m_client = NULL;

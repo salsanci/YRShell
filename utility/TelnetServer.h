@@ -1,16 +1,13 @@
 #ifndef TelnetServer_h
 #define TelnetServer_h
 
-#include <ESP8266WiFi.h>
-#include <LittleFS.h>
-#include "DebugLog.h"
-#include <YRShell8266.h>
 
-class YRShell8266;
+#include <ESP8266WiFi.h>
+#include "DebugLog.h"
+#include "CharQ.h"
 
 class TelnetServer : public Sliceable {
 protected:
-
   WiFiServer* m_server;
   WiFiClient* m_client;
 
@@ -28,36 +25,32 @@ public:
   TelnetServer(void);
   virtual ~TelnetServer();
   virtual const char* sliceName( ) { return "TelnetServer"; }
-  void init( unsigned port, YRShell8266* shell, DebugLog* log );
+  void init( unsigned port, DebugLog* log );
   void slice( void);
 };
 
-class CQ1 : public CircularQ<char, 32> {
+
+class TelnetConsoleServer : public TelnetServer {
+protected:
+  CQ32 m_fq;
+  CQ32 m_tq;
 public:
-  CQ1() {}
-  virtual ~CQ1() {}
-  virtual const char* sliceName( void) { return "CQ1"; } 
-  virtual void slice( void) { }
+  TelnetConsoleServer(const char* inQ, const char* outQ):m_fq{inQ}, m_tq{outQ} { }
+  virtual ~TelnetConsoleServer() { }
+  virtual const char* sliceName( ) { return "TelnetConsoleServer"; }
+  void init( unsigned port, DebugLog* log = NULL);
 };
-class CQ2 : public CircularQ<char, 1024> {
-public:
-  CQ2() {}
-  virtual ~CQ2() {}
-  virtual const char* sliceName( void) { return "CQ2"; } 
-  virtual void slice( void) { }
-};
+
 
 class TelnetLogServer : public TelnetServer {
 protected:
-  CQ1 m_fq;
-  CQ2 m_tq;
+  CQ32 m_fq;
+  CQ1024 m_tq;
 public:
-  TelnetLogServer(void) { }
+  TelnetLogServer(const char* inQ, const char* outQ):m_fq{inQ}, m_tq{outQ} { }
   virtual ~TelnetLogServer() { }
   virtual const char* sliceName( ) { return "TelnetLogServer"; }
-  void init( unsigned port);
-  void put( char c ) { m_tq.put( c); }
-  bool spaceAvailable( uint16_t n = 1) { return m_toTelnetQ->spaceAvailable( n); }
+  void init( unsigned port,  DebugLog* log = NULL);
 };
 
 #endif

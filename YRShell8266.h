@@ -1,6 +1,8 @@
 #ifndef YRShell8266_h
 #define YRShell8266_h
 
+class TelnetConsoleServer;
+
 #include "YRShell.h"
 #include "WifiConnection.h"
 
@@ -8,6 +10,8 @@
 
 #include <ESP8266WiFi.h>
 #include <LittleFS.h>
+
+#include "utility/CharQ.h"
 
 #include "utility/HttpServer.h"
 #include "utility/TelnetServer.h"
@@ -94,18 +98,30 @@ typedef enum {
 
     SE_CC_dotUb,
     SE_CC_strToInt,
-    
+    SE_CC_textBufferSize,
+
+    SE_CC_spiStart,
+    SE_CC_spiTransfer,
+    SE_CC_spiEnd,
+    SE_CC_spiTest,
+
+    SE_CC_connectQ,
+
+    SE_CC_cqDump,
+
     SE_CC_last
 } SE_CC_functions;
 
 class YRShell8266 : public virtual YRShellBase<2048, 128, 128, 16, 16, 16, 8, 256, 512, 256, 512, 128> {
 protected:
-  bool m_exec, m_initialized, m_telnetLogEnable;
+  bool m_exec, m_initialized;
   char m_auxBuf[ 128];
   uint8_t m_auxBufIndex;
 
+  CQ64 m_mainIn, m_mainOut, m_auxIn, m_auxOut;
+
   HServer* m_httpServer;
-  TelnetServer* m_telnetServer;
+  TelnetConsoleServer* m_telnetConsoleServer;
   TelnetLogServer* m_telnetLogServer;
   LedBlink* m_led;
   WifiConnection* m_wifiConnection;
@@ -119,17 +135,25 @@ protected:
   void outUInt8( int8_t v);
 
 public:
-  YRShell8266( );
+  YRShell8266(const char* mainIn = "", const char* mainOut = "", const char* auxIn = "", const char* auxOut = "") : m_mainIn{mainIn}, m_mainOut{mainOut}, m_auxIn{auxIn}, m_auxOut{auxOut} {
+    m_httpServer = NULL;
+    m_telnetConsoleServer = NULL;
+    m_fileOpen = false;
+    m_initialFileLoaded = false;
+    m_initialized = false;
+    m_auxBufIndex = 0;
+
+    m_mainIn.setNextQ( &m_inq);
+    m_outq.setNextQ( &m_mainOut);
+  }
   virtual ~YRShell8266( );
-  void init( unsigned httpPort, unsigned telnetPort, WifiConnection* wifiConnection, LedBlink* led, DebugLog* log, unsigned debugTelnetPort = 0);
+  void init( unsigned httpPort, WifiConnection* wifiConnection, LedBlink* led, DebugLog* log);
   virtual void slice( void);
   void loadFile( const char* fname, bool exec = true);
   void startExec( void);
   void endExec( void);
   void execString( const char* p);
   bool isExec( void) { return m_exec; }
-  void telnetLogPut( char c);
-  bool telnetLogSpaceAvaliable( uint16_t n = 1);
 };
 
 #endif
