@@ -109,6 +109,8 @@ typedef enum {
 
     SE_CC_cqDump,
 
+    SE_CC_echoLoop,
+
     SE_CC_last
 } SE_CC_functions;
 
@@ -126,7 +128,7 @@ protected:
   LedBlink* m_led;
   WifiConnection* m_wifiConnection;
   IntervalTimer m_execTimer;
-  bool m_fileOpen, m_initialFileLoaded, m_lastPromptEnable, m_lastCommandEcho;
+  bool m_fileOpen, m_initialFileLoaded, m_lastPromptEnable, m_lastCommandEcho, m_echoLoop;
   File m_file;
 
   virtual void executeFunction( uint16_t n);

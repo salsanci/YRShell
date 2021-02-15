@@ -118,6 +118,8 @@ static const FunctionEntry yr8266ShellExtensionFunctions[] = {
     { SE_CC_connectQ,             "connectQ" },
 
     { SE_CC_cqDump,               "cqDump" },
+
+    { SE_CC_echoLoop,             "echoLoop"},
   
     { 0, NULL}
 };
@@ -155,6 +157,7 @@ void YRShell8266::init( unsigned httpPort, WifiConnection* wifiConnection, LedBl
   }
   m_exec = false;
   m_initialized = true;
+  m_echoLoop = false;
 }
 
 void YRShell8266::startExec( void) {
@@ -212,52 +215,65 @@ void YRShell8266::loadFile( const char* fname, bool exec) {
 }
 
 void YRShell8266::slice() {
-  YRShellBase::slice();
-  if( m_fileOpen && m_auxInq.spaceAvailable(10)) {
-    int c = m_file.read();
-    if( c != -1) {
-      m_auxInq.put( c);   
-    } else {
-      m_file.close();
-      m_fileOpen = false;
-      m_log->print( __FILE__, __LINE__, 1, "YRShell8266_slice_closing_file");
-    } 
-  }
-
-  if( m_exec && m_execTimer.hasIntervalElapsed()) {
-    m_exec = false;
-  }
-  
-  if( m_useAuxQueues && !m_exec ) {
-    while( m_AuxOutq->valueAvailable()) {
-      char c = m_AuxOutq->get();
-      if( c != '\r' && c != '\n' ) {
-        m_auxBuf[ m_auxBufIndex++] = c;    
+  if( m_echoLoop) {
+    if( m_Inq->valueAvailable()) {
+      if( m_Outq->spaceAvailable()) {
+        char c = m_Inq->get();
+        if( c == '\x1B') {
+          m_echoLoop = false;
+        } else {
+          m_Outq->put( c);
+        }
       }
-      if( c == '\r' || c == '\n' ||  m_auxBufIndex > (sizeof(m_auxBuf) - 2 ) ) {
-        m_auxBuf[ m_auxBufIndex] = '\0';
-        bool flag = true;
-        for( const char* p = m_auxBuf; flag && *p != '\0'; p++) {
-          if( *p != ' ' && *p != '\r' && *p != '\n' && *p != '\t') {
-            flag = false;
+    }
+  } else {
+    YRShellBase::slice();
+    if( m_fileOpen && m_auxInq.spaceAvailable(10)) {
+      int c = m_file.read();
+      if( c != -1) {
+        m_auxInq.put( c);   
+      } else {
+        m_file.close();
+        m_fileOpen = false;
+        m_log->print( __FILE__, __LINE__, 1, "YRShell8266_slice_closing_file");
+      } 
+    }
+
+    if( m_exec && m_execTimer.hasIntervalElapsed()) {
+      m_exec = false;
+    }
+    
+    if( m_useAuxQueues && !m_exec ) {
+      while( m_AuxOutq->valueAvailable()) {
+        char c = m_AuxOutq->get();
+        if( c != '\r' && c != '\n' ) {
+          m_auxBuf[ m_auxBufIndex++] = c;    
+        }
+        if( c == '\r' || c == '\n' ||  m_auxBufIndex > (sizeof(m_auxBuf) - 2 ) ) {
+          m_auxBuf[ m_auxBufIndex] = '\0';
+          bool flag = true;
+          for( const char* p = m_auxBuf; flag && *p != '\0'; p++) {
+            if( *p != ' ' && *p != '\r' && *p != '\n' && *p != '\t') {
+              flag = false;
+            }
           }
+          if( !flag && m_log != NULL) {
+            m_log->print( __FILE__, __LINE__, 8, m_auxBuf, "YRShell8266_slice: auxBuf");
+          }
+          m_auxBufIndex = 0;
         }
-        if( !flag && m_log != NULL) {
-          m_log->print( __FILE__, __LINE__, 8, m_auxBuf, "YRShell8266_slice: auxBuf");
-        }
-        m_auxBufIndex = 0;
       }
+    } else if( m_auxBufIndex > 0) {
+      if( m_log != NULL) {
+        m_log->print( __FILE__, __LINE__, 8, m_auxBuf, "YRShell8266_slice: auxBuf");
+      }
+      m_auxBufIndex = 0;
     }
-  } else if( m_auxBufIndex > 0) {
-    if( m_log != NULL) {
-      m_log->print( __FILE__, __LINE__, 8, m_auxBuf, "YRShell8266_slice: auxBuf");
-    }
-    m_auxBufIndex = 0;
-  }
 
-  if( !m_initialFileLoaded && m_initialized && isIdle() ) {
-      m_initialFileLoaded = true;
-      loadFile( INITIAL_LOAD_FILE);
+    if( !m_initialFileLoaded && m_initialized && isIdle() ) {
+        m_initialFileLoaded = true;
+        loadFile( INITIAL_LOAD_FILE);
+    }
   }
 } 
 
@@ -571,6 +587,10 @@ void YRShell8266::executeFunction( uint16_t n) {
               m_log->print( __FILE__, __LINE__, -1, "ENTER" );
               CQitem::dump();
               m_log->print( __FILE__, __LINE__, -1, "EXIT" );
+              break;
+
+          case SE_CC_echoLoop:
+              m_echoLoop = true;
               break;
 
           default:
