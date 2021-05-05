@@ -1,7 +1,7 @@
 #ifndef HardwareSpecific_h
 #define HardwareSpecific_h
 
-// #define COMPILE_DEBUG
+//#define COMPILE_DEBUG
 
 #ifdef __unix__
 	#define PLATFORM_LUA
@@ -22,6 +22,14 @@
     #define PLATFORM_APPLE
 	#ifdef COMPILE_DEBUG
 		#warning "COMPILEDEBUG 2: __APPLE__ DEFINED"
+	#endif
+#endif
+
+#ifdef __WIN32
+	#define PLATFORM_WINDOWS
+	#define PLATFORM_LUA
+ 	#ifdef COMPILE_DEBUG
+		#warning "COMPILEDEBUG 3: __WIN32 DEFINED"
 	#endif
 #endif
 

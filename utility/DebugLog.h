@@ -53,7 +53,6 @@ public:
   void printX( const char* file, uint32_t line, uint32_t mask, uint32_t v1, uint32_t v2, uint32_t v3, const char* message);
   
   void printHex( const char* P, int len);
-  void printHex( String &s);
 };
 
 #endif

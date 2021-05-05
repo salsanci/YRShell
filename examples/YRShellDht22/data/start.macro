@@ -53,7 +53,7 @@
 : dfe dup 0x1F > over 0x7F < & [ dup emit ][ space dup .b ]
 : dumpFile loadFile dm? hex { auxKey? [ dfe dfb 0 ][ drop -1 ] } hm!
 
-: rhTemp getTemp getRh . .
+: rhTemp getRh . getTemp .
 
 1 setPromptEnable
 0 setTelnetLogEnable
@@ -66,3 +66,24 @@
 
 mainIO
 
+: echoLoop { key dup 0x1B == [ drop -1 ][ emit 0 ] }
+
+
+: ph 1 15 setDigitalPin
+: pl 0 15 setDigitalPin
+
+: st 10000000 0 0 spiStart 15 setPinOut
+
+: xf { ph 128 spiTransfer pl 128 spiTransfer esc? }
+
+: x ph pl ph 2 spiTransfer
+
+: xx { x esc? }
+
+: tt { spiTest esc? }
+
+: end spiEnd
+
+
+
+// 0x200001 setLogMask

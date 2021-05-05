@@ -1,5 +1,6 @@
 #include "YRShell8266.h"
 #include <SPI.h>
+#include "Dht22.h"
 
 #include <TelnetServer.h>
 
@@ -120,6 +121,10 @@ static const FunctionEntry yr8266ShellExtensionFunctions[] = {
     { SE_CC_cqDump,               "cqDump" },
 
     { SE_CC_echoLoop,             "echoLoop"},
+
+    { SE_CC_getRh,                "getRh"},
+    { SE_CC_getTemp,              "getTemp"},
+
   
     { 0, NULL}
 };
@@ -591,6 +596,14 @@ void YRShell8266::executeFunction( uint16_t n) {
 
           case SE_CC_echoLoop:
               m_echoLoop = true;
+              break;
+
+          case SE_CC_getRh:
+              pushParameterStack( Dht22::getRh());
+              break;
+
+          case SE_CC_getTemp:
+              pushParameterStack( Dht22::getTemp());
               break;
 
           default:

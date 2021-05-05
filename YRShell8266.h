@@ -111,6 +111,9 @@ typedef enum {
 
     SE_CC_echoLoop,
 
+    SE_CC_getRh,
+    SE_CC_getTemp,
+    
     SE_CC_last
 } SE_CC_functions;
 

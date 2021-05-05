@@ -1,0 +1,110 @@
+h1 {
+  background-color: rgb(101, 181, 235);
+}
+.__idClass__navTable {
+  /* border: 2px solid blue; */
+  width: 100%;
+}
+.__idClass__navHeaderCell {
+  /* border: 2px solid red; */
+  width: 20%;
+}
+.__idClass__navBodyCell {
+  /* border: 2px solid green; */
+  width: 20%;
+  text-align: center;
+}
+.__idClass__navButton {
+  background-color: rgb(97, 172, 48);
+  width: 100%;
+}
+.__idClass__navButton:disabled {
+  background-color: rgb(49, 132, 187);
+  width: 100%;
+}
+
+.__idClass__pinTable {
+  border-collapse: collapse;
+}
+.__idClass__pinCell {
+}
+.__idClass__pinCellRESERVED {
+  color: gray;
+}
+.__idClass__pinCellINPUT {
+  color: aqua;
+}
+.__idClass__pinCellINPUT_PULLUP {
+  color: blue;
+}
+.__idClass__pinCellINPUT_ANALOG {
+  color: green;
+}
+.__idClass__pinCellOUTPUT {
+  color: darkmagenta;
+}
+.__idClass__pinCellOUTPUT_ANALOG {
+  color: darkorchid;
+}
+.__idClass__pinCellGROUND {
+  color: black;
+}
+.__idClass__pinCellPOWER33 {
+  color: red;
+}
+.__idClass__pinCellPOWER50 {
+  color: tomato;
+}
+.__idClass__pinRow {
+  border: 1px solid black;
+}
+.__idClass__pinCellPicture {
+  border: 1px solid black;
+  padding: 50px;
+}
+.__idClass__pinProgress {
+  width: 100%;
+}
+.__idClass__pinProgress {
+  width: 100%;
+}
+.__idClass__pinRange {
+  width: 100%;
+}
+.__idClass__pinCellHeader {
+  width: 14.2857%;
+}
+.__idClass__debugTable {
+  width: 100%;
+  /* border: 2px solid blue; */
+}
+.__idClass__debugCell {
+  width: 20%;
+  /* border: 1px solid red; */
+}
+.__idClass__debugInput {
+  width: 100%;
+}
+.__idClass__pinStatusRateTable {
+  width: 100%;
+}
+.__idClass__pinStatusRateLabel {
+  width: 20%;
+}
+.__idClass__pinStatusRateInput {
+  width: 80%;
+}
+.__idClass__pinStatusRate {
+  width: 100%;
+}
+
+#__id__base {
+  width: 50%;
+}
+
+#__id__textInput {
+  width: 50%;
+}
+#__id__pinsStatusUpdateRate {
+  width: 100%;
+}
