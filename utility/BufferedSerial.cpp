@@ -20,7 +20,12 @@ void BufferedSerial::slice( void) {
 		}
 	}	
 	if( m_previousQ != NULL) {
+		#ifdef ARDUINO_PORTENTA_H7_M7
+		// Portenta mbed layer currently defaults availableForWrite() to 0 so we can't use it yet
+		while( m_previousQ->valueAvailable()) {
+		#else
 		while( m_previousQ->valueAvailable() && m_hs->availableForWrite() > 0) {
+		#endif
 			m_hs->write( m_previousQ->get());
 		}
 	}
