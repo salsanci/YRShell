@@ -99,7 +99,7 @@ public:
 	 */
 	CircularQ() {
 		m_nextQ = NULL;
-		Sliceable::m_sliceEnabled = true;
+		Sliceable::m_sliceEnabled = false;
 		reset();
 	}
 	/** \brief Destructor.
@@ -352,6 +352,13 @@ public:
 		return rc;
 	}
 };
+
+
+typedef CircularQBase<char>         CircularCharQ;
+typedef CircularQBase<uint16_t>     CircularUint16Q;
+typedef CircularQBase<uint32_t>     CircularUint32Q;
+
+
 
 #endif
 

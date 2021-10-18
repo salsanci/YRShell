@@ -2997,10 +2997,14 @@ void  YRShellInterpreter::pushFloat( float f) {
 }
 bool YRShellInterpreter::stringToFloat( const char* P, uint32_t* V) {
     bool rc = false;
+    bool negative = false;
     float fv = 0.0f;
     int32_t bd = 0, nd = 0, ad = 0, exp = 0;
     const char *ep;
     if( *P != '\0') {
+    	if( *P == '-') {
+    		negative = true;
+    	}
         P = stringToUnsignedInternal(P, (uint32_t*) &bd);
         if( *P++ == '.') {
             ep = stringToUnsignedInternal(P, (uint32_t*) &ad);
@@ -3017,7 +3021,13 @@ bool YRShellInterpreter::stringToFloat( const char* P, uint32_t* V) {
         }
     }
     if( rc) {
+    	if( bd < 0) {
+    		ad = 0 - ad;
+    	}
         fv = (powf(10.0f, nd) * ((float) bd) + ((float) ad)) * powf( 10.0f, exp - nd);
+    }
+    if(negative && fv > 0.0f) {
+    	fv = 0.0f - fv;
     }
     uint32_t* tp = ((uint32_t*) &fv);
     *V = *tp;
