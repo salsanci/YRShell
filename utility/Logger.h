@@ -44,6 +44,8 @@ private:
 
 	void  __kwh( const char* file, uint line, uint ID);
 
+	const char* m_loggerPrefix;
+
 public:
 	Logger( void);
 	virtual ~Logger( void);
@@ -56,6 +58,8 @@ public:
 	void setLoggingMask( uint mask) { m_loggingMask = mask; }
 
     CircularCharQ& getLoggerQ( ) { return m_loggerQ; }
+
+	void setLoggerPrefix( const char* p) { m_loggerPrefix = p; }
 
 	void kwh( const char* file, uint line, uint ID, uint mask, uint data);
 	void kwh( const char* file, uint line, uint ID, uint mask, const char* msg);

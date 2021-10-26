@@ -10,6 +10,7 @@ Logger::Logger() {
 	if( s_logger == NULL) {
 		s_logger = this;
 	}
+	m_loggerPrefix = "";
 }
 Logger::~Logger() {
 }
@@ -154,38 +155,40 @@ void Logger::putChar( char c) {
 }
 void Logger::putString( const char* s) {
 	uint16_t i, l = (uint16_t) strlen( s);
-	const char* truncMessage = " LOGGER STRING TRUCATED\n";
-	uint16_t lim = (sizeof( m_buf) - 1) - strlen(truncMessage);
-	bool trunc = false;
-	bool eol = false;
-	char c;
+	if( l > 0) {
+		const char* truncMessage = " LOGGER STRING TRUCATED\n";
+		uint16_t lim = (sizeof( m_buf) - 1) - strlen(truncMessage);
+		bool trunc = false;
+		bool eol = false;
+		char c;
 
-	if( l > ((sizeof( m_buf) -1) - m_count) ) {
-		outputBuf();
-	}
-	if( l > lim) {
-		outputBuf();
-		l = lim;
-		trunc = true;
-	}
-	for( i = 0; i < l && m_count < (sizeof( m_buf) -1); i++, m_count++, s++) {
-		c = *s;
-		if( c == '\n') {
-			eol = true;
+		if( l > ((sizeof( m_buf) -1) - m_count) ) {
+			outputBuf();
 		}
-		m_buf[ m_count] = c;
-	}
-	if( trunc) {
-		eol = true;
-		for( ; *truncMessage != '\0'; truncMessage++ ) {
-			c = *truncMessage;
+		if( l > lim) {
+			outputBuf();
+			l = lim;
+			trunc = true;
+		}
+		for( i = 0; i < l && m_count < (sizeof( m_buf) -1); i++, m_count++, s++) {
+			c = *s;
+			if( c == '\n') {
+				eol = true;
+			}
 			m_buf[ m_count] = c;
 		}
+		if( trunc) {
+			eol = true;
+			for( ; *truncMessage != '\0'; truncMessage++ ) {
+				c = *truncMessage;
+				m_buf[ m_count] = c;
+			}
+		}
+		if( eol) {
+			outputBuf();
+		}
+		m_timer.setInterval(LOGGER_TIMEOUT);
 	}
-	if( eol) {
-		outputBuf();
-	}
-	m_timer.setInterval(LOGGER_TIMEOUT);
 }
 void Logger::dataDropped( CircularCharQ& q) {
 	const char* s = "LOGGER DATA DROPPED\n";
@@ -264,6 +267,7 @@ void  Logger::__kwh( const char* file, uint line, uint ID) {
 
 	S = trimFileName(file);
 	int ln = strlen(S);
+	putString( m_loggerPrefix);
 
 	unsignedToStringZero(Logger::m_seq++, 4, t);
 	putString( t);
