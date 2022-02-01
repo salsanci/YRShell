@@ -73,7 +73,7 @@ public:
  
  
  */
-class YRShell : public virtual YRShellBase<2048, 128, 128, 16, 16, 16, 8, 128, 256, 128, 256, 256>{
+class YRShell : public virtual YRShellBase<2048, 256, 256, 32, 32, 32, 32, 256, 1024, 128, 256, 256>{
 protected:
 public:
     YRShell( ) { }

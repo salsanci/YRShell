@@ -223,6 +223,14 @@ void Logger::unsignedToString(uint num, uint8_t numDigits, char *s) {
         *s++ = ' ';
     }
 }
+const char* Logger::unsignedToStringTrim(uint num, uint8_t numDigits, char *s) {
+	const char* p = s;
+    unsignedToStringZero( num, numDigits, s);
+    while( *p == '0' && numDigits-- > 1) {
+        p++;
+    }
+	return p;
+}
 
 void Logger::unsignedToStringX(uint num, uint8_t numDigits, char *s){
     *s++ = '0';

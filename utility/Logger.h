@@ -38,9 +38,6 @@ private:
 	void putLoggerUint16X( const uint16_t v);
 	void putLoggerFloat( const float data);
 
-    void unsignedToStringZero(uint num, uint8_t numDigits, char *s);
-    void unsignedToString(uint num, uint8_t numDigits, char *s);
-    void unsignedToStringX(uint num, uint8_t numDigits, char *s);
 
 	void  __kwh( const char* file, uint line, uint ID);
 
@@ -60,6 +57,12 @@ public:
     CircularCharQ& getLoggerQ( ) { return m_loggerQ; }
 
 	void setLoggerPrefix( const char* p) { m_loggerPrefix = p; }
+
+	static const char* unsignedToStringTrim(uint num, uint8_t numDigits, char *s);
+	static void unsignedToStringZero(uint num, uint8_t numDigits, char *s);
+    static void unsignedToString(uint num, uint8_t numDigits, char *s);
+    static void unsignedToStringX(uint num, uint8_t numDigits, char *s);
+
 
 	void kwh( const char* file, uint line, uint ID, uint mask, uint data);
 	void kwh( const char* file, uint line, uint ID, uint mask, const char* msg);
