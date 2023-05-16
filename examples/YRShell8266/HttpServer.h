@@ -3,8 +3,8 @@
 
 #include <ESP8266WiFi.h>
 #include <LittleFS.h>
-#include "DebugLog.h"
-#include "LedBlink.h"
+#include <utility/DebugLog.h>
+#include <utility/LedBlink.h>
 
 class HttpServer : public Sliceable {
 protected:

@@ -3,8 +3,8 @@
 
 #include <ESP8266WiFi.h>
 #include <LittleFS.h>
-#include "DebugLog.h"
-#include <YRShell8266.h>
+#include <utility/DebugLog.h>
+#include "YRShell8266.h"
 
 class YRShell8266;
 
