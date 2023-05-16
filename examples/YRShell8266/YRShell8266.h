@@ -3,15 +3,14 @@
 
 #include "YRShell.h"
 #include "WifiConnection.h"
-
-#include "utility/DebugLog.h"
+#include "HttpServer.h"
+#include "TelnetServer.h"
 
 #include <ESP8266WiFi.h>
 #include <LittleFS.h>
 
-#include "utility/HttpServer.h"
-#include "utility/TelnetServer.h"
-#include "utility/LedBlink.h"
+#include <utility/DebugLog.h>
+#include <utility/LedBlink.h>
 
 extern void setLedOnOffMs( uint32_t t, uint32_t u);
 

@@ -1,5 +1,5 @@
-#include <YRShell8266.h>
-#include <WifiConnection.h>
+#include "YRShell8266.h"
+#include "WifiConnection.h"
 
 //  0x01 - setup log
 //  0x02 - errors
@@ -48,6 +48,8 @@ void setup(){
   }
 
   if( !LittleFS.exists( wifiConnection.networkParameters.fileName())) {
+    // Gateway - 192.168.10.1
+    // Ip - 192.168.10.2
     wifiConnection.networkParameters.setHost("esp8266", "esp8266password", "0x020AA8C0" , "0x010AA8C0", "0x00FFFFFF" );
     wifiConnection.networkParameters.addNetwork( "", "");
     wifiConnection.networkParameters.addNetwork( "", "");
