@@ -2,6 +2,12 @@
 *~
 *.o
 *.orig
+*.log
 
+.vscode/
 
-
+build/testall
+build/testresult
+build/yrshell
+build/genGitHash
+build/html/
