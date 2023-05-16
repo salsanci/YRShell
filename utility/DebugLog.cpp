@@ -62,8 +62,9 @@ void DebugLog::outPaddedStr( const char* p, uint32_t len) {
       out( p);
     }  
 }
+
 void DebugLog::printh( const char* file, uint32_t line) {
-    uint32_t t = (uint32_t) millis();
+    uint32_t t = HW_getMillis();
     out( t);
     out( ' ');
     out( t - m_lastTime);
@@ -74,6 +75,7 @@ void DebugLog::printh( const char* file, uint32_t line) {
     out( line, 4);
     out( ' ');
 }
+
 void DebugLog::printu( uint32_t v) {
     out( v);
     out( ' ');
@@ -223,6 +225,8 @@ void DebugLog::printHex( const char* P, int len) {
       printHexLine( P, len);
     }
 }
+#ifdef PLATFORM_ARDUINO
 void DebugLog::printHex( String &s) {
     printHex( s.c_str(), s.length());
 }
+#endif
